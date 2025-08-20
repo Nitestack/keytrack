@@ -6,12 +6,6 @@
 import "./src/env.js";
 
 /** @type {import("next").NextConfig} */
-const config = {
-  images: {
-    remotePatterns: [
-      new URL("https://nextuipro.nyc3.cdn.digitaloceanspaces.com/**"),
-    ],
-  },
-};
+const config = {};
 
 export default config;
