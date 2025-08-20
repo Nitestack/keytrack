@@ -137,7 +137,12 @@ export async function getScoresByWikiUrl(
           .siblings("td");
         const publisher = htmlToPublisher($pubElement.html() ?? ""); // extensive paring of the different publisher formats
 
-        if (!publisher) return undefined;
+        const scoreTitle =
+          $pubParentElement.prev("h4").length > 0
+            ? $pubParentElement.prev("h4").find("span").text()
+            : undefined;
+
+        if (!publisher) return;
 
         const isUrtext = $pubParentElement
           .find("table tbody tr .we_edition_info_i table tbody")
@@ -146,58 +151,57 @@ export async function getScoresByWikiUrl(
           .includes("urtext");
 
         // A publisher can publish multiple scores
-        scores.push(
-          ...$pubParentElement
-            .children()
-            .not("table")
-            .filter(
-              (_, el) =>
-                $(el)
-                  .find(".we_file_download p span a")
-                  .attr("href")
-                  ?.endsWith(".pdf") ?? false,
-            ) // ensure the score is a PDF
-            .map((_, scoreHeadingElement) => {
-              const $scoreElement = $(scoreHeadingElement).find(
-                ".we_file_download p",
-              );
+        $pubParentElement
+          .children()
+          .not("table")
+          .filter(
+            (_, el) =>
+              $(el)
+                .find(".we_file_download p span a")
+                .attr("href")
+                ?.endsWith(".pdf") ?? false,
+          ) // ensure the score is a PDF
+          .each((_, scoreHeadingElement) => {
+            const $scoreElement = $(scoreHeadingElement).find(
+              ".we_file_download p",
+            );
 
-              const [unresolvedId, unresolvedScoreData] = $scoreElement
-                .find(".we_file_info2")
-                .text()
-                .split("-");
-              if (!unresolvedId || !unresolvedScoreData) return undefined;
+            const [unresolvedId, unresolvedScoreData] = $scoreElement
+              .find(".we_file_info2")
+              .text()
+              .split("-");
+            if (!unresolvedId || !unresolvedScoreData) return;
 
-              const id = unresolvedId.replace(/\D/g, ""); // only include digits (ID is a number)
+            const id = unresolvedId.replace(/\D/g, ""); // only include digits (ID is a number)
 
-              const [unresolvedFileSize, unresolvedPages] = unresolvedScoreData
-                .trim()
-                .split(",");
+            const [unresolvedFileSize, unresolvedPages] = unresolvedScoreData
+              .trim()
+              .split(",");
 
-              if (!unresolvedFileSize || !unresolvedPages) return undefined;
+            if (!unresolvedFileSize || !unresolvedPages) return;
 
-              let title = $scoreElement.find("b a span").text().trim();
-              // Generally, the title is "Complete Score", trying to replace it with a more unique title, either the score title (prefered) or the title specified from the sibling element before the `.we` element, if it exists
-              if (publisher.title) {
-                title = title.replace("Complete Score", publisher.title);
-              }
+            let title = $scoreElement.find("b a span").text().trim();
+            // Generally, the title is "Complete Score", trying to replace it with a more unique title, either the score title (prefered) or the title specified from the sibling element before the `.we` element, if it exists
+            if (publisher.title) {
+              title = title.replace("Complete Score", publisher.title);
+            } else if (scoreTitle) {
+              title = title.replace("Complete Score", scoreTitle);
+            }
 
-              const url = $scoreElement.find("b a").attr("href");
+            const url = $scoreElement.find("b a").attr("href");
 
-              if (!url) return undefined;
+            if (!url) return;
 
-              return {
-                title,
-                url,
-                id,
-                publisher,
-                isUrtext,
-                fileSize: unresolvedFileSize.trim(),
-                pages: unresolvedPages.trim(),
-              } satisfies ImslpScore;
-            })
-            .filter(Boolean), // each `return undefined` means that the parsing has failed
-        );
+            scores.push({
+              title,
+              url,
+              id,
+              publisher,
+              isUrtext,
+              fileSize: unresolvedFileSize.trim(),
+              pages: unresolvedPages.trim(),
+            });
+          });
       });
   } catch (err) {
     console.error(err);
