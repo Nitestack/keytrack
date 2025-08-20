@@ -1,25 +1,75 @@
 import { load } from "cheerio";
 
+/**
+ * IMSLP score object (scraped from IMSLP wiki page)
+ */
 export interface ImslpScore {
+  /**
+   * The ID of the score, which is a number (index of the score on IMSLP)
+   * @example "34484"
+   */
   id: string;
+  /**
+   * The title of the score
+   * @example "Chopin: Walzer, No.1 (pp.1-9)"
+   */
   title: string;
+  /**
+   * The IMSLP url of the score, which is a permanent URL
+   * @example "https://imslp.org/wiki/Special:ImagefromIndex/34484/qraj"
+   */
   url: string;
+  /**
+   * The publisher of the score
+   * @see {@link ImslpScorePublisher}
+   */
   publisher: ImslpScorePublisher;
+  /**
+   * The number of pages in the score
+   * @example "15 pp."
+   */
   pages: string;
+  /**
+   * The file size of the PDF score
+   * @example "1.95MB"
+   */
   fileSize: string;
+  /**
+   * Whether the score is an Urtext edition or not
+   */
   isUrtext: boolean;
 }
 
+/**
+ * IMSLP score publisher object (scraped from IMSLP wiki page)
+ */
 export interface ImslpScorePublisher {
+  /**
+   * The publisher's name
+   * @example "G. Henle"
+   */
   name: string;
+  /**
+   * The publishment date of the score
+   * @example "1979"
+   */
   date?: string;
+  /**
+   * The city of publishment
+   * @example "München"
+   */
   city?: string;
+  /**
+   * The plate of the score, if available
+   * @example "K 105"
+   */
   plate?: string;
 }
 
 /**
  * Retrieves the PDF URL (non-permanent) of a score by its IMSLP index URL (permanent)
- * @param url https://imslp.org/wiki/Special:ImagefromIndex/<6-digit index>/qraj
+ * @param url https://imslp.org/wiki/Special:ImagefromIndex/<index>/qraj
+ * @returns the PDF URL or `undefined` if the PDF URL could not be retrieved
  */
 export async function getPdfUrlByIndex(url: string) {
   try {
@@ -48,6 +98,7 @@ export async function getPdfUrlByIndex(url: string) {
 /**
  * Retrieves all scores for a piece from IMSLP by its wiki URL
  * @param wikiUrl https://imslp.org/wiki/<piece>
+ * @returns a list of scores and an empty list if no scores were found or an error occurred
  */
 export async function getScoresByWikiUrl(
   wikiUrl: string,
@@ -117,7 +168,7 @@ export async function getScoresByWikiUrl(
                 .split("-");
               if (!unresolvedId || !unresolvedScoreData) return undefined;
 
-              const id = unresolvedId.replace(/\D/g, ""); // only include digits (ID is generally a 6-digit number)
+              const id = unresolvedId.replace(/\D/g, ""); // only include digits (ID is a number)
 
               const [unresolvedFileSize, unresolvedPages] = unresolvedScoreData
                 .trim()
@@ -174,6 +225,7 @@ export async function getScoresByWikiUrl(
 /**
  * Parses the raw HTML of a score publisher element into an object
  * @param html The raw HTML of a score publisher element from the IMSLP wiki page
+ * @returns the parsed publisher object, or `undefined` if the parsing failed
  */
 function htmlToPublisher(
   html: string,

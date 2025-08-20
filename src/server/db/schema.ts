@@ -13,7 +13,7 @@ export const createTable = pgTableCreator((name) => `keytrack_${name}`);
 export const repertoirePieces = createTable(
   "repertoire_piece",
   (d) => ({
-    musicBrainzId: d.uuid().unique().notNull(),
+    musicBrainzId: d.uuid().notNull(),
     userId: d
       .varchar({ length: 255 })
       .notNull()
@@ -24,7 +24,7 @@ export const repertoirePieces = createTable(
   }),
   (t) => [
     primaryKey({
-      columns: [t.musicBrainzId],
+      columns: [t.userId, t.musicBrainzId],
     }),
     index("repertoire_piece_user_id_idx").on(t.userId),
   ],
