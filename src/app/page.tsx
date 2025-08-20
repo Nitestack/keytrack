@@ -1,3 +1,7 @@
+"use client";
+
+import { DashboardLayout } from "@toolpad/core/DashboardLayout";
+
 export default function HomePage() {
-  return <div>Keytrack</div>;
+  return <DashboardLayout hideNavigation>Keytrack</DashboardLayout>;
 }

@@ -21,6 +21,7 @@ const navigation: Navigation = [
   {
     segment: "repertoire",
     title: "Repertoire",
+    pattern: "repertoire{/:musicBrainzId}*",
   },
 ];
 

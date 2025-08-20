@@ -24,7 +24,7 @@ export default async function RepertoirePage() {
       {pieces.length > 0 ? (
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
           {pieces.map((piece) => (
-            <ListItemButton key={piece.id}>
+            <ListItemButton href={`/repertoire/${piece.id}`} key={piece.id}>
               <ListItemText primary={piece.title} secondary={piece.composer} />
             </ListItemButton>
           ))}
