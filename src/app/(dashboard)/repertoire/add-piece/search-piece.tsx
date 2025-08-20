@@ -14,13 +14,13 @@ import { api } from "~/trpc/react";
 
 import type { AutocompleteInputChangeReason } from "@mui/material/Autocomplete";
 import type { Dispatch, FC, SetStateAction } from "react";
-import type { Work } from "~/server/api/routers/repertoire";
+import type { MBWork } from "~/services/music-brainz";
 
 const SearchPiece: FC<{
-  selectedPiece: Work | null;
-  setSelectedPiece: Dispatch<SetStateAction<Work | null>>;
+  selectedPiece: MBWork | null;
+  setSelectedPiece: Dispatch<SetStateAction<MBWork | null>>;
 }> = ({ selectedPiece, setSelectedPiece }) => {
-  const [searchResultItems, setSearchResultItems] = useState<Work[]>([]);
+  const [searchResultItems, setSearchResultItems] = useState<MBWork[]>([]);
 
   const { data, isPending, mutate, variables } =
     api.repertoire.search.useMutation({

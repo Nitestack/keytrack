@@ -24,14 +24,14 @@ import { api } from "~/trpc/react";
 
 import type { Dayjs } from "dayjs";
 import type { FC } from "react";
-import type { Work } from "~/server/api/routers/repertoire";
 import type { ImslpScore } from "~/services/imslp";
+import type { MBWork } from "~/services/music-brainz";
 
 const steps = ["Search piece", "Select score", "Add general information"];
 
 const AddPiece: FC = () => {
   const [open, setOpen] = useState(false);
-  const [selectedPiece, setSelectedPiece] = useState<Work | null>(null);
+  const [selectedPiece, setSelectedPiece] = useState<MBWork | null>(null);
   const [selectedImslpScore, setSelectedImslpScore] =
     useState<ImslpScore | null>(null);
   const [activeStep, setActiveStep] = useState(0);

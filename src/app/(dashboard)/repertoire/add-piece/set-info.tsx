@@ -6,13 +6,13 @@ import Typography from "@mui/material/Typography";
 
 import type { Dayjs } from "dayjs";
 import type { Dispatch, FC, SetStateAction } from "react";
-import type { Work } from "~/server/api/routers/repertoire";
 import type { ImslpScore } from "~/services/imslp";
+import type { MBWork } from "~/services/music-brainz";
 
 const SetInfo: FC<{
   dateAdded: Dayjs;
   setDateAdded: Dispatch<SetStateAction<Dayjs>>;
-  selectedPiece: Work;
+  selectedPiece: MBWork;
   selectedImslpScore: ImslpScore;
 }> = ({ dateAdded, setDateAdded, selectedPiece, selectedImslpScore }) => {
   return (
