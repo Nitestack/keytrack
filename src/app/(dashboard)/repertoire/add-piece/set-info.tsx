@@ -6,7 +6,8 @@ import Typography from "@mui/material/Typography";
 
 import type { Dayjs } from "dayjs";
 import type { Dispatch, FC, SetStateAction } from "react";
-import type { ImslpScore, Work } from "~/server/api/routers/repertoire";
+import type { Work } from "~/server/api/routers/repertoire";
+import type { ImslpScore } from "~/services/imslp";
 
 const SetInfo: FC<{
   dateAdded: Dayjs;
@@ -24,9 +25,9 @@ const SetInfo: FC<{
           </Typography>
         )}
         <br />
-        {selectedImslpScore.publishment.publisher}
-        {selectedImslpScore.publishment.publishDate
-          ? `, ${selectedImslpScore.publishment.publishDate}`
+        {selectedImslpScore.publisher.name}
+        {selectedImslpScore.publisher.date
+          ? `, ${selectedImslpScore.publisher.date}`
           : ""}
         {selectedImslpScore.isUrtext ? " (Urtext Edition)" : ""}
       </Alert>

@@ -1,11 +1,11 @@
 import { TRPCError } from "@trpc/server";
-import { load } from "cheerio";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { repertoirePieces } from "~/server/db/schema";
 import { mbApi } from "~/server/musicbrainz";
+import { getScoresByWikiUrl } from "~/services/imslp";
 
 import type { EntityType, IWork, IWorkMatch } from "musicbrainz-api";
 
@@ -15,23 +15,6 @@ export interface Work {
   composer: string;
   arrangement?: string;
   isInRepertoire: boolean;
-}
-
-export interface ImslpScore {
-  id: string;
-  title: string;
-  url: string;
-  publishment: ImslpScorePublisher;
-  pages: string;
-  fileSize: string;
-  isUrtext: boolean;
-}
-
-export interface ImslpScorePublisher {
-  publisher: string;
-  publishDate?: string;
-  city?: string;
-  plate?: string;
 }
 
 function toWork(work: IWork | IWorkMatch): Work {
@@ -67,57 +50,6 @@ function resolveWorks(
  */
 function getComposerName(work: IWork): string {
   return work.relations?.find((rel) => rel.type === "composer")?.artist?.name;
-}
-
-function replaceAllHTMLTags(text: string) {
-  return load(text).text().trim();
-}
-
-function parsePublishment(
-  html: string,
-): ImslpScorePublisher & { title?: string } {
-  const result: ImslpScorePublisher & { title?: string } = {
-    publisher: "",
-  };
-
-  const workingText = html
-    .trim()
-    .split("\n")[0]! // Take only first line if there are single newlines
-    .split(/urtext\s/i)[0]! // Take only the part before "urtext" (case-insensitive)
-    .split("<div")[0]! // Remove any boxes
-    .trim();
-
-  let publisherPart = "";
-
-  // if two parts, first is always title, second is publishment info
-  const splitParts = workingText.split("<br>");
-  if (splitParts.length > 1) {
-    result.title = replaceAllHTMLTags(splitParts[0]!);
-    publisherPart = replaceAllHTMLTags(splitParts[1]!);
-  } else {
-    publisherPart = replaceAllHTMLTags(workingText);
-  }
-
-  // City
-  if (publisherPart.includes(":")) {
-    const [city, ...newPublisherParts] = publisherPart.split(":");
-    result.city = city!.trim();
-    publisherPart = newPublisherParts.join(":").trim();
-  }
-  // Plate
-  if (publisherPart.includes("Plate")) {
-    const [newPublisherParts, plate] = publisherPart.split("Plate");
-    result.plate = plate!.replace(/\.$/, "").trim();
-    publisherPart = newPublisherParts!.trim();
-  }
-  const match = /^(.*?)(?:, ([^,]*)\.)?$/.exec(publisherPart);
-  if (match) {
-    result.publisher = match[1]!.trim();
-    result.publishDate = match[2]?.trim();
-  } else {
-    result.publisher = publisherPart.trim();
-  }
-  return result;
 }
 
 export const repertoireRouter = createTRPCRouter({
@@ -193,6 +125,38 @@ export const repertoireRouter = createTRPCRouter({
         imslpUrl: input.imslpUrl,
       });
     }),
+  getPiece: protectedProcedure
+    .input(
+      z.object({
+        musicBrainzId: z.string().nonempty(),
+      }),
+    )
+    .query(async ({ input, ctx: { db, session } }) => {
+      const [lookupResult, dbRepertoirePieceResult] = await Promise.allSettled([
+        await mbApi.lookup("work", input.musicBrainzId, ["artist-rels"]),
+        db.query.repertoirePieces.findFirst({
+          where: and(
+            eq(repertoirePieces.userId, session.user.id),
+            eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
+          ),
+        }),
+      ]);
+      if (lookupResult.status === "rejected")
+        throw new TRPCError({ code: "NOT_FOUND" });
+      if (
+        dbRepertoirePieceResult.status === "rejected" ||
+        !dbRepertoirePieceResult.value
+      )
+        throw new TRPCError({
+          message: "Couldn't fetch piece from user",
+          code: "BAD_REQUEST",
+        });
+      return {
+        ...toWork(lookupResult.value),
+        dateAdded: dbRepertoirePieceResult.value.dateAdded,
+        imslpUrl: dbRepertoirePieceResult.value.imslpUrl,
+      };
+    }),
   getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     const pieces = await db
       .select()
@@ -241,105 +205,9 @@ export const repertoireRouter = createTRPCRouter({
       }
       if (!imslpUrl?.includes("imslp")) return undefined;
 
-      const response = await fetch(imslpUrl, {
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-          "Accept-Encoding": "gzip, deflate",
-          DNT: "1",
-          Connection: "keep-alive",
-        },
-      });
-      if (!response.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-      const $ = load(await response.text());
-      const scores: ImslpScore[] = [];
-      $("#wpscoresection #tabScore1")
-        .children(".we")
-        .each((_, scoreElement) => {
-          const $score = $(scoreElement);
-
-          const $publishers = $score
-            .find("table tbody tr .we_edition_info_i table tbody")
-            .children("tr");
-
-          const unresolvedPublisher = $publishers
-            .find("th")
-            .filter((_, el) => $(el).text().startsWith("Pub"))
-            .siblings("td");
-
-          const publishment = parsePublishment(
-            unresolvedPublisher.html() ?? "",
-          );
-          const isUrtext = $score
-            .find("table tbody tr .we_edition_info_i table tbody")
-            .text()
-            .toLowerCase()
-            .includes("urtext");
-
-          scores.push(
-            ...$score
-              .children()
-              .not("table")
-              .filter((_, el) => {
-                return (
-                  $(el)
-                    .find(".we_file_download p span a")
-                    .attr("href")
-                    ?.endsWith(".pdf") ?? false
-                );
-              }) // ensure it's a PDF
-              .map((_, scoreHeadingElement) => {
-                const metadata = $(scoreHeadingElement).find(
-                  ".we_file_download p",
-                );
-                const [unresolvedId, unresolvedData] = metadata
-                  .find(".we_file_info2")
-                  .text()
-                  .split("-");
-                const [unresolvedFileSize, unresolvedPages] = unresolvedData
-                  .trim()
-                  ?.split(",");
-
-                let title = metadata.find("b a span").text().trim();
-                if (publishment.title) {
-                  title = title.replace("Complete Score", publishment.title);
-                }
-
-                return {
-                  title,
-                  url: metadata.find("b a").attr("href"),
-                  id: unresolvedId.replace(/\D/g, ""),
-                  fileSize: unresolvedFileSize.trim(),
-                  pages: unresolvedPages.trim(),
-                  publishment,
-                  isUrtext,
-                } as ImslpScore;
-              }),
-          );
-        });
-      /**
-       * sorts the result:
-       * 1. whether it is Urtext edition or not
-       * 2. whether the title is not "Complete Score"
-       * 3. publisher
-       * 4. title
-       */
       return {
         imslpUrl,
-        scores: scores.sort(
-          (a, b) =>
-            (a.isUrtext ? -1 : b.isUrtext ? 1 : 0) ||
-            a.publishment.publisher.localeCompare(b.publishment.publisher) ||
-            (!a.title.toLowerCase().includes("complete score")
-              ? -1
-              : !b.title.toLowerCase().includes("complete score")
-                ? 1
-                : 0) ||
-            a.title.localeCompare(b.title),
-        ),
+        scores: await getScoresByWikiUrl(imslpUrl),
       };
     }),
 });

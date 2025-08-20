@@ -12,7 +12,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import SearchIcon from "@mui/icons-material/Search";
 
 import type { Dispatch, FC, SetStateAction } from "react";
-import type { ImslpScore } from "~/server/api/routers/repertoire";
+import type { ImslpScore } from "~/services/imslp";
 
 const SelectScore: FC<{
   imslpResult?: {
@@ -84,18 +84,18 @@ const SelectScore: FC<{
         isOptionEqualToValue={(a, b) => a.id === b.id}
         options={imslpResult.scores}
         groupBy={(option) =>
-          option.isUrtext ? "Urtext Edition" : option.publishment.publisher
+          option.isUrtext ? "Urtext Edition" : option.publisher.name
         }
         getOptionLabel={(option) =>
-          `${option.publishment.publisher} - ${option.title}${option.isUrtext ? " (Urtext Edition)" : ""}`
+          `${option.publisher.name} - ${option.title}${option.isUrtext ? " (Urtext Edition)" : ""}`
         }
         renderOption={({ key, ...optionProps }, option) => (
           <ListItem key={key + option.id} {...optionProps}>
             <ListItemText
               primary={option.title}
               secondary={[
-                option.isUrtext ? option.publishment.publisher : undefined,
-                option.publishment.publishDate,
+                option.isUrtext ? option.publisher.name : undefined,
+                option.publisher.date,
                 option.pages,
                 option.fileSize,
               ]

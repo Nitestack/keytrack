@@ -24,7 +24,8 @@ import { api } from "~/trpc/react";
 
 import type { Dayjs } from "dayjs";
 import type { FC } from "react";
-import type { ImslpScore, Work } from "~/server/api/routers/repertoire";
+import type { Work } from "~/server/api/routers/repertoire";
+import type { ImslpScore } from "~/services/imslp";
 
 const steps = ["Search piece", "Select score", "Add general information"];
 
