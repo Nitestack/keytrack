@@ -6,51 +6,14 @@ import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { repertoirePieces } from "~/server/db/schema";
 import { mbApi } from "~/server/musicbrainz";
 import { getScoresByWikiUrl } from "~/services/imslp";
+import {
+  getImslpURLByWorkId,
+  getWorkById,
+  toMBWork,
+} from "~/services/music-brainz";
 
-import type { EntityType, IWork, IWorkMatch } from "musicbrainz-api";
-
-export interface Work {
-  id: string;
-  title: string;
-  composer: string;
-  arrangement?: string;
-  isInRepertoire: boolean;
-}
-
-function toWork(work: IWork | IWorkMatch): Work {
-  return {
-    id: work.id,
-    title: work.title,
-    composer: getComposerName(work),
-    arrangement:
-      "disambiguation" in work &&
-      typeof work.disambiguation === "string" &&
-      work.disambiguation !== ""
-        ? work.disambiguation
-        : undefined,
-    isInRepertoire: false,
-  };
-}
-
-function resolveWorks(
-  unresolvedWorks: IWorkMatch[],
-  addedRepertoirePieceIds: string[],
-): Work[] {
-  return unresolvedWorks
-    .filter((work) => !!work.relations?.find((rel) => rel.type === "composer"))
-    .map((workMatch) => {
-      const work = toWork(workMatch);
-      work.isInRepertoire = addedRepertoirePieceIds.includes(work.id);
-      return work;
-    });
-}
-
-/**
- * must check beforehand relations has a relation of type `composer`
- */
-function getComposerName(work: IWork): string {
-  return work.relations?.find((rel) => rel.type === "composer")?.artist?.name;
-}
+import type { EntityType } from "musicbrainz-api";
+import type { RepertoirePiece } from "~/services/repertoire";
 
 export const repertoireRouter = createTRPCRouter({
   search: protectedProcedure
@@ -98,16 +61,23 @@ export const repertoireRouter = createTRPCRouter({
        * 2. Title
        * 3. Arrangement (undefined has higher priority)
        */
-      return resolveWorks(works, addedRepertoirePieceIds).sort(
-        (a, b) =>
-          a.composer.localeCompare(b.composer) ||
-          a.title.localeCompare(b.title) ||
-          (a.arrangement === undefined
-            ? -1
-            : b.arrangement === undefined
-              ? 1
-              : a.arrangement.localeCompare(b.arrangement)),
-      );
+      return works
+        .map((work) => toMBWork(work))
+        .filter(Boolean)
+        .map((work) => {
+          work.isInRepertoire = addedRepertoirePieceIds.includes(work.id);
+          return work;
+        })
+        .sort(
+          (a, b) =>
+            a.composer.localeCompare(b.composer) ||
+            a.title.localeCompare(b.title) ||
+            (a.arrangement === undefined
+              ? -1
+              : b.arrangement === undefined
+                ? 1
+                : a.arrangement.localeCompare(b.arrangement)),
+        );
     }),
   addPiece: protectedProcedure
     .input(
@@ -133,7 +103,7 @@ export const repertoireRouter = createTRPCRouter({
     )
     .query(async ({ input, ctx: { db, session } }) => {
       const [lookupResult, dbRepertoirePieceResult] = await Promise.allSettled([
-        await mbApi.lookup("work", input.musicBrainzId, ["artist-rels"]),
+        getWorkById(input.musicBrainzId),
         db.query.repertoirePieces.findFirst({
           where: and(
             eq(repertoirePieces.userId, session.user.id),
@@ -141,7 +111,7 @@ export const repertoireRouter = createTRPCRouter({
           ),
         }),
       ]);
-      if (lookupResult.status === "rejected")
+      if (lookupResult.status === "rejected" || !lookupResult.value)
         throw new TRPCError({ code: "NOT_FOUND" });
       if (
         dbRepertoirePieceResult.status === "rejected" ||
@@ -151,26 +121,32 @@ export const repertoireRouter = createTRPCRouter({
           message: "Couldn't fetch piece from user",
           code: "BAD_REQUEST",
         });
-      return {
-        ...toWork(lookupResult.value),
+      const piece: RepertoirePiece = {
+        ...lookupResult.value,
         dateAdded: dbRepertoirePieceResult.value.dateAdded,
         imslpUrl: dbRepertoirePieceResult.value.imslpUrl,
       };
+      return piece;
     }),
   getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     const pieces = await db
       .select()
       .from(repertoirePieces)
       .where(eq(repertoirePieces.userId, session.user.id));
-    return Promise.all(
-      pieces.map(async (dbPiece) => ({
-        ...toWork(
-          await mbApi.lookup("work", dbPiece.musicBrainzId, ["artist-rels"]),
-        ),
-        dateAdded: dbPiece.dateAdded,
-        imslpUrl: dbPiece.imslpUrl,
-      })),
-    );
+    return (
+      await Promise.all(
+        pieces.map(async (dbPiece) => {
+          const work = await getWorkById(dbPiece.musicBrainzId);
+          if (!work) return undefined;
+          const piece: RepertoirePiece = {
+            ...work,
+            dateAdded: dbPiece.dateAdded,
+            imslpUrl: dbPiece.imslpUrl,
+          };
+          return piece;
+        }),
+      )
+    ).filter(Boolean);
   }),
   getImslpScores: protectedProcedure
     .input(
@@ -180,30 +156,10 @@ export const repertoireRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      let imslpUrl = input.imslpUrl;
-      if (!imslpUrl) {
-        const work = await mbApi.lookup("work", input.musicBrainzId, [
-          "url-rels",
-          "work-rels",
-        ]);
-        if (!work) throw new TRPCError({ code: "NOT_FOUND" });
-        if (work.relations.find((rel) => rel.type === "parts")) {
-          const partsWork = await mbApi.lookup(
-            "work",
-            work.relations.find((rel) => rel.type === "parts")!.work!.id,
-            ["url-rels", "work-rels"],
-          );
-          imslpUrl = partsWork?.relations?.find(
-            (rel) => rel.type === "download for free",
-          )?.url?.resource;
-        }
-        if (!imslpUrl) {
-          imslpUrl = work?.relations?.find(
-            (rel) => rel.type === "download for free",
-          )?.url?.resource;
-        }
-      }
-      if (!imslpUrl?.includes("imslp")) return undefined;
+      const imslpUrl =
+        input.imslpUrl ?? (await getImslpURLByWorkId(input.musicBrainzId));
+
+      if (!imslpUrl) return undefined;
 
       return {
         imslpUrl,
