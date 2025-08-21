@@ -1,5 +1,6 @@
 import { PageContainer } from "@toolpad/core/PageContainer";
 
+import PdfViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer";
 import { getPdfUrlByIndex } from "~/services/imslp";
 import { api } from "~/trpc/server";
 
@@ -16,7 +17,7 @@ export default async function RepertoirePiecePage({
 
   return (
     <PageContainer title={piece.title}>
-      <object className="h-full" data={imslpPdfUrl} />
+      {imslpPdfUrl && <PdfViewer title={piece.title} pdfUrl={imslpPdfUrl} />}
     </PageContainer>
   );
 }
