@@ -227,25 +227,21 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl, title }) => {
                 style={{ width: "100%", height: "100%" }}
               >
                 {pagesInSlide.map((pageIndex) => (
-                  <div key={`page_${pageIndex + 1}`} className="relative">
-                    <Page
-                      pageNumber={pageIndex + 1}
-                      width={
-                        fullScreenDimensions.width > 0
-                          ? fullScreenDimensions.width
-                          : undefined
-                      }
-                      height={
-                        fullScreenDimensions.height > 0
-                          ? fullScreenDimensions.height
-                          : undefined
-                      }
-                      className="shadow-md border border-gray-200 bg-white"
-                    />
-                    <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 text-xs rounded">
-                      {pageIndex + 1}
-                    </div>
-                  </div>
+                  <Page
+                    key={`page_${pageIndex + 1}`}
+                    pageNumber={pageIndex + 1}
+                    width={
+                      fullScreenDimensions.width > 0
+                        ? fullScreenDimensions.width
+                        : undefined
+                    }
+                    height={
+                      fullScreenDimensions.height > 0
+                        ? fullScreenDimensions.height
+                        : undefined
+                    }
+                    className="shadow-md border border-gray-200 bg-white"
+                  />
                 ))}
               </div>
             ))}
