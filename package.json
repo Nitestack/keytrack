@@ -36,6 +36,7 @@
     "@trpc/server": "^11.4.0",
     "babel-plugin-react-compiler": "19.1.0-rc.2",
     "cheerio": "^1.1.2",
+    "clsx": "^2.1.1",
     "dayjs": "^1.11.13",
     "drizzle-orm": "^0.41.0",
     "embla-carousel-react": "^8.6.0",
