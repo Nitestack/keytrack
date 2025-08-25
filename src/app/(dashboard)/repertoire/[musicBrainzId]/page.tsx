@@ -17,7 +17,7 @@ export default async function RepertoirePiecePage({
 
   return (
     <PageContainer title={piece.title}>
-      {imslpPdfUrl && <PdfViewer title={piece.title} pdfUrl={imslpPdfUrl} />}
+      {imslpPdfUrl && <PdfViewer pdfUrl={imslpPdfUrl} />}
     </PageContainer>
   );
 }
