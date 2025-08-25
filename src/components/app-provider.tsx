@@ -50,12 +50,7 @@ const AppProvider: FC<{ children: ReactNode; session: Session | null }> = ({
           branding={{
             title: appName,
             logo: (
-              <NextImage
-                width={28}
-                height={28}
-                src="/logo.png"
-                alt="MUI logo"
-              />
+              <NextImage width={28} height={28} src="/logo.png" alt={appName} />
             ),
           }}
           theme={theme}
