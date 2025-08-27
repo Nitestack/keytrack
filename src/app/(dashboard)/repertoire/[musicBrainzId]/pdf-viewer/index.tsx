@@ -20,6 +20,7 @@ import { browserName, isIOS, isMacOs, isSafari } from "react-device-detect";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
 import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/icon-button";
+import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/toolbar";
 import IconButton from "~/components/icon-button";
 
 import type { FC } from "react";
@@ -97,6 +98,7 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
               emblaRef={emblaRef}
               isMobile={isMobile}
             />
+            <PdfToolbar isMobile={isMobile} />
           </>
         )}
       </FullScreen>
