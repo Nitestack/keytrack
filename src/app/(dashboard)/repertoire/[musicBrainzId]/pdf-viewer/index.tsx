@@ -13,6 +13,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
 
 import dynamic from "next/dynamic";
+import { useRef } from "react";
 
 import useEmblaCarousel from "embla-carousel-react";
 import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
@@ -21,7 +22,6 @@ import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
 import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/icon-button";
 import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/toolbar";
-import IconButton from "~/components/icon-button";
 
 import type { FC } from "react";
 
@@ -37,6 +37,8 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
   const theme = useTheme();
   const breakpoint = theme.breakpoints.down("lg");
   const isMobile = useMediaQuery(breakpoint);
+
+  const fullScreenRef = useRef<HTMLDivElement>(null);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
@@ -84,9 +86,9 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
           </Button>
         </CardActions>
       </Card>
-      <FullScreen className="bg-white relative" handle={handle}>
+      <FullScreen handle={handle}>
         {handle.active && (
-          <>
+          <div className="bg-white relative h-full" ref={fullScreenRef}>
             {!hasNativeCloseButton && (
               <PdfIconButton className="top-4 left-4" onClick={handle.exit}>
                 <CloseIcon />
@@ -98,8 +100,11 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
               emblaRef={emblaRef}
               isMobile={isMobile}
             />
-            <PdfToolbar isMobile={isMobile} />
-          </>
+            <PdfToolbar
+              isMobile={isMobile}
+              fullScreenEl={fullScreenRef.current ?? undefined}
+            />
+          </div>
         )}
       </FullScreen>
     </>
