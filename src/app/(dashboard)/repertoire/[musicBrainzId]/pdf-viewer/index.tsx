@@ -19,6 +19,7 @@ import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { browserName, isIOS, isMacOs, isSafari } from "react-device-detect";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
+import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/icon-button";
 import IconButton from "~/components/icon-button";
 
 import type { FC } from "react";
@@ -82,16 +83,13 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
           </Button>
         </CardActions>
       </Card>
-      <FullScreen className="relative" handle={handle}>
+      <FullScreen className="bg-white relative" handle={handle}>
         {handle.active && (
           <>
             {!hasNativeCloseButton && (
-              <IconButton
-                onClick={handle.exit}
-                className="absolute top-4 left-4 z-50"
-              >
+              <PdfIconButton className="top-4 left-4" onClick={handle.exit}>
                 <CloseIcon />
-              </IconButton>
+              </PdfIconButton>
             )}
             <PdfDocument
               file={pdfUrl}
