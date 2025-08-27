@@ -11,8 +11,6 @@ import { useCallback, useEffect, useState } from "react";
 import clsx from "clsx";
 import { Document, Page, pdfjs } from "react-pdf";
 
-import IconButton from "~/components/icon-button";
-
 import type { EmblaCarouselType } from "embla-carousel";
 import type { EmblaViewportRefType } from "embla-carousel-react";
 import type { FC } from "react";
@@ -21,6 +19,8 @@ import type { DocumentProps } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 import "./document.scss";
+
+import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/icon-button";
 
 const PDF_ASPECT_RATIO = 1 / Math.sqrt(2);
 
@@ -138,24 +138,24 @@ const PdfDocument: FC<
           }
         </Document>
       </div>
-      <IconButton
+      <PdfIconButton
         onClick={scrollPrev}
         className={clsx(
-          "embla__prev absolute left-4 transition z-50",
-          isMobile ? "bottom-4" : "top-1/2",
+          "embla__prev left-4",
+          isMobile ? "bottom-4" : "top-1/2 -translate-y-1/2",
         )}
       >
         <ChevronLeftIcon />
-      </IconButton>
-      <IconButton
+      </PdfIconButton>
+      <PdfIconButton
         onClick={scrollNext}
         className={clsx(
-          "embla__next absolute right-4 transition z-50",
-          isMobile ? "bottom-4" : "top-1/2",
+          "embla__next right-4",
+          isMobile ? "bottom-4" : "top-1/2 -translate-y-1/2",
         )}
       >
         <ChevronRightIcon />
-      </IconButton>
+      </PdfIconButton>
     </div>
   );
 };

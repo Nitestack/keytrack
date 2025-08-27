@@ -9,10 +9,7 @@ const IconButton: FC<IconButtonProps> = ({ className, ...props }) => {
   return (
     <MuiIconButton
       {...props}
-      className={clsx(
-        "text-(--mui-palette-text-secondary) hover:text-(--mui-palette-text-disabled) bg-(--IconButton-hoverBg) py-2.5 px-3.5 rounded-2xl transition",
-        className,
-      )}
+      className={clsx("py-2.5 px-3.5 rounded-2xl transition", className)}
     />
   );
 };
