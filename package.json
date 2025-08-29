@@ -56,7 +56,9 @@
     "server-only": "^0.0.1",
     "superjson": "^2.2.2",
     "use-debounce": "^10.0.5",
-    "zod": "^3.25.63"
+    "zod": "^3.25.63",
+    "zustand": "^5.0.8",
+    "zustand-computed": "^2.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
