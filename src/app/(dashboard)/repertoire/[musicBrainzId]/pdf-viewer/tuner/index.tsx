@@ -10,7 +10,9 @@ import Popover from "@mui/material/Popover";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 
-import { useState } from "react";
+import TunerFrequency from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import TunerTranspose from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/transpose";
 
 import type { FC } from "react";
 
@@ -19,13 +21,10 @@ const Tuner: FC<{
   handleClose: () => void;
   fullScreenEl?: Element;
 }> = ({ anchorEl, handleClose, fullScreenEl }) => {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const isListening = useTunerStore((state) => state.isListening);
+  const toggleIsListening = useTunerStore((state) => state.toggleIsListening);
 
   const open = Boolean(anchorEl);
-
-  function toggleIsPlaying() {
-    setIsPlaying((currentIsPlaying) => !currentIsPlaying);
-  }
 
   return (
     <Popover
@@ -52,16 +51,21 @@ const Tuner: FC<{
             },
           }}
         />
-        <CardContent className="flex flex-col items-center gap-4 select-none"></CardContent>
+        <CardContent className="flex flex-col items-center gap-4 select-none">
+          <div className="grid grid-cols-2 gap-4 items-center justify-between w-92">
+            <TunerTranspose />
+            <TunerFrequency />
+          </div>
+        </CardContent>
         <CardActions>
           <Button
             variant="contained"
             fullWidth
-            color={isPlaying ? "error" : "primary"}
-            onClick={toggleIsPlaying}
-            startIcon={isPlaying ? <StopIcon /> : <PlayArrowIcon />}
+            color={isListening ? "error" : "primary"}
+            onClick={toggleIsListening}
+            startIcon={isListening ? <StopIcon /> : <PlayArrowIcon />}
           >
-            {isPlaying ? "Stop" : "Start"}
+            {isListening ? "Stop" : "Start"}
           </Button>
         </CardActions>
       </Card>

@@ -18,7 +18,7 @@ import type { DocumentProps } from "react-pdf";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
-import "./document.scss";
+import "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/document.scss";
 
 import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/icon-button";
 
