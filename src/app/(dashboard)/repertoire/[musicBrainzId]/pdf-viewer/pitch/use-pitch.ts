@@ -41,7 +41,7 @@ export default function usePitch() {
   useEffect(() => {
     if (!oscillatorRef.current) return;
 
-    oscillatorRef.current.frequency.value = frequency;
+    oscillatorRef.current.frequency.rampTo(frequency, 0.03);
   }, [frequency]);
 
   // Volume control
@@ -52,7 +52,7 @@ export default function usePitch() {
     // Convert 0-100 range to dB range (-Infinity to ~0dB)
     const volumeDb = volume === 0 ? -Infinity : 20 * Math.log10(volume / 100);
 
-    oscillatorRef.current.volume.value = volumeDb;
+    oscillatorRef.current.volume.rampTo(volumeDb, 0.1);
   }, [volume]);
 
   // Play/pause control

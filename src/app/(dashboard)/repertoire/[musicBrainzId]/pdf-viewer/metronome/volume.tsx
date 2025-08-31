@@ -3,7 +3,7 @@
 import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 
-import VolumeMuteIcon from "@mui/icons-material/VolumeMute";
+import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 
 import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
@@ -17,7 +17,7 @@ const MetronomeVolume: FC = () => {
   return (
     <div className="flex items-center w-full gap-2">
       {volume === 0 ? (
-        <VolumeMuteIcon fontSize="small" />
+        <VolumeOffIcon color="error" fontSize="small" />
       ) : (
         <VolumeUpIcon fontSize="small" />
       )}
@@ -29,7 +29,7 @@ const MetronomeVolume: FC = () => {
         max={100}
         size="small"
       />
-      <Typography variant="caption" className="min-w-8">
+      <Typography variant="caption" className="min-w-8 text-right">
         {volume}%
       </Typography>
     </div>

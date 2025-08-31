@@ -1,5 +1,6 @@
 "use client";
 
+import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
@@ -10,9 +11,16 @@ import Popover from "@mui/material/Popover";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import StopIcon from "@mui/icons-material/Stop";
 
-import TunerFrequency from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency";
+import TunerFrequencyDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-display";
+import TunerFrequencySetter from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-setter";
+import TunerMicSelect from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/mic-select";
+import TunerMicVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/mic-volume";
+import TunerNeedle from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/needle";
+import TunerNoteDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/note-display";
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 import TunerTranspose from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/transpose";
+import TunerStatus from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/tuning-status";
+import { useTuner } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/use-tuner";
 
 import type { FC } from "react";
 
@@ -22,7 +30,8 @@ const Tuner: FC<{
   fullScreenEl?: Element;
 }> = ({ anchorEl, handleClose, fullScreenEl }) => {
   const isListening = useTunerStore((state) => state.isListening);
-  const toggleIsListening = useTunerStore((state) => state.toggleIsListening);
+
+  const { error, handleToggleListening } = useTuner();
 
   const open = Boolean(anchorEl);
 
@@ -33,14 +42,8 @@ const Tuner: FC<{
       open={open}
       anchorEl={anchorEl}
       onClose={handleClose}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "center",
-      }}
-      transformOrigin={{
-        vertical: "bottom",
-        horizontal: "center",
-      }}
+      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      transformOrigin={{ vertical: "bottom", horizontal: "center" }}
     >
       <Card>
         <CardHeader
@@ -51,10 +54,17 @@ const Tuner: FC<{
             },
           }}
         />
-        <CardContent className="flex flex-col items-center gap-4 select-none">
-          <div className="grid grid-cols-2 gap-4 items-center justify-between w-92">
+        <CardContent className="flex flex-col items-center gap-4 select-none max-w-90">
+          {error && <Alert severity="error">{error.message}</Alert>}
+          <TunerMicSelect fullScreenEl={fullScreenEl} />
+          <TunerNoteDisplay />
+          <TunerNeedle />
+          <TunerFrequencyDisplay />
+          <TunerMicVolume />
+          <TunerStatus />
+          <div className="grid grid-cols-2 gap-2 items-center justify-between w-full min-w-82">
             <TunerTranspose />
-            <TunerFrequency />
+            <TunerFrequencySetter />
           </div>
         </CardContent>
         <CardActions>
@@ -62,7 +72,7 @@ const Tuner: FC<{
             variant="contained"
             fullWidth
             color={isListening ? "error" : "primary"}
-            onClick={toggleIsListening}
+            onClick={handleToggleListening}
             startIcon={isListening ? <StopIcon /> : <PlayArrowIcon />}
           >
             {isListening ? "Stop" : "Start"}

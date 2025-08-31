@@ -3,26 +3,17 @@
 import { create } from "zustand";
 import { createComputed } from "zustand-computed";
 
+import {
+  chromaticNotes,
+  maxFrequency,
+  minFrequency,
+  noteToFrequency,
+} from "~/services/music-theory";
+
+import type { ChromaticNote } from "~/services/music-theory";
+
 export const minOctave = 2;
 export const maxOctave = 6;
-
-export const minFrequency = 400;
-export const maxFrequency = 480;
-
-export const chromaticPitches = [
-  "C",
-  "C♯/D♭",
-  "D",
-  "D♯/E♭",
-  "E",
-  "F",
-  "F♯/G♭",
-  "G",
-  "G♯/A♭",
-  "A",
-  "A♯/B♭",
-  "B",
-];
 
 /**
  * The pitch creator base store properties
@@ -31,11 +22,11 @@ interface PitchStoreBaseProps {
   /**
    * The selected pitch to be played
    */
-  selectedPitch: string;
+  selectedPitch: ChromaticNote;
   /**
    * Sets the pitch
    */
-  setSelectedPitch: (newPitch: string) => void;
+  setSelectedPitch: (newPitch: ChromaticNote) => void;
   /**
    * The octave the pitch should be played in
    */
@@ -113,27 +104,28 @@ export type PitchStoreProps = PitchStoreBaseProps & PitchStoreComputedProps;
 const computedPitchStore = createComputed<
   PitchStoreBaseProps,
   PitchStoreComputedProps
->((state) => ({
-  isIncreasingOctaveDisabled: state.octave >= maxOctave,
-  isDecreasingOctaveDisabled: state.octave <= minOctave,
-  isIncreasingBaseFrequencyDisabled: state.baseFrequency >= maxFrequency,
-  isDecreasingBaseFrequencyDisabled: state.baseFrequency <= minFrequency,
-  frequency:
-    state.baseFrequency *
-    Math.pow(
-      2,
-      (chromaticPitches.findIndex((pitch) => pitch === state.selectedPitch) -
-        chromaticPitches.findIndex((pitch) => pitch === "A") +
-        (state.octave - 4) * 12) /
-        12,
+>(
+  (state) => ({
+    isIncreasingOctaveDisabled: state.octave >= maxOctave,
+    isDecreasingOctaveDisabled: state.octave <= minOctave,
+    isIncreasingBaseFrequencyDisabled: state.baseFrequency >= maxFrequency,
+    isDecreasingBaseFrequencyDisabled: state.baseFrequency <= minFrequency,
+    frequency: noteToFrequency(
+      state.selectedPitch,
+      state.octave,
+      state.baseFrequency,
     ),
-}));
+  }),
+  {
+    keys: ["octave", "baseFrequency", "selectedPitch"],
+  },
+);
 
 export const usePitchStore = create<PitchStoreBaseProps>()(
   computedPitchStore((set, get) => ({
     selectedPitch: "A",
     setSelectedPitch: (newPitch) => {
-      if (chromaticPitches.includes(newPitch))
+      if (chromaticNotes.includes(newPitch))
         set(() => ({
           selectedPitch: newPitch,
         }));

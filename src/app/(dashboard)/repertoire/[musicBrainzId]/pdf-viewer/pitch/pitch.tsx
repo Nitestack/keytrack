@@ -2,10 +2,8 @@
 
 import Button from "@mui/material/Button";
 
-import {
-  chromaticPitches,
-  usePitchStore,
-} from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import { chromaticNotes } from "~/services/music-theory";
 
 import type { FC } from "react";
 
@@ -15,7 +13,7 @@ const PitchSelector: FC = () => {
 
   return (
     <div className="grid grid-cols-4 gap-2 justify-center items-center">
-      {chromaticPitches.map((pitch) => (
+      {chromaticNotes.map((pitch) => (
         <Button
           className="w-18 whitespace-nowrap"
           key={pitch}
