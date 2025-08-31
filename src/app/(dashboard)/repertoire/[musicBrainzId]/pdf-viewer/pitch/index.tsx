@@ -56,7 +56,7 @@ const Pitch: FC<{
             },
           }}
         />
-        <CardContent className="flex flex-col items-center gap-4 select-none">
+        <CardContent className="flex flex-col items-center gap-4">
           <PitchSelector />
           <div className="grid grid-cols-2 gap-4 items-center justify-between w-full">
             <PitchOctave />
