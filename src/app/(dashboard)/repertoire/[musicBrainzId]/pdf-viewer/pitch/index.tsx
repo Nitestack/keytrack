@@ -25,10 +25,11 @@ const Pitch: FC<{
   fullScreenEl?: Element;
 }> = ({ anchorEl, handleClose, fullScreenEl }) => {
   const isPlaying = usePitchStore((state) => state.isPlaying);
+  const toggleIsPlaying = usePitchStore((state) => state.toggleIsPlaying);
 
   const open = Boolean(anchorEl);
 
-  const togglePlaying = usePitch();
+  usePitch();
 
   return (
     <Popover
@@ -68,7 +69,7 @@ const Pitch: FC<{
             variant="contained"
             fullWidth
             color={isPlaying ? "error" : "primary"}
-            onClick={togglePlaying}
+            onClick={toggleIsPlaying}
             startIcon={isPlaying ? <StopIcon /> : <PlayArrowIcon />}
           >
             {isPlaying ? "Stop" : "Start"}

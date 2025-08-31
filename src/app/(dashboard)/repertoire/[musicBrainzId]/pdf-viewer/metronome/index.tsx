@@ -25,10 +25,11 @@ const Metronome: FC<{
   fullScreenEl?: Element;
 }> = ({ anchorEl, handleClose, fullScreenEl }) => {
   const isPlaying = useMetronomeStore((state) => state.isPlaying);
+  const toggleIsPlaying = useMetronomeStore((state) => state.toggleIsPlaying);
 
   const open = Boolean(anchorEl);
 
-  const togglePlaying = useMetronome();
+  useMetronome();
 
   return (
     <Popover
@@ -66,7 +67,7 @@ const Metronome: FC<{
             variant="contained"
             fullWidth
             color={isPlaying ? "error" : "primary"}
-            onClick={togglePlaying}
+            onClick={toggleIsPlaying}
             startIcon={isPlaying ? <StopIcon /> : <PlayArrowIcon />}
           >
             {isPlaying ? "Stop" : "Start"}

@@ -55,6 +55,7 @@
     "react-pdf": "^10.1.0",
     "server-only": "^0.0.1",
     "superjson": "^2.2.2",
+    "tone": "^15.1.22",
     "use-debounce": "^10.0.5",
     "zod": "^3.25.63",
     "zustand": "^5.0.8",

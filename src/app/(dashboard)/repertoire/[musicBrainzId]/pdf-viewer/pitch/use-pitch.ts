@@ -1,109 +1,65 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+import { Context, Oscillator, setContext, start } from "tone";
 
 import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
 
-let audioContext: AudioContext | null = null;
-let oscillatorNode: OscillatorNode | null = null;
-let gainNode: GainNode | null = null;
-
 /**
- * Creates the audio context and the gain node
- */
-function initializeAudioContext(initialVolume: number) {
-  audioContext ??= new AudioContext();
-  if (!gainNode) {
-    gainNode = audioContext.createGain();
-    gainNode.connect(audioContext.destination);
-    setVolume(initialVolume);
-  }
-}
-
-/**
- * Sets the volume (from 0 to 1)
- */
-function setVolume(newVolume: number) {
-  if (gainNode && 0 <= newVolume && newVolume <= 1) {
-    gainNode.gain.value = newVolume;
-  }
-}
-
-/**
- * Plays the pitch sound
- * @param frequency The real frequency
- */
-async function playPitch(frequency: number) {
-  if (!audioContext || !gainNode) return;
-
-  if (audioContext.state === "suspended") {
-    await audioContext.resume();
-  }
-
-  if (oscillatorNode) {
-    stopPitch();
-  }
-
-  oscillatorNode = audioContext.createOscillator();
-  oscillatorNode.connect(gainNode);
-
-  oscillatorNode.frequency.value = frequency;
-  oscillatorNode.type = "sine";
-
-  oscillatorNode.start();
-}
-
-/**
- * Updates frequency of currently playing oscillator
- */
-function updateFrequency(newFrequency: number) {
-  if (!oscillatorNode || !audioContext) return;
-
-  oscillatorNode.frequency.setValueAtTime(
-    newFrequency,
-    audioContext.currentTime,
-  );
-}
-
-/**
- * Stops the pitch sound
- */
-function stopPitch() {
-  if (!oscillatorNode) return;
-
-  oscillatorNode.stop();
-  oscillatorNode = null;
-}
-
-/**
- * Pitch creator hook for initializing and management
+ * An efficient pitch creator hook using a single, persistent Tone.js oscillator
  */
 export default function usePitch() {
   const frequency = usePitchStore((state) => state.frequency);
   const volume = usePitchStore((state) => state.volume);
   const isPlaying = usePitchStore((state) => state.isPlaying);
-  const toggleIsPlaying = usePitchStore((state) => state.toggleIsPlaying);
 
+  const oscillatorRef = useRef<Oscillator | null>(null);
+
+  // Initialization: creates audio nodes and sets up audio graph
   useEffect(() => {
-    setVolume(volume / 100);
+    function setupAudio() {
+      // Set context with performance optimizations
+      setContext(new Context({ latencyHint: "balanced" }));
+
+      oscillatorRef.current = new Oscillator({
+        type: "sine",
+      }).toDestination();
+    }
+
+    setupAudio();
+
+    return () => {
+      if (oscillatorRef.current) {
+        oscillatorRef.current.stop();
+        oscillatorRef.current.dispose();
+      }
+    };
+  }, []);
+
+  // Frequency control
+  useEffect(() => {
+    if (!oscillatorRef.current) return;
+
+    oscillatorRef.current.frequency.value = frequency;
+  }, [frequency]);
+
+  // Volume control
+  useEffect(() => {
+    if (!oscillatorRef.current) return;
+
+    // Calculate volume in decibels (Tone.js uses dB scale)
+    // Convert 0-100 range to dB range (-Infinity to ~0dB)
+    const volumeDb = volume === 0 ? -Infinity : 20 * Math.log10(volume / 100);
+
+    oscillatorRef.current.volume.value = volumeDb;
   }, [volume]);
 
+  // Play/pause control
   useEffect(() => {
-    if (isPlaying) {
-      if (oscillatorNode) {
-        updateFrequency(frequency);
-      } else {
-        void playPitch(frequency);
-      }
-    } else {
-      void stopPitch();
-    }
-  }, [isPlaying, frequency]);
+    if (!oscillatorRef.current) return;
 
-  return useCallback(() => {
-    if (!isPlaying) {
-      initializeAudioContext(volume);
-    }
-    toggleIsPlaying();
-  }, [isPlaying, volume]);
+    if (isPlaying) void start().then(() => oscillatorRef.current?.start());
+    else oscillatorRef.current.stop();
+  }, [isPlaying]);
 }
