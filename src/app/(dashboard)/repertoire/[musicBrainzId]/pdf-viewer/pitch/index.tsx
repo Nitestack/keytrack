@@ -58,7 +58,7 @@ const Pitch: FC<{
         />
         <CardContent className="flex flex-col items-center gap-4 select-none">
           <PitchSelector />
-          <div className="grid grid-cols-2 gap-8 items-center justify-between w-full">
+          <div className="grid grid-cols-2 gap-4 items-center justify-between w-full">
             <PitchOctave />
             <PitchFrequency />
           </div>

@@ -33,8 +33,8 @@ const PitchFrequency: FC = () => {
       >
         <RemoveIcon />
       </IconButton>
-      <Typography className="select-none font-bold" variant="h6">
-        {baseFrequency}
+      <Typography className="font-bold select-none" variant="h6">
+        {baseFrequency} <Typography variant="caption">Hz</Typography>
       </Typography>
       <IconButton
         disabled={isIncreasingBaseFrequencyDisabled}
