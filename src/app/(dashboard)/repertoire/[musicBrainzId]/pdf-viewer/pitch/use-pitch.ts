@@ -54,6 +54,18 @@ async function playPitch(frequency: number) {
 }
 
 /**
+ * Updates frequency of currently playing oscillator
+ */
+function updateFrequency(newFrequency: number) {
+  if (!oscillatorNode || !audioContext) return;
+
+  oscillatorNode.frequency.setValueAtTime(
+    newFrequency,
+    audioContext.currentTime,
+  );
+}
+
+/**
  * Stops the pitch sound
  */
 function stopPitch() {
@@ -78,7 +90,11 @@ export default function usePitch() {
 
   useEffect(() => {
     if (isPlaying) {
-      void playPitch(frequency);
+      if (oscillatorNode) {
+        updateFrequency(frequency);
+      } else {
+        void playPitch(frequency);
+      }
     } else {
       void stopPitch();
     }
