@@ -6,12 +6,14 @@ import SpeedDialAction from "@mui/material/SpeedDialAction";
 import AvTimerIcon from "@mui/icons-material/AvTimer";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
 
 import { useState } from "react";
 
 import clsx from "clsx";
 
 import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome";
+import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch";
 
 import type { SpeedDialActionProps } from "@mui/material/SpeedDialAction";
 import type { FC, MouseEvent } from "react";
@@ -21,22 +23,37 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
   fullScreenEl,
 }) => {
   const [open, setOpen] = useState(false);
-  const [metronomeEl, setMetronomeEl] = useState<null | HTMLElement>(null);
+  const [metronomeEl, setMetronomeEl] = useState<HTMLElement | null>(null);
+  const [pitchEl, setPitchEl] = useState<HTMLElement | null>(null);
+
   const handleMetronomeClick = (event: MouseEvent<HTMLDivElement>) => {
     setMetronomeEl(event.currentTarget);
   };
-  const handleMetronomeClose = () => {
+
+  function handleMetronomeClose() {
     setMetronomeEl(null);
-  };
-  const handleToggle = () => {
+  }
+  function handleToggle() {
     setOpen((prevOpen) => !prevOpen);
-  };
+  }
+
+  function handlePitchClick(event: MouseEvent<HTMLDivElement>) {
+    setPitchEl(event.currentTarget);
+  }
+  function handlePitchClose() {
+    setPitchEl(null);
+  }
 
   const actions: (Omit<SpeedDialActionProps, "key"> & { name: string })[] = [
     {
       name: "Metronome",
       icon: <AvTimerIcon />,
       onClick: handleMetronomeClick,
+    },
+    {
+      name: "Pitch",
+      icon: <MusicNoteIcon />,
+      onClick: handlePitchClick,
     },
   ];
 
@@ -80,6 +97,11 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
       <Metronome
         anchorEl={metronomeEl}
         handleClose={handleMetronomeClose}
+        fullScreenEl={fullScreenEl}
+      />
+      <Pitch
+        anchorEl={pitchEl}
+        handleClose={handlePitchClose}
         fullScreenEl={fullScreenEl}
       />
     </>
