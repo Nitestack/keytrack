@@ -29,53 +29,38 @@ const MetronomeTimeSignature: FC = () => {
   const isDecreasingDenomDisabled = useMetronomeStore(
     (state) => state.isDecreasingDenominatorDisabled,
   );
-  const isPlaying = useMetronomeStore((state) => state.isPlaying);
 
   return (
     <div className="flex justify-center">
       <div className="flex items-center select-none">
         <div className="flex flex-col">
-          {!isPlaying && (
-            <IconButton
-              disabled={isDecreasingNumDisabled}
-              onClick={decreaseNum}
-            >
-              <RemoveIcon />
-            </IconButton>
-          )}
+          <IconButton disabled={isDecreasingNumDisabled} onClick={decreaseNum}>
+            <RemoveIcon />
+          </IconButton>
           <Typography className="text-center font-bold" variant="h4">
             {num}
           </Typography>
-          {!isPlaying && (
-            <IconButton
-              disabled={isIncreasingNumDisabled}
-              onClick={increaseNum}
-            >
-              <AddIcon />
-            </IconButton>
-          )}
+          <IconButton disabled={isIncreasingNumDisabled} onClick={increaseNum}>
+            <AddIcon />
+          </IconButton>
         </div>
         <Typography variant="h4">/</Typography>
         <div className="flex flex-col">
-          {!isPlaying && (
-            <IconButton
-              disabled={isDecreasingDenomDisabled}
-              onClick={decreaseDenom}
-            >
-              <RemoveIcon />
-            </IconButton>
-          )}
+          <IconButton
+            disabled={isDecreasingDenomDisabled}
+            onClick={decreaseDenom}
+          >
+            <RemoveIcon />
+          </IconButton>
           <Typography className="text-center font-bold" variant="h4">
             {denom}
           </Typography>
-          {!isPlaying && (
-            <IconButton
-              disabled={isIncreasingDenomDisabled}
-              onClick={increaseDenom}
-            >
-              <AddIcon />
-            </IconButton>
-          )}
+          <IconButton
+            disabled={isIncreasingDenomDisabled}
+            onClick={increaseDenom}
+          >
+            <AddIcon />
+          </IconButton>
         </div>
       </div>
     </div>

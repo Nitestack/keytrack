@@ -112,13 +112,13 @@ export function useMetronomeBeat() {
   const loopBeat = useMetronomeStore((state) => state.loopBeat);
 
   useEffect(() => {
+    resetBeat();
+
     if (isPlaying) {
       const intervalId = setInterval(loopBeat, (60 / bpm) * 1000);
       loopBeat();
 
       return () => clearInterval(intervalId);
-    } else {
-      resetBeat();
     }
-  }, [isPlaying]);
+  }, [isPlaying, bpm]);
 }
