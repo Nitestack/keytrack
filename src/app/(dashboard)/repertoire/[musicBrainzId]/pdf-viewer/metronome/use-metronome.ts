@@ -78,8 +78,8 @@ export function useMetronome() {
     // Convert 0-100 range to dB range (-Infinity to ~0dB)
     const volumeDb = volume === 0 ? -Infinity : 20 * Math.log10(volume / 100);
 
-    accentSynthRef.current.volume.value = volumeDb;
-    clickSynthRef.current.volume.value = volumeDb;
+    accentSynthRef.current.volume.rampTo(volumeDb, 0.1);
+    clickSynthRef.current.volume.rampTo(volumeDb, 0.1);
   }, [volume]);
 
   // Play/pause control (dependent on maxBeat)

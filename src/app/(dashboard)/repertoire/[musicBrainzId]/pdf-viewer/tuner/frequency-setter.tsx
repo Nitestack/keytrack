@@ -10,7 +10,7 @@ import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-
 
 import type { FC } from "react";
 
-const TunerFrequency: FC = () => {
+const TunerFrequencySetter: FC = () => {
   const baseFrequency = useTunerStore((state) => state.baseFrequency);
   const increaseBaseFrequency = useTunerStore(
     (state) => state.increaseBaseFrequency,
@@ -46,4 +46,4 @@ const TunerFrequency: FC = () => {
   );
 };
 
-export default TunerFrequency;
+export default TunerFrequencySetter;

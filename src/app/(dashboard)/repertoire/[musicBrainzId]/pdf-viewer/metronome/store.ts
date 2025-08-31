@@ -150,7 +150,7 @@ const computedMetronomeStore = createComputed<
       state.denominatorExponent <= minDenominatorExponent,
   }),
   {
-    keys: ["isPlaying", "numerator", "denominatorExponent", "bpm"],
+    keys: ["numerator", "denominatorExponent", "bpm"],
   },
 );
 

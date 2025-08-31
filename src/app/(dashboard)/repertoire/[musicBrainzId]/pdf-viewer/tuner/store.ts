@@ -3,15 +3,22 @@
 import { create } from "zustand";
 import { createComputed } from "zustand-computed";
 
-import { chromaticPitches } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import {
+  maxFrequency,
+  minFrequency,
+  transposeKeys,
+} from "~/services/music-theory";
 
-export const minFrequency = 400;
-export const maxFrequency = 480;
+import type { NoteInfo, TransposeKey } from "~/services/music-theory";
 
-export const transposeKeys = [
-  ...chromaticPitches.slice(1).map((pitch) => `-${pitch}`),
-  ...chromaticPitches.map((pitch) => (pitch !== "C" ? `+${pitch}` : "C")),
-];
+const IN_TUNE_THRESHOLD_CENTS = 5; // +/- cents to be considered "in tune"
+const CLOSE_THRESHOLD_CENTS = 10; // +/- cents to be considered "close"
+
+type TuningStatus = {
+  text: string;
+  color: "success" | "warning" | "error";
+  cents: number;
+};
 
 /**
  * The tuner base store properties
@@ -20,7 +27,7 @@ interface TunerStoreBaseProps {
   /**
    * The selected transpose key
    */
-  selectedTransposeKey: string;
+  selectedTransposeKey: TransposeKey;
   /**
    * Selects the next available transpose key
    */
@@ -49,6 +56,38 @@ interface TunerStoreBaseProps {
    * Toggles the listening state of the tuner
    */
   toggleIsListening: () => void;
+  /**
+   * Information about the detected note
+   */
+  detectedNote?: NoteInfo;
+  /**
+   * Sets detected note
+   */
+  setDetectedNote: (newNote?: NoteInfo) => void;
+  /**
+   * The volume of the microphone input (0 to 100)
+   */
+  volume: number;
+  /**
+   * Sets the volume of the microphone input (0 to 100)
+   */
+  setVolume: (newVolume: number) => void;
+  /**
+   * The id of the selected input device
+   */
+  selectedDeviceId?: string;
+  /**
+   * Sets the id of the selected input device
+   */
+  setSelectedDeviceId: (newDeviceId?: string) => void;
+  /**
+   * All available input devices
+   */
+  audioDevices: MediaDeviceInfo[];
+  /**
+   * Sets the available audio input devices
+   */
+  setAudioDevices: (audioDevices: MediaDeviceInfo[]) => void;
 }
 
 /**
@@ -71,6 +110,10 @@ interface TunerStoreComputedProps {
    * Whether decreasing the base frequency is disabled (if frequency is at `minFrequency`)
    */
   isDecreasingBaseFrequencyDisabled: boolean;
+  /**
+   * Current status of the tuner (in tune, close, sharp or flat)
+   */
+  tuningStatus?: TuningStatus;
 }
 
 /**
@@ -81,16 +124,45 @@ export type TunerStoreProps = TunerStoreBaseProps & TunerStoreComputedProps;
 const computedTunerStore = createComputed<
   TunerStoreBaseProps,
   TunerStoreComputedProps
->((state) => ({
-  isIncreasingTransposeKeyDisabled:
-    transposeKeys.findIndex((pitch) => pitch === state.selectedTransposeKey) >=
-    transposeKeys.length - 1,
-  isDecreasingTransposeKeyDisabled:
-    transposeKeys.findIndex((pitch) => pitch === state.selectedTransposeKey) <=
-    0,
-  isIncreasingBaseFrequencyDisabled: state.baseFrequency >= maxFrequency,
-  isDecreasingBaseFrequencyDisabled: state.baseFrequency <= minFrequency,
-}));
+>(
+  (state) => ({
+    isIncreasingTransposeKeyDisabled:
+      transposeKeys.findIndex(
+        (pitch) => pitch === state.selectedTransposeKey,
+      ) >=
+      transposeKeys.length - 1,
+    isDecreasingTransposeKeyDisabled:
+      transposeKeys.findIndex(
+        (pitch) => pitch === state.selectedTransposeKey,
+      ) <= 0,
+    isIncreasingBaseFrequencyDisabled: state.baseFrequency >= maxFrequency,
+    isDecreasingBaseFrequencyDisabled: state.baseFrequency <= minFrequency,
+    tuningStatus: (() => {
+      if (!state.detectedNote) return undefined;
+      const { cents } = state.detectedNote;
+      if (Math.abs(cents) <= IN_TUNE_THRESHOLD_CENTS)
+        return {
+          text: "In Tune",
+          color: "success",
+          cents,
+        } satisfies TuningStatus;
+      if (Math.abs(cents) <= CLOSE_THRESHOLD_CENTS)
+        return {
+          text: "Close",
+          color: "warning",
+          cents,
+        } satisfies TuningStatus;
+      return {
+        text: cents > 0 ? "Too Sharp" : "Too Flat",
+        color: "error",
+        cents,
+      } satisfies TuningStatus;
+    })() as TuningStatus | undefined,
+  }),
+  {
+    keys: ["selectedTransposeKey", "baseFrequency", "detectedNote"],
+  },
+);
 
 export const useTunerStore = create<TunerStoreBaseProps>()(
   computedTunerStore((set, get) => ({
@@ -136,6 +208,30 @@ export const useTunerStore = create<TunerStoreBaseProps>()(
     toggleIsListening: () =>
       set((state) => ({
         isListening: !state.isListening,
+      })),
+
+    detectedNote: undefined,
+    setDetectedNote: (newNote?: NoteInfo) =>
+      set(() => ({
+        detectedNote: newNote,
+      })),
+
+    volume: 0,
+    setVolume: (newVolume: number) => {
+      if (0 <= newVolume && newVolume <= 100)
+        set(() => ({ volume: newVolume }));
+    },
+
+    selectedDeviceId: undefined,
+    setSelectedDeviceId: (newDeviceId) =>
+      set(() => ({
+        selectedDeviceId: newDeviceId,
+      })),
+
+    audioDevices: [],
+    setAudioDevices: (audioDevices) =>
+      set(() => ({
+        audioDevices,
       })),
   })),
 );
