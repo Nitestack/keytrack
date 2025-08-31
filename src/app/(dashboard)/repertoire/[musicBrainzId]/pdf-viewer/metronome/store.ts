@@ -64,13 +64,9 @@ interface MetronomeStoreBaseProps {
    */
   beat: number;
   /**
-   * Increments the beat by 1, and resets to 1 if it exceeds the max beat
+   * Sets the beat
    */
-  loopBeat: () => void;
-  /**
-   * Resets the beat to 0
-   */
-  resetBeat: () => void;
+  setBeat: (newBeat: number) => void;
   /**
    * The current volume of the metronome (0-100)
    */
@@ -208,14 +204,13 @@ export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
     },
 
     beat: 0,
-    loopBeat: () =>
-      set((state) => ({
-        beat: state.beat < get().maxBeat ? state.beat + 1 : 1,
-      })),
-    resetBeat: () =>
-      set(() => ({
-        beat: 0,
-      })),
+    setBeat: (newBeat) => {
+      if (1 <= newBeat && newBeat <= get().maxBeat) {
+        set(() => ({
+          beat: newBeat,
+        }));
+      }
+    },
 
     volume: 50,
     setVolume: (newVolume: number) => {

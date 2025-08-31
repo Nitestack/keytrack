@@ -1,124 +1,121 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+import {
+  Context,
+  getDraw,
+  getTransport,
+  Loop,
+  setContext,
+  start,
+  Synth,
+} from "tone";
 
 import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
 
-let audioContext: AudioContext | null = null;
-let gainNode: GainNode | null = null;
-let accentBuffer: AudioBuffer | null = null;
-let clickBuffer: AudioBuffer | null = null;
+const ACCENT_SYNTH_CONFIG: ConstructorParameters<typeof Synth>["0"] = {
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 },
+};
+
+const CLICK_SYNTH_CONFIG: ConstructorParameters<typeof Synth>["0"] = {
+  oscillator: { type: "sine" },
+  envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.08 },
+};
 
 /**
- * Creates the audio context and the gain node
- */
-function initializeAudioContext(initialVolume: number) {
-  audioContext ??= new AudioContext();
-  if (!gainNode) {
-    gainNode = audioContext.createGain();
-    gainNode.connect(audioContext.destination);
-    setVolume(initialVolume);
-  }
-  accentBuffer ??= generateClickSound(1200, 0.15);
-  clickBuffer ??= generateClickSound(800, 0.1);
-}
-
-/**
- * Sets the volume (from 0 to 1)
- */
-function setVolume(newVolume: number) {
-  if (gainNode && 0 <= newVolume && newVolume <= 1) {
-    gainNode.gain.value = newVolume;
-  }
-}
-
-/**
- * Generates a sharp click sound with quick decay
- * @param frequency The frequency in Hz
- * @param duration The duration
- */
-function generateClickSound(frequency: number, duration: number): AudioBuffer {
-  if (!audioContext)
-    throw new Error("Please initialize the audio context first.");
-
-  const sampleRate = audioContext.sampleRate;
-  const samples = Math.floor(sampleRate * duration);
-  const buffer = audioContext.createBuffer(1, samples, sampleRate);
-  const data = buffer.getChannelData(0);
-
-  for (let i = 0; i < samples; i++) {
-    const t = i / sampleRate;
-    const envelope = Math.exp(-t * 30);
-    data[i] = Math.sin(2 * Math.PI * frequency * t) * envelope * 0.3;
-  }
-
-  return buffer;
-}
-
-/**
- * Plays the tick sound
- * @param isAccent Whether the tick is an accent tick
- */
-async function playTick(isAccent = false) {
-  if (!audioContext || !gainNode) return;
-
-  if (audioContext.state === "suspended") {
-    await audioContext.resume();
-  }
-
-  const buffer = isAccent ? accentBuffer : clickBuffer;
-  if (!buffer) return;
-
-  const source = audioContext.createBufferSource();
-  source.buffer = buffer;
-  source.connect(gainNode);
-  source.start();
-}
-
-/**
- * Metronome hook for initializing and management
+ * Metronome hook for initializing and management using Tone.js
  */
 export function useMetronome() {
-  const beat = useMetronomeStore((state) => state.beat);
+  const maxBeat = useMetronomeStore((state) => state.maxBeat);
+  const setBeat = useMetronomeStore((state) => state.setBeat);
+  const bpm = useMetronomeStore((state) => state.bpm);
   const volume = useMetronomeStore((state) => state.volume);
   const isPlaying = useMetronomeStore((state) => state.isPlaying);
-  const toggleIsPlaying = useMetronomeStore((state) => state.toggleIsPlaying);
 
+  const accentSynthRef = useRef<Synth | null>(null);
+  const clickSynthRef = useRef<Synth | null>(null);
+
+  const loop = useRef<Loop | null>(null);
+
+  // Initialization: creates audio nodes and sets up audio graph
   useEffect(() => {
-    setVolume(volume / 100);
+    function setupAudio() {
+      // Set context with performance optimizations
+      setContext(new Context({ latencyHint: "playback", lookAhead: 0.1 }));
+
+      accentSynthRef.current = new Synth(ACCENT_SYNTH_CONFIG).toDestination();
+      clickSynthRef.current = new Synth(CLICK_SYNTH_CONFIG).toDestination();
+    }
+
+    setupAudio();
+
+    return () => {
+      loop.current?.dispose();
+      accentSynthRef.current?.dispose();
+      clickSynthRef.current?.dispose();
+
+      const transport = getTransport();
+
+      if (transport.state !== "stopped") {
+        transport.stop();
+        transport.cancel(0);
+      }
+    };
+  }, []);
+
+  // BPM control
+  useEffect(() => {
+    getTransport().bpm.value = bpm;
+  }, [bpm]);
+
+  // Volume control
+  useEffect(() => {
+    if (!accentSynthRef.current || !clickSynthRef.current) return;
+
+    // Calculate volume in decibels (Tone.js uses dB scale)
+    // Convert 0-100 range to dB range (-Infinity to ~0dB)
+    const volumeDb = volume === 0 ? -Infinity : 20 * Math.log10(volume / 100);
+
+    accentSynthRef.current.volume.value = volumeDb;
+    clickSynthRef.current.volume.value = volumeDb;
   }, [volume]);
 
+  // Play/pause control (dependent on maxBeat)
   useEffect(() => {
-    if (isPlaying && beat !== 0) {
-      void playTick(beat === 1);
+    if (!accentSynthRef.current || !clickSynthRef.current) return;
+
+    // Always dispose existing loop
+    if (loop.current) {
+      loop.current.dispose();
+      loop.current = null;
     }
-  }, [isPlaying, beat]);
 
-  return useCallback(() => {
-    if (!isPlaying) {
-      initializeAudioContext(volume);
-    }
-    toggleIsPlaying();
-  }, [isPlaying, volume]);
-}
-
-/**
- * Metronome hook for setting the current beat
- */
-export function useMetronomeBeat() {
-  const bpm = useMetronomeStore((state) => state.bpm);
-  const isPlaying = useMetronomeStore((state) => state.isPlaying);
-  const resetBeat = useMetronomeStore((state) => state.resetBeat);
-  const loopBeat = useMetronomeStore((state) => state.loopBeat);
-
-  useEffect(() => {
-    resetBeat();
+    setBeat(0);
 
     if (isPlaying) {
-      const intervalId = setInterval(loopBeat, (60 / bpm) * 1000);
-      loopBeat();
+      getTransport().timeSignature = maxBeat;
 
-      return () => clearInterval(intervalId);
-    }
-  }, [isPlaying, bpm]);
+      let currentBeat = 0;
+
+      loop.current = new Loop((time) => {
+        const beatNumber = (currentBeat % maxBeat) + 1;
+
+        getDraw().schedule(() => {
+          setBeat(beatNumber);
+        }, time);
+
+        // Play sound
+        const isAccent = beatNumber === 1;
+        const synth = isAccent ? accentSynthRef.current : clickSynthRef.current;
+        const frequency = isAccent ? "C6" : "C5";
+        synth?.triggerAttackRelease(frequency, "16n", time);
+
+        currentBeat++;
+      }, "4n").start(0);
+
+      void start().then(() => getTransport().start());
+    } else getTransport().pause();
+  }, [isPlaying, maxBeat, setBeat]);
 }
