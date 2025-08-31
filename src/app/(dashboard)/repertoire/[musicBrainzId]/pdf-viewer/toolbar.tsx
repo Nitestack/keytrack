@@ -4,6 +4,7 @@ import SpeedDial from "@mui/material/SpeedDial";
 import SpeedDialAction from "@mui/material/SpeedDialAction";
 
 import AvTimerIcon from "@mui/icons-material/AvTimer";
+import GraphicEqIcon from "@mui/icons-material/GraphicEq";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import MusicNoteIcon from "@mui/icons-material/MusicNote";
@@ -14,6 +15,7 @@ import clsx from "clsx";
 
 import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome";
 import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch";
+import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner";
 
 import type { SpeedDialActionProps } from "@mui/material/SpeedDialAction";
 import type { FC, MouseEvent } from "react";
@@ -25,16 +27,17 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
   const [open, setOpen] = useState(false);
   const [metronomeEl, setMetronomeEl] = useState<HTMLElement | null>(null);
   const [pitchEl, setPitchEl] = useState<HTMLElement | null>(null);
+  const [tunerEl, setTunerEl] = useState<HTMLElement | null>(null);
+
+  function handleToggle() {
+    setOpen((prevOpen) => !prevOpen);
+  }
 
   const handleMetronomeClick = (event: MouseEvent<HTMLDivElement>) => {
     setMetronomeEl(event.currentTarget);
   };
-
   function handleMetronomeClose() {
     setMetronomeEl(null);
-  }
-  function handleToggle() {
-    setOpen((prevOpen) => !prevOpen);
   }
 
   function handlePitchClick(event: MouseEvent<HTMLDivElement>) {
@@ -42,6 +45,13 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
   }
   function handlePitchClose() {
     setPitchEl(null);
+  }
+
+  function handleTunerClick(event: MouseEvent<HTMLDivElement>) {
+    setTunerEl(event.currentTarget);
+  }
+  function handleTunerClose() {
+    setTunerEl(null);
   }
 
   const actions: (Omit<SpeedDialActionProps, "key"> & { name: string })[] = [
@@ -54,6 +64,11 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
       name: "Pitch",
       icon: <MusicNoteIcon />,
       onClick: handlePitchClick,
+    },
+    {
+      name: "Tuner",
+      icon: <GraphicEqIcon />,
+      onClick: handleTunerClick,
     },
   ];
 
@@ -102,6 +117,11 @@ const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
       <Pitch
         anchorEl={pitchEl}
         handleClose={handlePitchClose}
+        fullScreenEl={fullScreenEl}
+      />
+      <Tuner
+        anchorEl={tunerEl}
+        handleClose={handleTunerClose}
         fullScreenEl={fullScreenEl}
       />
     </>
