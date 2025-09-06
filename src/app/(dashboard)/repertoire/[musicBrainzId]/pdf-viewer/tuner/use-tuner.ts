@@ -58,6 +58,7 @@ export function useTuner() {
   const setSelectedDeviceId = useTunerStore(
     (state) => state.setSelectedDeviceId,
   );
+  const resetStore = useTunerStore((state) => state.resetStore);
 
   const [error, setError] = useState<TunerError | null>(null);
 
@@ -82,14 +83,10 @@ export function useTuner() {
     analyserRef.current = null;
     meterRef.current = null;
     pitchDetectorRef.current = null;
-    setDetectedNote(undefined);
-    setVolume(0);
+    setError(null);
   }, []);
 
   const startTuner = useCallback(async () => {
-    stopTuner();
-    setError(null);
-
     try {
       userMediaRef.current ??= new UserMedia();
       await userMediaRef.current.open(selectedDeviceId);
@@ -228,6 +225,11 @@ export function useTuner() {
         setSelectedDeviceId(audioInputDevices[0]!.deviceId);
       }
     });
+
+    return () => {
+      stopTuner();
+      resetStore();
+    };
   }, []);
 
   async function handleToggleListening() {

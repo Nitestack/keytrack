@@ -3,6 +3,8 @@
 import { create } from "zustand";
 import { createComputed } from "zustand-computed";
 
+import type { NonFunction } from "~/utils/types";
+
 export const minBpm = 30;
 export const maxBpm = 280;
 
@@ -11,6 +13,15 @@ export const maxNumerator = 32;
 
 export const minDenominatorExponent = 0; // 2^0 = 1
 export const maxDenominatorExponent = 6; // 2^6 = 64
+
+export const defaultValues: NonFunction<MetronomeStoreBaseProps> = {
+  bpm: 100,
+  numerator: 4,
+  denominatorExponent: 2,
+  beat: 0,
+  volume: 50,
+  isPlaying: false,
+};
 
 /**
  * The metronome base store properties
@@ -84,6 +95,10 @@ interface MetronomeStoreBaseProps {
    * Toggles the playing state of the metronome
    */
   toggleIsPlaying: () => void;
+  /**
+   * Resets the store
+   */
+  resetStore: () => void;
 }
 
 /**
@@ -156,12 +171,12 @@ const computedMetronomeStore = createComputed<
 
 export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
   computedMetronomeStore((set, get) => ({
-    bpm: 100,
+    ...defaultValues,
     setBpm: (newBpm: number) => {
       if (minBpm <= newBpm && newBpm <= maxBpm)
-        set(() => ({
+        set({
           bpm: newBpm,
-        }));
+        });
     },
     increaseBpm: () => {
       if (!get().isIncreasingBpmDisabled)
@@ -175,7 +190,6 @@ export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
           bpm: state.bpm - 1,
         }));
     },
-    numerator: 4,
     increaseNumerator: () => {
       if (!get().isIncreasingNumeratorDisabled)
         set((state) => ({
@@ -189,7 +203,6 @@ export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
         }));
     },
 
-    denominatorExponent: 2,
     increaseDenominator: () => {
       if (!get().isIncreasingDenominatorDisabled)
         set((state) => ({
@@ -203,27 +216,26 @@ export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
         }));
     },
 
-    beat: 0,
     setBeat: (newBeat) => {
       if (1 <= newBeat && newBeat <= get().maxBeat) {
-        set(() => ({
+        set({
           beat: newBeat,
-        }));
+        });
       }
     },
 
-    volume: 50,
     setVolume: (newVolume: number) => {
       if (0 <= newVolume && newVolume <= 100)
-        set(() => ({
+        set({
           volume: newVolume,
-        }));
+        });
     },
 
-    isPlaying: false,
     toggleIsPlaying: () =>
       set((state) => ({
         isPlaying: !state.isPlaying,
       })),
+
+    resetStore: () => set(defaultValues),
   })),
 );

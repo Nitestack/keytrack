@@ -10,9 +10,20 @@ import {
 } from "~/services/music-theory";
 
 import type { NoteInfo, TransposeKey } from "~/services/music-theory";
+import type { NonFunction } from "~/utils/types";
 
 const IN_TUNE_THRESHOLD_CENTS = 5; // +/- cents to be considered "in tune"
 const CLOSE_THRESHOLD_CENTS = 10; // +/- cents to be considered "close"
+
+const defaultValues: NonFunction<TunerStoreBaseProps> = {
+  selectedTransposeKey: "C",
+  baseFrequency: 440,
+  volume: 0,
+  selectedDeviceId: undefined,
+  audioDevices: [],
+  detectedNote: undefined,
+  isListening: false,
+};
 
 type TuningStatus = {
   text: string;
@@ -88,6 +99,10 @@ interface TunerStoreBaseProps {
    * Sets the available audio input devices
    */
   setAudioDevices: (audioDevices: MediaDeviceInfo[]) => void;
+  /**
+   * Resets the store
+   */
+  resetStore: () => void;
 }
 
 /**
@@ -166,7 +181,7 @@ const computedTunerStore = createComputed<
 
 export const useTunerStore = create<TunerStoreBaseProps>()(
   computedTunerStore((set, get) => ({
-    selectedTransposeKey: "C",
+    ...defaultValues,
     increaseTransposeKey: () => {
       if (!get().isIncreasingTransposeKeyDisabled)
         set((state) => ({
@@ -190,7 +205,6 @@ export const useTunerStore = create<TunerStoreBaseProps>()(
         }));
     },
 
-    baseFrequency: 440,
     increaseBaseFrequency: () => {
       if (!get().isIncreasingBaseFrequencyDisabled)
         set((state) => ({
@@ -204,34 +218,30 @@ export const useTunerStore = create<TunerStoreBaseProps>()(
         }));
     },
 
-    isListening: false,
     toggleIsListening: () =>
       set((state) => ({
         isListening: !state.isListening,
       })),
 
-    detectedNote: undefined,
     setDetectedNote: (newNote?: NoteInfo) =>
-      set(() => ({
+      set({
         detectedNote: newNote,
-      })),
+      }),
 
-    volume: 0,
     setVolume: (newVolume: number) => {
-      if (0 <= newVolume && newVolume <= 100)
-        set(() => ({ volume: newVolume }));
+      if (0 <= newVolume && newVolume <= 100) set({ volume: newVolume });
     },
 
-    selectedDeviceId: undefined,
     setSelectedDeviceId: (newDeviceId) =>
-      set(() => ({
+      set({
         selectedDeviceId: newDeviceId,
-      })),
+      }),
 
-    audioDevices: [],
     setAudioDevices: (audioDevices) =>
-      set(() => ({
+      set({
         audioDevices,
-      })),
+      }),
+
+    resetStore: () => set(defaultValues),
   })),
 );
