@@ -33,6 +33,7 @@ export function useMetronome() {
   const bpm = useMetronomeStore((state) => state.bpm);
   const volume = useMetronomeStore((state) => state.volume);
   const isPlaying = useMetronomeStore((state) => state.isPlaying);
+  const resetStore = useMetronomeStore((state) => state.resetStore);
 
   const accentSynthRef = useRef<Synth | null>(null);
   const clickSynthRef = useRef<Synth | null>(null);
@@ -62,6 +63,8 @@ export function useMetronome() {
         transport.stop();
         transport.cancel(0);
       }
+
+      resetStore();
     };
   }, []);
 
@@ -117,5 +120,5 @@ export function useMetronome() {
 
       void start().then(() => getTransport().start());
     } else getTransport().pause();
-  }, [isPlaying, maxBeat, setBeat]);
+  }, [isPlaying, maxBeat]);
 }

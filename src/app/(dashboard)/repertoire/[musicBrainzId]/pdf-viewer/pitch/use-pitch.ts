@@ -13,6 +13,7 @@ export default function usePitch() {
   const frequency = usePitchStore((state) => state.frequency);
   const volume = usePitchStore((state) => state.volume);
   const isPlaying = usePitchStore((state) => state.isPlaying);
+  const resetStore = usePitchStore((state) => state.resetStore);
 
   const oscillatorRef = useRef<Oscillator | null>(null);
 
@@ -34,6 +35,7 @@ export default function usePitch() {
         oscillatorRef.current.stop();
         oscillatorRef.current.dispose();
       }
+      resetStore();
     };
   }, []);
 

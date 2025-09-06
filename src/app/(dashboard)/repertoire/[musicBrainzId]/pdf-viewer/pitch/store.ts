@@ -11,9 +11,18 @@ import {
 } from "~/services/music-theory";
 
 import type { ChromaticNote } from "~/services/music-theory";
+import type { NonFunction } from "~/utils/types";
 
 export const minOctave = 2;
 export const maxOctave = 6;
+
+const defaultValues: NonFunction<PitchStoreBaseProps> = {
+  selectedPitch: "A",
+  octave: 4,
+  baseFrequency: 440,
+  volume: 50,
+  isPlaying: false,
+};
 
 /**
  * The pitch creator base store properties
@@ -68,6 +77,10 @@ interface PitchStoreBaseProps {
    * Toggles the playing state of the pitch
    */
   toggleIsPlaying: () => void;
+  /**
+   * Resets the store
+   */
+  resetStore: () => void;
 }
 
 /**
@@ -123,15 +136,14 @@ const computedPitchStore = createComputed<
 
 export const usePitchStore = create<PitchStoreBaseProps>()(
   computedPitchStore((set, get) => ({
-    selectedPitch: "A",
+    ...defaultValues,
     setSelectedPitch: (newPitch) => {
       if (chromaticNotes.includes(newPitch))
-        set(() => ({
+        set({
           selectedPitch: newPitch,
-        }));
+        });
     },
 
-    octave: 4,
     increaseOctave: () => {
       if (!get().isIncreasingOctaveDisabled)
         set((state) => ({
@@ -145,7 +157,6 @@ export const usePitchStore = create<PitchStoreBaseProps>()(
         }));
     },
 
-    baseFrequency: 440,
     increaseBaseFrequency: () => {
       if (!get().isIncreasingBaseFrequencyDisabled)
         set((state) => ({
@@ -159,18 +170,18 @@ export const usePitchStore = create<PitchStoreBaseProps>()(
         }));
     },
 
-    volume: 50,
     setVolume: (newVolume: number) => {
       if (0 <= newVolume && newVolume <= 100)
-        set(() => ({
+        set({
           volume: newVolume,
-        }));
+        });
     },
 
-    isPlaying: false,
     toggleIsPlaying: () =>
       set((state) => ({
         isPlaying: !state.isPlaying,
       })),
+
+    resetStore: () => set(defaultValues),
   })),
 );
