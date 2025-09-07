@@ -33,8 +33,8 @@ export default async function RepertoirePage() {
         <Alert variant="outlined" severity="info">
           Your repertoire is currently empty.
           <br />
-          Get started by using the &quot;Add&quot; button to build your
-          collection.
+          Click the <span className="font-bold">+ Add</span> button to get
+          started.
         </Alert>
       )}
     </PageContainer>

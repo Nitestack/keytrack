@@ -18,22 +18,20 @@ import dayjs from "dayjs";
 import { useSnackbar } from "notistack";
 
 import SearchPiece from "~/app/(dashboard)/repertoire/add-piece/search-piece";
-import SelectScore from "~/app/(dashboard)/repertoire/add-piece/select-score";
 import SetInfo from "~/app/(dashboard)/repertoire/add-piece/set-info";
+import SetScore from "~/app/(dashboard)/repertoire/add-piece/set-score";
 import { api } from "~/trpc/react";
 
 import type { Dayjs } from "dayjs";
 import type { FC } from "react";
-import type { ImslpScore } from "~/services/imslp";
 import type { MBWork } from "~/services/music-brainz";
 
-const steps = ["Search piece", "Select score", "Add general information"];
+const steps = ["Search piece", "Set score", "Add general information"];
 
 const AddPiece: FC = () => {
   const [open, setOpen] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<MBWork | null>(null);
-  const [selectedImslpScore, setSelectedImslpScore] =
-    useState<ImslpScore | null>(null);
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [dateAdded, setDateAdded] = useState<Dayjs>(dayjs());
   const isFirstStep = activeStep === 0;
@@ -48,7 +46,11 @@ const AddPiece: FC = () => {
     isPending: isGetImslpScoresPending,
     variables: lastImslpScoresVariables,
   } = api.repertoire.getImslpScores.useMutation({
-    onSuccess: () => {
+    onSuccess: (newImslpResult) => {
+      if (newImslpResult && newImslpResult.scores.length < 1)
+        enqueueSnackbar("Couldn't find any scores to the IMSLP url.", {
+          variant: "error",
+        });
       if (activeStep !== 1) setActiveStep(1);
     },
   });
@@ -82,12 +84,12 @@ const AddPiece: FC = () => {
     setOpen(false);
     setActiveStep(0);
     setSelectedPiece(null);
-    setSelectedImslpScore(null);
+    setPdfUrl(null);
     setDateAdded(dayjs());
   }
   function canNext() {
     if (activeStep === 0 && selectedPiece === null) return false;
-    else if (activeStep === 1 && selectedImslpScore === null) return false;
+    else if (activeStep === 1 && pdfUrl === null) return false;
     else if (activeStep === 2 && dateAdded === null) return false;
     return true;
   }
@@ -99,7 +101,7 @@ const AddPiece: FC = () => {
     } else if (isLastStep) {
       addPiece({
         musicBrainzId: selectedPiece!.id,
-        imslpUrl: selectedImslpScore!.url,
+        pdfUrl: pdfUrl!,
         date: dateAdded.toISOString().split("T")[0]!,
       });
       return;
@@ -142,9 +144,8 @@ const AddPiece: FC = () => {
               setSelectedPiece={setSelectedPiece}
             />
           ) : activeStep === 1 ? (
-            <SelectScore
-              selectedImslpScore={selectedImslpScore}
-              setSelectedImslpScore={setSelectedImslpScore}
+            <SetScore
+              setPdfUrl={setPdfUrl}
               imslpResult={imslpResult}
               getImslpScores={getImslpScores}
               isGetImslpScoresPending={isGetImslpScoresPending}
@@ -152,7 +153,6 @@ const AddPiece: FC = () => {
           ) : (
             <SetInfo
               selectedPiece={selectedPiece!}
-              selectedImslpScore={selectedImslpScore!}
               dateAdded={dateAdded}
               setDateAdded={setDateAdded}
             />

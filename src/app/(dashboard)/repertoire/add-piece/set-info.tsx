@@ -6,15 +6,13 @@ import Typography from "@mui/material/Typography";
 
 import type { Dayjs } from "dayjs";
 import type { Dispatch, FC, SetStateAction } from "react";
-import type { ImslpScore } from "~/services/imslp";
 import type { MBWork } from "~/services/music-brainz";
 
 const SetInfo: FC<{
   dateAdded: Dayjs;
   setDateAdded: Dispatch<SetStateAction<Dayjs>>;
   selectedPiece: MBWork;
-  selectedImslpScore: ImslpScore;
-}> = ({ dateAdded, setDateAdded, selectedPiece, selectedImslpScore }) => {
+}> = ({ dateAdded, setDateAdded, selectedPiece }) => {
   return (
     <>
       <Alert variant="outlined" severity="info">
@@ -24,12 +22,6 @@ const SetInfo: FC<{
             ({selectedPiece?.arrangement})
           </Typography>
         )}
-        <br />
-        {selectedImslpScore.publisher.name}
-        {selectedImslpScore.publisher.date
-          ? `, ${selectedImslpScore.publisher.date}`
-          : ""}
-        {selectedImslpScore.isUrtext ? " (Urtext Edition)" : ""}
       </Alert>
       <DatePicker
         label="Date added"
