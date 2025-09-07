@@ -9,8 +9,10 @@ import "./src/env.js";
 const config = {
   output: "standalone",
   experimental: {
+    browserDebugInfoInTerminal: true,
     reactCompiler: true,
   },
+  typedRoutes: true,
 };
 
 export default config;
