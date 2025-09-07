@@ -84,7 +84,7 @@ export const repertoireRouter = createTRPCRouter({
       z.object({
         musicBrainzId: z.string().nonempty(),
         date: z.string().date().nonempty(),
-        imslpUrl: z.string().url(),
+        pdfUrl: z.string().url(),
       }),
     )
     .mutation(async ({ input, ctx: { db, session } }) => {
@@ -92,7 +92,7 @@ export const repertoireRouter = createTRPCRouter({
         musicBrainzId: input.musicBrainzId,
         userId: session.user.id,
         dateAdded: input.date,
-        imslpUrl: input.imslpUrl,
+        pdfUrl: input.pdfUrl,
       });
     }),
   getPiece: protectedProcedure
@@ -124,7 +124,7 @@ export const repertoireRouter = createTRPCRouter({
       const piece: RepertoirePiece = {
         ...lookupResult.value,
         dateAdded: dbRepertoirePieceResult.value.dateAdded,
-        imslpUrl: dbRepertoirePieceResult.value.imslpUrl,
+        pdfUrl: dbRepertoirePieceResult.value.pdfUrl,
       };
       return piece;
     }),
@@ -141,7 +141,7 @@ export const repertoireRouter = createTRPCRouter({
           const piece: RepertoirePiece = {
             ...work,
             dateAdded: dbPiece.dateAdded,
-            imslpUrl: dbPiece.imslpUrl,
+            pdfUrl: dbPiece.pdfUrl,
           };
           return piece;
         }),

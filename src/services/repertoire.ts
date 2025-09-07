@@ -27,10 +27,10 @@ export interface RepertoirePiece {
    */
   arrangement?: string;
   /**
-   * The IMSLP url of the score, which is a permanent URL
+   * The url of the score
    * @example "https://imslp.org/wiki/Special:ImagefromIndex/34484/qraj"
    */
-  imslpUrl: string;
+  pdfUrl: string;
   /**
    * The date when the piece was added to the repertoire
    * @example "2025-08-21"

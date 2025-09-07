@@ -24,14 +24,11 @@ import PdfIconButton from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-view
 import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/toolbar";
 
 import type { FC } from "react";
-
-export interface PdfViewerProps {
-  pdfUrl: string;
-}
+import type { DocumentProps } from "react-pdf";
 
 const PdfDocument = dynamic(() => import("./document"), { ssr: false });
 
-const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
+const PdfViewer: FC<Required<Pick<DocumentProps, "file">>> = ({ file }) => {
   const handle = useFullScreenHandle();
 
   const theme = useTheme();
@@ -95,7 +92,7 @@ const PdfViewer: FC<PdfViewerProps> = ({ pdfUrl }) => {
               </PdfIconButton>
             )}
             <PdfDocument
-              file={pdfUrl}
+              file={file}
               emblaApi={emblaApi}
               emblaRef={emblaRef}
               isMobile={isMobile}

@@ -6,8 +6,7 @@ import type { RepertoirePiece } from "~/services/repertoire";
 /**
  * MusicBrainz work object
  */
-export interface MBWork
-  extends Omit<RepertoirePiece, "imslpUrl" | "dateAdded"> {
+export interface MBWork extends Omit<RepertoirePiece, "pdfUrl" | "dateAdded"> {
   /**
    * Whether the piece is in the user's current repertoire
    */
