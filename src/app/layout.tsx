@@ -11,8 +11,6 @@ import { appDescription, appName } from "~/constants";
 import { auth } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
 
-import type { ReactNode } from "react";
-
 export const metadata: Metadata = {
   title: {
     template: `%s | ${appName}`,
@@ -27,11 +25,7 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default async function RootLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
   const session = await auth();
 
   return (

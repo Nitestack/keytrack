@@ -5,9 +5,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 
 import { Suspense } from "react";
 
-import type { ReactNode } from "react";
-
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+export default function DashboardLayout({ children }: LayoutProps<"/">) {
   return (
     <_DashboardLayout>
       <Suspense fallback={<LinearProgress />}>{children}</Suspense>
