@@ -35,15 +35,16 @@ function hasRelations(work: IWork | IWorkMatch): work is IWorkWithRelations {
 /**
  * Retrieves the composer name and sorted name from a MusicBrainz work object
  * @param work - The MusicBrainz work object
- * @returns The composer name and sorted name or undefined if no composer relation exists
+ * @returns The composer id, name and sorted name or undefined if no composer relation exists
  */
 function getComposerNames(
   work: IWorkWithRelations,
-): Pick<MBWork, "composer" | "composerSortedName"> | undefined {
+): Pick<MBWork, "composerId" | "composer" | "composerSortedName"> | undefined {
   // @ts-expect-error When the relation is of type `composer`, it has an artist object
   const composerRelation:
     | {
         artist: {
+          id: string;
           name: string;
           "sort-name": string;
         };
@@ -53,6 +54,7 @@ function getComposerNames(
 
   const { artist } = composerRelation;
   return {
+    composerId: artist.id,
     composer: artist.name,
     composerSortedName: artist["sort-name"],
   };

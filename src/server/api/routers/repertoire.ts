@@ -3,7 +3,11 @@ import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { repertoirePieces } from "~/server/db/schema";
+import {
+  musicBrainzComposers,
+  musicBrainzPieces,
+  repertoirePieces,
+} from "~/server/db/schema";
 import { mbApi } from "~/server/musicbrainz";
 import { getScoresByWikiUrl } from "~/services/imslp";
 import {
@@ -13,7 +17,6 @@ import {
 } from "~/services/music-brainz";
 
 import type { EntityType } from "musicbrainz-api";
-import type { RepertoirePiece } from "~/services/repertoire";
 
 export const repertoireRouter = createTRPCRouter({
   search: protectedProcedure
@@ -88,6 +91,34 @@ export const repertoireRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx: { db, session } }) => {
+      const mbPiece = await db.query.musicBrainzPieces.findFirst({
+        where: eq(musicBrainzPieces.id, input.musicBrainzId),
+      });
+
+      if (!mbPiece) {
+        const mbWork = await getWorkById(input.musicBrainzId);
+        if (!mbWork) throw new TRPCError({ code: "BAD_REQUEST" });
+
+        await db
+          .insert(musicBrainzComposers)
+          .values({
+            id: mbWork.composerId,
+            name: mbWork.composer,
+            sortedName: mbWork.composerSortedName,
+          })
+          .onConflictDoNothing();
+
+        await db
+          .insert(musicBrainzPieces)
+          .values({
+            id: mbWork.id,
+            composerId: mbWork.composerId,
+            title: mbWork.title,
+            arrangement: mbWork.arrangement,
+          })
+          .onConflictDoNothing();
+      }
+
       await db.insert(repertoirePieces).values({
         musicBrainzId: input.musicBrainzId,
         userId: session.user.id,
@@ -102,51 +133,31 @@ export const repertoireRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx: { db, session } }) => {
-      const [lookupResult, dbRepertoirePieceResult] = await Promise.allSettled([
-        getWorkById(input.musicBrainzId),
-        db.query.repertoirePieces.findFirst({
-          where: and(
-            eq(repertoirePieces.userId, session.user.id),
-            eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
-          ),
-        }),
-      ]);
-      if (lookupResult.status === "rejected" || !lookupResult.value)
-        throw new TRPCError({ code: "NOT_FOUND" });
-      if (
-        dbRepertoirePieceResult.status === "rejected" ||
-        !dbRepertoirePieceResult.value
-      )
-        throw new TRPCError({
-          message: "Couldn't fetch piece from user",
-          code: "BAD_REQUEST",
-        });
-      const piece: RepertoirePiece = {
-        ...lookupResult.value,
-        dateAdded: dbRepertoirePieceResult.value.dateAdded,
-        pdfUrl: dbRepertoirePieceResult.value.pdfUrl,
-      };
-      return piece;
+      return db.query.repertoirePieces.findFirst({
+        where: and(
+          eq(repertoirePieces.userId, session.user.id),
+          eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
+        ),
+        with: {
+          musicBrainzPiece: {
+            with: {
+              composer: true,
+            },
+          },
+        },
+      });
     }),
   getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    const pieces = await db
-      .select()
-      .from(repertoirePieces)
-      .where(eq(repertoirePieces.userId, session.user.id));
-    return (
-      await Promise.all(
-        pieces.map(async (dbPiece) => {
-          const work = await getWorkById(dbPiece.musicBrainzId);
-          if (!work) return undefined;
-          const piece: RepertoirePiece = {
-            ...work,
-            dateAdded: dbPiece.dateAdded,
-            pdfUrl: dbPiece.pdfUrl,
-          };
-          return piece;
-        }),
-      )
-    ).filter(Boolean);
+    return await db.query.repertoirePieces.findMany({
+      where: eq(repertoirePieces.userId, session.user.id),
+      with: {
+        musicBrainzPiece: {
+          with: {
+            composer: true,
+          },
+        },
+      },
+    });
   }),
   getImslpScores: protectedProcedure
     .input(
