@@ -13,6 +13,11 @@ export interface RepertoirePiece {
    */
   title: string;
   /**
+   * The MusicBrainz ID of the composer, which is an UUID
+   * @example "09ff1fe8-d61c-4b98-bb82-18487c74d7b7"
+   */
+  composerId: string;
+  /**
    * The composer of the piece
    * @example "Frédéric Chopin"
    */
