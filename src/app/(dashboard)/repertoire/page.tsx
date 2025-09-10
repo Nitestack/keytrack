@@ -1,11 +1,14 @@
 import { PageContainer } from "@toolpad/core/PageContainer";
 import Alert from "@mui/material/Alert";
 import List from "@mui/material/List";
-import ListItemButton from "@mui/material/ListItemButton";
+import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Typography from "@mui/material/Typography";
 
+import Link from "next/link";
+
 import AddPiece from "~/app/(dashboard)/repertoire/add-piece";
+import DeletePiece from "~/app/(dashboard)/repertoire/delete-piece";
 import { api } from "~/trpc/server";
 
 export default async function RepertoirePage() {
@@ -26,9 +29,21 @@ export default async function RepertoirePage() {
       {pieces.length > 0 ? (
         <List sx={{ width: "100%", bgcolor: "background.paper" }}>
           {pieces.map((piece) => (
-            <ListItemButton
-              href={`/repertoire/${piece.musicBrainzId}`}
+            <ListItem
+              secondaryAction={
+                <DeletePiece
+                  musicBrainzId={piece.musicBrainzId}
+                  title={piece.musicBrainzPiece.title}
+                  composer={piece.musicBrainzPiece.composer.name}
+                  arrangement={piece.musicBrainzPiece.arrangement}
+                />
+              }
               key={piece.musicBrainzId}
+              sx={{
+                ":hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
             >
               <ListItemText
                 primary={
@@ -42,8 +57,15 @@ export default async function RepertoirePage() {
                   </div>
                 }
                 secondary={piece.musicBrainzPiece.composer.name}
+                slotProps={{
+                  root: {
+                    component: Link,
+                    // @ts-expect-error link
+                    href: `/repertoire/${piece.musicBrainzId}`,
+                  },
+                }}
               />
-            </ListItemButton>
+            </ListItem>
           ))}
         </List>
       ) : (

@@ -133,7 +133,7 @@ export const repertoireRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx: { db, session } }) => {
-      return db.query.repertoirePieces.findFirst({
+      return await db.query.repertoirePieces.findFirst({
         where: and(
           eq(repertoirePieces.userId, session.user.id),
           eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
@@ -146,6 +146,22 @@ export const repertoireRouter = createTRPCRouter({
           },
         },
       });
+    }),
+  removePiece: protectedProcedure
+    .input(
+      z.object({
+        musicBrainzId: z.string().nonempty(),
+      }),
+    )
+    .mutation(async ({ input, ctx: { db, session } }) => {
+      return await db
+        .delete(repertoirePieces)
+        .where(
+          and(
+            eq(repertoirePieces.userId, session.user.id),
+            eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
+          ),
+        );
     }),
   getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
     return await db.query.repertoirePieces.findMany({
