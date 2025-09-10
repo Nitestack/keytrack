@@ -84,11 +84,21 @@ export async function getPdfUrlByIndex(url: string) {
     if (!response.ok) return undefined;
 
     const $ = load(await response.text());
+
+    let alternativeFileUrl: string | undefined;
+
+    // clicking on index link automatically redirects to this path
     const fileUrlPath = $("a.bigbutton").attr("href");
 
-    if (!fileUrlPath) return undefined;
+    if (fileUrlPath) {
+      return new URL(response.url).origin + fileUrlPath;
+    } else {
+      // clicking on index link and then clicking on download link
+      alternativeFileUrl ??=
+        decodeURI($("body center span").attr("data-id") ?? "") || undefined;
+    }
 
-    return new URL(response.url).origin + fileUrlPath;
+    return alternativeFileUrl;
   } catch (err) {
     console.error(err);
     return undefined;
