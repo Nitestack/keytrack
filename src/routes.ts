@@ -1,11 +1,9 @@
-export interface RouteItem {
-  label: string;
-  path: string;
-}
+import type { Navigation } from "@toolpad/core/AppProvider";
 
-export const routes: RouteItem[] = [
+export const navigation: Navigation = [
   {
-    label: "Repertoire",
-    path: "/repertoire",
+    segment: "repertoire",
+    title: "Repertoire",
+    pattern: "repertoire{/:musicBrainzId}*",
   },
 ];

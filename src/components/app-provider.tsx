@@ -13,19 +13,11 @@ import { signIn, signOut } from "next-auth/react";
 import { closeSnackbar, SnackbarProvider } from "notistack";
 
 import { appName } from "~/constants";
+import { navigation } from "~/routes";
 import theme from "~/theme";
 
-import type { Navigation } from "@toolpad/core/AppProvider";
 import type { Session } from "next-auth";
 import type { FC, ReactNode } from "react";
-
-const navigation: Navigation = [
-  {
-    segment: "repertoire",
-    title: "Repertoire",
-    pattern: "repertoire{/:musicBrainzId}*",
-  },
-];
 
 const AppProvider: FC<{ children: ReactNode; session: Session | null }> = ({
   children,
