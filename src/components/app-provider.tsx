@@ -47,8 +47,14 @@ const AppProvider: FC<{ children: ReactNode; session: Session | null }> = ({
           }}
           theme={theme}
           authentication={{
-            signIn: () => void signIn("google"),
-            signOut: () => void signOut(),
+            signIn: () =>
+              void signIn("google", {
+                redirectTo: "/repertoire",
+              }),
+            signOut: () =>
+              void signOut({
+                redirectTo: "/",
+              }),
           }}
           navigation={navigation}
         >

@@ -54,7 +54,7 @@ const RemovePiece: FC<{
 
   return (
     <>
-      <IconButton onClick={handleOpen}>
+      <IconButton color="error" onClick={handleOpen}>
         <DeleteIcon />
       </IconButton>
       <Dialog fullWidth open={open} onClose={handleClose}>

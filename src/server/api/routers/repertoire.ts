@@ -9,7 +9,7 @@ import {
   repertoirePieces,
 } from "~/server/db/schema";
 import { mbApi } from "~/server/musicbrainz";
-import { getScoresByWikiUrl } from "~/services/imslp";
+import { getPdfUrlByIndex, getScoresByWikiUrl } from "~/services/imslp";
 import {
   getImslpURLByWorkId,
   getWorkById,
@@ -133,7 +133,7 @@ export const repertoireRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input, ctx: { db, session } }) => {
-      return await db.query.repertoirePieces.findFirst({
+      const piece = await db.query.repertoirePieces.findFirst({
         where: and(
           eq(repertoirePieces.userId, session.user.id),
           eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
@@ -146,6 +146,23 @@ export const repertoireRouter = createTRPCRouter({
           },
         },
       });
+
+      if (
+        piece?.pdfUrl.startsWith(
+          "https://imslp.org/wiki/Special:ImagefromIndex",
+        )
+      ) {
+        try {
+          piece.pdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
+        } catch (error) {
+          console.error(
+            `Failed to fetch direct PDF URL for ${piece.pdfUrl}:`,
+            error,
+          );
+        }
+      }
+
+      return piece;
     }),
   removePiece: protectedProcedure
     .input(
@@ -164,7 +181,7 @@ export const repertoireRouter = createTRPCRouter({
         );
     }),
   getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    return await db.query.repertoirePieces.findMany({
+    const pieces = await db.query.repertoirePieces.findMany({
       where: eq(repertoirePieces.userId, session.user.id),
       with: {
         musicBrainzPiece: {
@@ -173,6 +190,30 @@ export const repertoireRouter = createTRPCRouter({
           },
         },
       },
+    });
+
+    const piecePromises = pieces.map(async (piece) => {
+      if (
+        piece.pdfUrl.startsWith("https://imslp.org/wiki/Special:ImagefromIndex")
+      ) {
+        const directPdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
+        return {
+          ...piece,
+          pdfUrl: directPdfUrl,
+        };
+      }
+      return piece;
+    });
+
+    const results = await Promise.allSettled(piecePromises);
+
+    return results.map((result, index) => {
+      if (result.status === "fulfilled") return result.value;
+      console.error(
+        `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
+        result.reason,
+      );
+      return pieces[index]!;
     });
   }),
   getImslpScores: protectedProcedure
