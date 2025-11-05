@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@mui/material/Button";
+import { Button } from "@heroui/button";
 
 import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
 import { chromaticNotes } from "~/services/music-theory";
@@ -17,8 +17,8 @@ const PitchSelector: FC = () => {
         <Button
           className="w-18 whitespace-nowrap"
           key={pitch}
-          variant={pitch === selectedPitch ? "outlined" : "text"}
-          onClick={() => setSelectedPitch(pitch)}
+          variant={pitch === selectedPitch ? "bordered" : "light"}
+          onPress={() => setSelectedPitch(pitch)}
         >
           {pitch}
         </Button>

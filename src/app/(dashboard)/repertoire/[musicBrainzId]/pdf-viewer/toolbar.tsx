@@ -1,129 +1,98 @@
 "use client";
 
-import SpeedDial from "@mui/material/SpeedDial";
-import SpeedDialAction from "@mui/material/SpeedDialAction";
+import { Button } from "@heroui/button";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+} from "@heroui/dropdown";
+import { Modal, ModalContent } from "@heroui/modal";
+import { cn } from "@heroui/react";
+import { Tab, Tabs } from "@heroui/tabs";
+import { useDisclosure } from "@heroui/use-disclosure";
 
-import AvTimerIcon from "@mui/icons-material/AvTimer";
-import GraphicEqIcon from "@mui/icons-material/GraphicEq";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import {
+  AudioLines,
+  Ellipsis,
+  EllipsisVertical,
+  Music3,
+  Timer,
+} from "lucide-react";
 
 import { useState } from "react";
-
-import clsx from "clsx";
 
 import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome";
 import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch";
 import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner";
 
-import type { SpeedDialActionProps } from "@mui/material/SpeedDialAction";
-import type { FC, MouseEvent } from "react";
+import type { Key } from "@react-types/shared";
+import type { FC } from "react";
 
 const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
   isMobile,
   fullScreenEl,
 }) => {
-  const [open, setOpen] = useState(false);
-  const [metronomeEl, setMetronomeEl] = useState<HTMLElement | null>(null);
-  const [pitchEl, setPitchEl] = useState<HTMLElement | null>(null);
-  const [tunerEl, setTunerEl] = useState<HTMLElement | null>(null);
+  const [activeTool, setActiveTool] = useState<Key>("metronome");
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
-  function handleToggle() {
-    setOpen((prevOpen) => !prevOpen);
+  function handleOnAction(key: Key | null) {
+    if (!key) return;
+    onOpen();
+    setActiveTool(key);
   }
-
-  const handleMetronomeClick = (event: MouseEvent<HTMLDivElement>) => {
-    setMetronomeEl(event.currentTarget);
-  };
-  function handleMetronomeClose() {
-    setMetronomeEl(null);
-  }
-
-  function handlePitchClick(event: MouseEvent<HTMLDivElement>) {
-    setPitchEl(event.currentTarget);
-  }
-  function handlePitchClose() {
-    setPitchEl(null);
-  }
-
-  function handleTunerClick(event: MouseEvent<HTMLDivElement>) {
-    setTunerEl(event.currentTarget);
-  }
-  function handleTunerClose() {
-    setTunerEl(null);
-  }
-
-  const actions: (Omit<SpeedDialActionProps, "key"> & { name: string })[] = [
-    {
-      name: "Metronome",
-      icon: <AvTimerIcon />,
-      onClick: handleMetronomeClick,
-    },
-    {
-      name: "Pitch",
-      icon: <MusicNoteIcon />,
-      onClick: handlePitchClick,
-    },
-    {
-      name: "Tuner",
-      icon: <GraphicEqIcon />,
-      onClick: handleTunerClick,
-    },
-  ];
 
   return (
     <>
-      <SpeedDial
-        className={clsx(
-          "absolute bottom-4 z-50",
-          isMobile ? "-translate-x-1/2 left-1/2" : "right-4",
-        )}
-        direction={isMobile ? "up" : "left"}
-        ariaLabel="pdf-toolbar"
-        icon={isMobile ? <MoreVertIcon /> : <MoreHorizIcon />}
-        open={open}
-        onClick={handleToggle}
-        // Disable default hover behavior
-        onMouseEnter={undefined}
-        onMouseLeave={undefined}
+      <Dropdown portalContainer={fullScreenEl}>
+        <DropdownTrigger>
+          <Button
+            color="primary"
+            className={cn(
+              "absolute bottom-4 z-50",
+              isMobile ? "-translate-x-1/2 left-1/2" : "right-4",
+            )}
+            isIconOnly
+          >
+            {isMobile ? <EllipsisVertical /> : <Ellipsis />}
+          </Button>
+        </DropdownTrigger>
+        <DropdownMenu onAction={handleOnAction}>
+          <DropdownItem key="metronome" startContent={<Timer />}>
+            Metronome
+          </DropdownItem>
+          <DropdownItem key="pitch" startContent={<Music3 />}>
+            Pitch
+          </DropdownItem>
+          <DropdownItem key="tuner" startContent={<AudioLines />}>
+            Tuner
+          </DropdownItem>
+        </DropdownMenu>
+      </Dropdown>
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        portalContainer={fullScreenEl}
       >
-        {actions.map(({ name, onClick, ...action }) => (
-          <SpeedDialAction
-            key={name}
-            {...action}
-            slotProps={{
-              tooltip: {
-                title: name,
-                slotProps: {
-                  popper: {
-                    container: fullScreenEl,
-                  },
-                },
-              },
-            }}
-            onClick={(ev) => {
-              ev.stopPropagation();
-              onClick?.(ev);
-            }}
-          />
-        ))}
-      </SpeedDial>
-      <Metronome
-        anchorEl={metronomeEl}
-        handleClose={handleMetronomeClose}
-        fullScreenEl={fullScreenEl}
-      />
-      <Pitch
-        anchorEl={pitchEl}
-        handleClose={handlePitchClose}
-        fullScreenEl={fullScreenEl}
-      />
-      <Tuner
-        anchorEl={tunerEl}
-        handleClose={handleTunerClose}
-        fullScreenEl={fullScreenEl}
-      />
+        <ModalContent>
+          <Tabs
+            fullWidth
+            aria-label="pdf-toolbar"
+            selectedKey={activeTool}
+            onSelectionChange={setActiveTool}
+          >
+            <Tab key="metronome" title="Metronome">
+              <Metronome />
+            </Tab>
+            <Tab key="pitch" title="Pitch">
+              <Pitch />
+            </Tab>
+            <Tab key="tuner" title="Tuner">
+              <Tuner fullScreenEl={fullScreenEl} />
+            </Tab>
+          </Tabs>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

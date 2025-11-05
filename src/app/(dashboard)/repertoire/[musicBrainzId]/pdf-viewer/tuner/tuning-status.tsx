@@ -1,10 +1,10 @@
 "use client";
 
-import Chip from "@mui/material/Chip";
+import { Chip } from "@heroui/chip";
 
-import ArrowCircleDownIcon from "@mui/icons-material/ArrowCircleDown";
-import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { CircleArrowDown, CircleArrowUp, CircleCheck } from "lucide-react";
+
+import { useShallow } from "zustand/react/shallow";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
@@ -12,28 +12,27 @@ import type { FC } from "react";
 
 const TunerStatus: FC = () => {
   const isListening = useTunerStore((state) => state.isListening);
-  const tuningStatus = useTunerStore((state) => state.tuningStatus);
+  const tuningStatus = useTunerStore(
+    useShallow((state) => state.tuningStatus()),
+  );
 
   if (isListening && tuningStatus)
     return (
       <Chip
-        icon={
+        startContent={
           tuningStatus.color === "success" ? (
-            <CheckCircleIcon />
+            <CircleCheck />
           ) : tuningStatus.cents > 0 ? (
-            <ArrowCircleUpIcon />
+            <CircleArrowUp />
           ) : (
-            <ArrowCircleDownIcon />
+            <CircleArrowDown />
           )
         }
         color={tuningStatus.color}
-        label={tuningStatus.text.toUpperCase()}
-        slotProps={{
-          label: {
-            className: "font-bold",
-          },
-        }}
-      />
+        variant="flat"
+      >
+        <span className="font-bold">{tuningStatus.text.toUpperCase()}</span>
+      </Chip>
     );
 };
 

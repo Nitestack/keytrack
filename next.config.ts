@@ -14,5 +14,11 @@ export default {
     turbopackFileSystemCacheForDev: true,
   },
   reactCompiler: true,
-  typedRoutes: true,
+  images: {
+    remotePatterns: [
+      {
+        hostname: "nextuipro.nyc3.cdn.digitaloceanspaces.com",
+      },
+    ],
+  },
 } satisfies NextConfig;

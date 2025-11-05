@@ -1,108 +1,18 @@
-"use client";
+import HeroButton from "~/app/hero-button";
 
-import { DashboardLayout } from "@toolpad/core/DashboardLayout";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Container from "@mui/material/Container";
-import Link from "@mui/material/Link";
-import Stack from "@mui/material/Stack";
-import Typography from "@mui/material/Typography";
-
-import { signIn, useSession } from "next-auth/react";
-
-export default function HomePage() {
-  const session = useSession();
-
+export default async function HomePage() {
   return (
-    <DashboardLayout hideNavigation>
-      <Box
-        id="hero"
-        sx={(theme) => ({
-          width: "100%",
-          backgroundRepeat: "no-repeat",
-
-          backgroundImage:
-            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 90%), transparent)",
-          ...theme.applyStyles("dark", {
-            backgroundImage:
-              "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(210, 100%, 16%), transparent)",
-          }),
-        })}
-      >
-        <Container
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            pt: { xs: 14, sm: 20 },
-            pb: { xs: 8, sm: 12 },
-          }}
-        >
-          <Stack
-            spacing={2}
-            useFlexGap
-            sx={{ alignItems: "center", width: { xs: "100%", sm: "70%" } }}
-          >
-            <Typography
-              className="flex items-center flex-col sm:flex-row font-medium"
-              variant="h1"
-              sx={{
-                fontSize: "clamp(3rem, 10vw, 3.5rem)",
-              }}
-            >
-              Practice&nbsp;with&nbsp;
-              <Typography
-                className="font-medium"
-                fontSize="inherit"
-                color="primary"
-                component="span"
-                variant="h1"
-              >
-                purpose
-              </Typography>
-            </Typography>
-            <Typography
-              sx={{
-                textAlign: "center",
-                color: "text.secondary",
-                width: { sm: "100%", md: "80%" },
-              }}
-            >
-              An all-in-one practice hub for managing repertoire and scores, and
-              turning daily sessions into measurable progress.
-            </Typography>
-            {session.status === "authenticated" ? (
-              <Button href="/repertoire" variant="contained" color="primary">
-                Continue
-              </Button>
-            ) : (
-              <Button
-                loading={session.status === "loading"}
-                onClick={() =>
-                  void signIn("google", {
-                    redirectTo: "/repertoire",
-                  })
-                }
-                variant="contained"
-                color="primary"
-              >
-                Start now
-              </Button>
-            )}
-            <Typography
-              className="text-center"
-              variant="caption"
-              color="text.secondary"
-            >
-              By clicking &quot;Start now&quot; you agree to our&nbsp;
-              <Link href="/tos" component={NextLink} color="primary">
-                Terms & Conditions
-              </Link>
-              .
-            </Typography>
-          </Stack>
-        </Container>
-      </Box>
-    </DashboardLayout>
+    <section className="flex flex-1 flex-col items-center justify-center gap-[18px] sm:gap-6">
+      <div className="text-center text-[clamp(40px,10vw,44px)] leading-[1.2] font-bold tracking-tighter sm:text-[64px]">
+        <div className="bg-[linear-gradient(91deg,#FFF_32.88%,rgba(255,255,255,0.40)_99.12%)] bg-clip-text text-transparent">
+          Practice with <br /> purpose
+        </div>
+      </div>
+      <p className="text-default-500 text-center leading-7 font-normal sm:w-[466px] sm:text-[18px]">
+        An all-in-one practice hub for managing repertoire and scores, and
+        turning daily sessions into measurable progress.
+      </p>
+      <HeroButton />
+    </section>
   );
 }

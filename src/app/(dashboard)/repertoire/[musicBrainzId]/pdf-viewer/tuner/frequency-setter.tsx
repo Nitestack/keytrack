@@ -1,10 +1,8 @@
 "use client";
 
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { Button } from "@heroui/button";
 
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Minus, Plus } from "lucide-react";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
@@ -18,30 +16,34 @@ const TunerFrequencySetter: FC = () => {
   const decreaseBaseFrequency = useTunerStore(
     (state) => state.decreaseBaseFrequency,
   );
-  const isIncreasingBaseFrequencyDisabled = useTunerStore(
-    (state) => state.isIncreasingBaseFrequencyDisabled,
+  const isIncreasingBaseFrequencyDisabled = useTunerStore((state) =>
+    state.isIncreasingBaseFrequencyDisabled(),
   );
-  const isDecreasingBaseFrequencyDisabled = useTunerStore(
-    (state) => state.isDecreasingBaseFrequencyDisabled,
+  const isDecreasingBaseFrequencyDisabled = useTunerStore((state) =>
+    state.isDecreasingBaseFrequencyDisabled(),
   );
 
   return (
     <div className="flex justify-between items-center gap-1">
-      <IconButton
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isDecreasingBaseFrequencyDisabled}
-        onClick={decreaseBaseFrequency}
+        onPress={decreaseBaseFrequency}
       >
-        <RemoveIcon />
-      </IconButton>
-      <Typography className="font-bold select-none" variant="h6">
-        {baseFrequency} <Typography variant="caption">Hz</Typography>
-      </Typography>
-      <IconButton
+        <Minus />
+      </Button>
+      <h6 className="font-bold select-none text-xl">
+        {baseFrequency} <span className="text-sm">Hz</span>
+      </h6>
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isIncreasingBaseFrequencyDisabled}
-        onClick={increaseBaseFrequency}
+        onPress={increaseBaseFrequency}
       >
-        <AddIcon />
-      </IconButton>
+        <Plus />
+      </Button>
     </div>
   );
 };

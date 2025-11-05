@@ -1,10 +1,8 @@
 "use client";
 
-import Slider from "@mui/material/Slider";
-import Typography from "@mui/material/Typography";
+import { Slider } from "@heroui/slider";
 
-import VolumeOffIcon from "@mui/icons-material/VolumeOff";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import { Volume2, VolumeOff } from "lucide-react";
 
 import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
 
@@ -15,24 +13,22 @@ const PitchVolume: FC = () => {
   const setVolume = usePitchStore((state) => state.setVolume);
 
   return (
-    <div className="flex items-center w-full gap-2">
-      {volume === 0 ? (
-        <VolumeOffIcon color="error" fontSize="small" />
-      ) : (
-        <VolumeUpIcon fontSize="small" />
-      )}
-      <Slider
-        aria-label="volume"
-        value={volume}
-        onChange={(_, newVolume) => setVolume(newVolume)}
-        min={0}
-        max={100}
-        size="small"
-      />
-      <Typography variant="caption" className="min-w-8 text-right">
-        {volume}%
-      </Typography>
-    </div>
+    <Slider
+      label="Volume"
+      value={volume}
+      onChange={(newVolume) => setVolume(newVolume as number)}
+      startContent={
+        volume === 0 ? (
+          <VolumeOff className="text-danger" size={16} />
+        ) : (
+          <Volume2 size={16} />
+        )
+      }
+      minValue={0}
+      maxValue={100}
+      size="sm"
+      getValue={(percentage) => `${percentage as number}%`}
+    />
   );
 };
 

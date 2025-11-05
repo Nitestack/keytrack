@@ -1,11 +1,9 @@
 "use client";
 
-import IconButton from "@mui/material/IconButton";
-import Slider from "@mui/material/Slider";
-import Typography from "@mui/material/Typography";
+import { Button } from "@heroui/button";
+import { Slider } from "@heroui/slider";
 
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Minus, Plus } from "lucide-react";
 
 import {
   maxBpm,
@@ -20,33 +18,45 @@ const MetronomeBpm: FC = () => {
   const setBpm = useMetronomeStore((state) => state.setBpm);
   const increaseBpm = useMetronomeStore((state) => state.increaseBpm);
   const decreaseBpm = useMetronomeStore((state) => state.decreaseBpm);
-  const isIncreasingBpmDisabled = useMetronomeStore(
-    (state) => state.isIncreasingBpmDisabled,
+  const isIncreasingBpmDisabled = useMetronomeStore((state) =>
+    state.isIncreasingBpmDisabled(),
   );
-  const isDecreasingBpmDisabled = useMetronomeStore(
-    (state) => state.isDecreasingBpmDisabled,
+  const isDecreasingBpmDisabled = useMetronomeStore((state) =>
+    state.isDecreasingBpmDisabled(),
   );
 
   return (
     <>
-      <Typography className="font-bold select-none" variant="h4">
-        {bpm} <Typography variant="caption">BPM</Typography>
-      </Typography>
-      <div className="flex items-center w-full gap-4">
-        <IconButton disabled={isDecreasingBpmDisabled} onClick={decreaseBpm}>
-          <RemoveIcon />
-        </IconButton>
-        <Slider
-          aria-label="bpm"
-          value={bpm}
-          onChange={(_, newBpm) => setBpm(newBpm)}
-          min={minBpm}
-          max={maxBpm}
-        />
-        <IconButton disabled={isIncreasingBpmDisabled} onClick={increaseBpm}>
-          <AddIcon />
-        </IconButton>
-      </div>
+      <h4 className="font-bold select-none text-3xl">
+        {bpm} <span className="text-sm">BPM</span>
+      </h4>
+      <Slider
+        aria-label="bpm"
+        startContent={
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isDecreasingBpmDisabled}
+            onPress={decreaseBpm}
+          >
+            <Minus />
+          </Button>
+        }
+        endContent={
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isIncreasingBpmDisabled}
+            onPress={increaseBpm}
+          >
+            <Plus />
+          </Button>
+        }
+        value={bpm}
+        onChange={(value) => setBpm(value as number)}
+        minValue={minBpm}
+        maxValue={maxBpm}
+      />
     </>
   );
 };

@@ -1,10 +1,8 @@
 "use client";
 
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { Button } from "@heroui/button";
 
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Minus, Plus } from "lucide-react";
 
 import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
 
@@ -14,30 +12,32 @@ const PitchOctave: FC = () => {
   const octave = usePitchStore((state) => state.octave);
   const increaseOctave = usePitchStore((state) => state.increaseOctave);
   const decreaseOctave = usePitchStore((state) => state.decreaseOctave);
-  const isIncreasingOctaveDisabled = usePitchStore(
-    (state) => state.isIncreasingOctaveDisabled,
+  const isIncreasingOctaveDisabled = usePitchStore((state) =>
+    state.isIncreasingOctaveDisabled(),
   );
-  const isDecreasingOctaveDisabled = usePitchStore(
-    (state) => state.isDecreasingOctaveDisabled,
+  const isDecreasingOctaveDisabled = usePitchStore((state) =>
+    state.isDecreasingOctaveDisabled(),
   );
 
   return (
     <div className="flex justify-between items-center gap-1">
-      <IconButton
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isDecreasingOctaveDisabled}
-        onClick={decreaseOctave}
+        onPress={decreaseOctave}
       >
-        <RemoveIcon />
-      </IconButton>
-      <Typography className="select-none font-bold" variant="h6">
-        {octave}
-      </Typography>
-      <IconButton
+        <Minus />
+      </Button>
+      <h6 className="select-none font-bold text-xl">{octave}</h6>
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isIncreasingOctaveDisabled}
-        onClick={increaseOctave}
+        onPress={increaseOctave}
       >
-        <AddIcon />
-      </IconButton>
+        <Plus />
+      </Button>
     </div>
   );
 };

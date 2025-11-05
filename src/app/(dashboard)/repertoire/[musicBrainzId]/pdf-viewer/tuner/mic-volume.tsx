@@ -1,10 +1,8 @@
 "use client";
 
-import LinearProgress from "@mui/material/LinearProgress";
-import Typography from "@mui/material/Typography";
+import { Progress } from "@heroui/progress";
 
-import MicIcon from "@mui/icons-material/Mic";
-import MicOffIcon from "@mui/icons-material/MicOff";
+import { Mic, MicOff } from "lucide-react";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
@@ -16,22 +14,23 @@ const TunerMicVolume: FC = () => {
   return (
     <div className="flex items-center gap-2 w-full">
       {volume > 1 ? (
-        <MicIcon fontSize="small" color={volume > 70 ? "error" : "primary"} />
+        <Mic
+          className={volume > 70 ? "text-danger" : "text-primary"}
+          size={16}
+        />
       ) : (
-        <MicOffIcon
-          fontSize="small"
-          color={isListening ? "error" : "disabled"}
+        <MicOff
+          size={16}
+          className={isListening ? "text-danger" : "text-default"}
         />
       )}
-      <LinearProgress
-        variant="determinate"
+      <Progress
+        size="sm"
         value={volume}
         className="flex-1"
-        color={volume > 70 ? "error" : volume > 30 ? "primary" : "inherit"}
+        color={volume > 70 ? "danger" : volume > 30 ? "primary" : "default"}
       />
-      <Typography className="min-w-8 text-right" variant="caption">
-        {Math.round(volume)}%
-      </Typography>
+      <span className="min-w-8 text-right text-sm">{Math.round(volume)}%</span>
     </div>
   );
 };

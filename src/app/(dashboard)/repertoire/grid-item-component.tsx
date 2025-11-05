@@ -1,19 +1,16 @@
 "use client";
 
-import Card from "@mui/material/Card";
-import CardHeader from "@mui/material/CardHeader";
-import CardMedia from "@mui/material/CardMedia";
-import CircularProgress from "@mui/material/CircularProgress";
-
 import "~/app/(dashboard)/repertoire/grid-item-component.scss";
 
-import CardActionArea from "@mui/material/CardActionArea";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { CircularProgress } from "@heroui/progress";
+import { User } from "@heroui/user";
 
-import clsx from "clsx";
+import NextLink from "next/link";
+
 import { Document, Page, pdfjs } from "react-pdf";
 
-import RemovePiece from "~/app/(dashboard)/repertoire/delete-piece";
-
+import type { Route } from "next";
 import type { FC } from "react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -30,25 +27,26 @@ const RepertoireGridItemComponent: FC<{
 }> = ({ title, arrangement, composer, musicBrainzId, pdfUrl }) => {
   return (
     <Card
-      className={clsx("relative", {
-        "aspect-square": pdfUrl,
-      })}
+      className="aspect-square"
+      as={NextLink}
+      isPressable
+      href={`/repertoire/${musicBrainzId}` as Route}
     >
-      <CardActionArea href={`/repertoire/${musicBrainzId}`}>
-        <CardHeader
-          title={`${title}${arrangement ? ` (${arrangement})` : ""}`}
-          subheader={composer}
-          slotProps={{
-            content: {
-              className: "max-w-full",
-            },
-            title: {
-              noWrap: true,
+      <CardHeader>
+        <User
+          avatarProps={{
+            name: composer,
+            classNames: {
+              base: "hidden",
             },
           }}
+          name={`${title}${arrangement ? ` (${arrangement})` : ""}`}
+          description={composer}
         />
+      </CardHeader>
+      <CardBody>
         {pdfUrl && (
-          <CardMedia className="flex items-center justify-center overflow-hidden bg-white h-full">
+          <div className="flex items-center justify-center overflow-hidden bg-white h-full rounded-small">
             <Document file={pdfUrl} loading={<CircularProgress />}>
               <Page
                 pageNumber={1}
@@ -56,17 +54,9 @@ const RepertoireGridItemComponent: FC<{
                 renderAnnotationLayer={false}
               />
             </Document>
-          </CardMedia>
+          </div>
         )}
-      </CardActionArea>
-      <div className="absolute right-0 bottom-0">
-        <RemovePiece
-          title={title}
-          composer={composer}
-          arrangement={arrangement}
-          musicBrainzId={musicBrainzId}
-        />
-      </div>
+      </CardBody>
     </Card>
   );
 };

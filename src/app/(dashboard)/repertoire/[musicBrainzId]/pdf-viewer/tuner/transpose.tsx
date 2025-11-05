@@ -1,10 +1,8 @@
 "use client";
 
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { Button } from "@heroui/button";
 
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Minus, Plus } from "lucide-react";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
@@ -20,30 +18,32 @@ const TunerTranspose: FC = () => {
   const decreaseTransposeKey = useTunerStore(
     (state) => state.decreaseTransposeKey,
   );
-  const isIncreasingTransposeKeyDisabled = useTunerStore(
-    (state) => state.isIncreasingTransposeKeyDisabled,
+  const isIncreasingTransposeKeyDisabled = useTunerStore((state) =>
+    state.isIncreasingTransposeKeyDisabled(),
   );
-  const isDecreasingTransposeKeyDisabled = useTunerStore(
-    (state) => state.isDecreasingTransposeKeyDisabled,
+  const isDecreasingTransposeKeyDisabled = useTunerStore((state) =>
+    state.isDecreasingTransposeKeyDisabled(),
   );
 
   return (
     <div className="flex justify-between items-center gap-1">
-      <IconButton
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isDecreasingTransposeKeyDisabled}
-        onClick={decreaseTransposeKey}
+        onPress={decreaseTransposeKey}
       >
-        <RemoveIcon />
-      </IconButton>
-      <Typography className="select-none font-bold" variant="h6">
-        {selectedTransposeKey}
-      </Typography>
-      <IconButton
+        <Minus />
+      </Button>
+      <h6 className="select-none font-bold text-xl">{selectedTransposeKey}</h6>
+      <Button
+        isIconOnly
+        variant="light"
         disabled={isIncreasingTransposeKeyDisabled}
-        onClick={increaseTransposeKey}
+        onPress={increaseTransposeKey}
       >
-        <AddIcon />
-      </IconButton>
+        <Plus />
+      </Button>
     </div>
   );
 };

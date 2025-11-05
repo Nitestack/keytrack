@@ -1,18 +1,19 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
+import { Button } from "@heroui/button";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@heroui/modal";
+import { addToast } from "@heroui/toast";
+import { useDisclosure } from "@heroui/use-disclosure";
 
-import DeleteIcon from "@mui/icons-material/Delete";
+import { Trash } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-import { useSnackbar } from "notistack";
 
 import { api } from "~/trpc/react";
 
@@ -24,27 +25,20 @@ const RemovePiece: FC<{
   composer: string;
   arrangement: string | null;
 }> = ({ title, musicBrainzId, composer, arrangement }) => {
-  const [open, setOpen] = useState(false);
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
 
   const { mutate, isPending } = api.repertoire.removePiece.useMutation({
     onSuccess: () => {
       router.refresh();
-      enqueueSnackbar(`Successfully removed "${title}" from the repertoire.`, {
-        variant: "success",
+      addToast({
+        title: `Successfully removed "${title}" from the repertoire.`,
+        color: "success",
       });
-      handleClose();
+      onClose();
     },
   });
-
-  function handleOpen() {
-    setOpen(true);
-  }
-  function handleClose() {
-    setOpen(false);
-  }
 
   function handleDelete() {
     mutate({
@@ -54,25 +48,34 @@ const RemovePiece: FC<{
 
   return (
     <>
-      <IconButton color="error" onClick={handleOpen}>
-        <DeleteIcon />
-      </IconButton>
-      <Dialog fullWidth open={open} onClose={handleClose}>
-        <DialogTitle>Remove piece</DialogTitle>
-        <DialogContent>
-          Remove <span className="font-bold">{title}</span>
-          {arrangement ? ` (${arrangement})` : ""} by{" "}
-          <span className="font-bold">{composer}</span> from your repertoire?
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleDelete} loading={isPending}>
-            Ok
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Button isIconOnly color="danger" onPress={onOpen}>
+        <Trash size={16} />
+      </Button>
+      <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          <ModalHeader>Remove piece</ModalHeader>
+          <ModalBody>
+            <p>
+              Remove <span className="font-bold">{title}</span>
+              {arrangement ? ` (${arrangement})` : ""} by{" "}
+              <span className="font-bold">{composer}</span> from your
+              repertoire?
+            </p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={onClose}>
+              Cancel
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleDelete}
+              isLoading={isPending}
+            >
+              Ok
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

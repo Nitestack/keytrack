@@ -1,12 +1,12 @@
 "use client";
 
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
+import { Select, SelectItem } from "@heroui/select";
+
+import { Mic } from "lucide-react";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
+import type { SharedSelection } from "@heroui/react";
 import type { FC } from "react";
 
 const TunerMicSelect: FC<{
@@ -19,26 +19,36 @@ const TunerMicSelect: FC<{
   );
   const isListening = useTunerStore((state) => state.isListening);
 
+  function handleSelectionChange(keys: SharedSelection) {
+    const selectedKey =
+      "values" in keys
+        ? (keys.values().next().value as string | undefined)
+        : undefined;
+    if (selectedKey) setSelectedDeviceId(selectedKey);
+  }
+
   if (audioDevices.length > 1)
     return (
-      <FormControl fullWidth>
-        <InputLabel>Microphone</InputLabel>
-        <Select
-          label="Microphone"
-          value={selectedDeviceId}
-          onChange={(e) => setSelectedDeviceId(e.target.value)}
-          disabled={isListening}
-          MenuProps={{
-            container: fullScreenEl,
-          }}
-        >
-          {audioDevices.map((d) => (
-            <MenuItem key={d.deviceId} value={d.deviceId}>
-              {d.label || d.deviceId}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Select
+        fullWidth
+        label="Microphone"
+        selectedKeys={
+          selectedDeviceId ? new Set([selectedDeviceId]) : undefined
+        }
+        onSelectionChange={handleSelectionChange}
+        isDisabled={isListening}
+        popoverProps={{
+          portalContainer: fullScreenEl,
+        }}
+        items={audioDevices}
+        startContent={<Mic size={16} />}
+      >
+        {(device) => (
+          <SelectItem key={device.deviceId}>
+            {device.label || device.deviceId}
+          </SelectItem>
+        )}
+      </Select>
     );
   else return null;
 };

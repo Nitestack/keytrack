@@ -1,44 +1,48 @@
 "use client";
 
-import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
-import Step from "@mui/material/Step";
-import StepLabel from "@mui/material/StepLabel";
-import Stepper from "@mui/material/Stepper";
+import { Button } from "@heroui/button";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from "@heroui/modal";
+import { addToast } from "@heroui/toast";
+import { useDisclosure } from "@heroui/use-disclosure";
 
-import AddIcon from "@mui/icons-material/Add";
+import { Plus } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import dayjs from "dayjs";
-import { useSnackbar } from "notistack";
+import { getLocalTimeZone, today } from "@internationalized/date";
 
 import SearchPiece from "~/app/(dashboard)/repertoire/add-piece/search-piece";
 import SetInfo from "~/app/(dashboard)/repertoire/add-piece/set-info";
 import SetScore from "~/app/(dashboard)/repertoire/add-piece/set-score";
+import RowSteps from "~/components/row-steps";
 import { api } from "~/trpc/react";
 
-import type { Dayjs } from "dayjs";
+import type { DateValue } from "@internationalized/date";
 import type { FC } from "react";
 import type { MBWork } from "~/services/music-brainz";
 
-const steps = ["Search piece", "Set score", "Add general information"];
+const steps = ["Search piece", "Set score", "Add information"];
 
 const AddPiece: FC = () => {
-  const [open, setOpen] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<MBWork | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [activeStep, setActiveStep] = useState(0);
-  const [dateAdded, setDateAdded] = useState<Dayjs>(dayjs());
+  const [dateAdded, setDateAdded] = useState<DateValue>(
+    today(getLocalTimeZone()),
+  );
   const isFirstStep = activeStep === 0;
   const isLastStep = steps.length - 1 === activeStep;
 
+  const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
+
   const router = useRouter();
-  const { enqueueSnackbar } = useSnackbar();
 
   const {
     data: imslpResult,
@@ -48,8 +52,9 @@ const AddPiece: FC = () => {
   } = api.repertoire.getImslpScores.useMutation({
     onSuccess: (newImslpResult) => {
       if (newImslpResult && newImslpResult.scores.length < 1)
-        enqueueSnackbar("Couldn't find any scores to the IMSLP url.", {
-          variant: "error",
+        addToast({
+          title: "Couldn't find any scores to the IMSLP url.",
+          color: "danger",
         });
       if (activeStep !== 1) setActiveStep(1);
     },
@@ -59,10 +64,10 @@ const AddPiece: FC = () => {
     api.repertoire.addPiece.useMutation({
       onSuccess: async () => {
         router.refresh();
-        enqueueSnackbar(
-          `Successfully added "${selectedPiece!.title}" to the repertoire.`,
-          { variant: "success" },
-        );
+        addToast({
+          title: `Successfully added "${selectedPiece!.title}" to the repertoire.`,
+          color: "success",
+        });
         handleClose();
       },
     });
@@ -77,15 +82,12 @@ const AddPiece: FC = () => {
       _getImslpScores({ musicBrainzId: selectedPiece.id, imslpUrl });
     else setActiveStep(1);
   }
-  function handleOpen() {
-    setOpen(true);
-  }
   function handleClose() {
-    setOpen(false);
+    onClose();
     setActiveStep(0);
     setSelectedPiece(null);
     setPdfUrl(null);
-    setDateAdded(dayjs());
+    setDateAdded(today(getLocalTimeZone()));
   }
   function canNext() {
     if (activeStep === 0 && selectedPiece === null) return false;
@@ -102,7 +104,7 @@ const AddPiece: FC = () => {
       addPiece({
         musicBrainzId: selectedPiece!.id,
         pdfUrl: pdfUrl!,
-        date: dateAdded.toISOString().split("T")[0]!,
+        date: dateAdded.toString().split("T")[0]!,
       });
       return;
     }
@@ -115,65 +117,75 @@ const AddPiece: FC = () => {
     }
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   }
+  function handleOnStepChange(step: number) {
+    if (activeStep > step || canNext()) setActiveStep(step);
+  }
 
   return (
     <>
-      <Button onClick={handleOpen} variant="contained" startIcon={<AddIcon />}>
+      <Button
+        onPress={onOpen}
+        color="primary"
+        startContent={<Plus size={16} />}
+      >
         Add
       </Button>
-      <Dialog fullWidth open={open} onClose={handleClose}>
-        <DialogTitle>
-          Add Piece{" "}
-          <span className="sm:hidden">
-            ({activeStep + 1}/{steps.length})
-          </span>
-        </DialogTitle>
-        <DialogContent>
-          <div className="mb-4 hidden sm:block">
-            <Stepper activeStep={activeStep}>
-              {steps.map((label, index) => (
-                <Step key={label} completed={activeStep > index}>
-                  <StepLabel>{label}</StepLabel>
-                </Step>
-              ))}
-            </Stepper>
-          </div>
-          {activeStep === 0 ? (
-            <SearchPiece
-              selectedPiece={selectedPiece}
-              setSelectedPiece={setSelectedPiece}
-            />
-          ) : activeStep === 1 ? (
-            <SetScore
-              setPdfUrl={setPdfUrl}
-              imslpResult={imslpResult}
-              getImslpScores={getImslpScores}
-              isGetImslpScoresPending={isGetImslpScoresPending}
-            />
-          ) : (
-            <SetInfo
-              selectedPiece={selectedPiece!}
-              dateAdded={dateAdded}
-              setDateAdded={setDateAdded}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleBack}>
-            {isFirstStep ? "Cancel" : "Back"}
-          </Button>
-          <Button
-            onClick={handleNext}
-            disabled={!canNext()}
-            loading={
-              (activeStep === 0 && isGetImslpScoresPending) ||
-              (isLastStep && isAddingPiecePending)
-            }
-          >
-            {isLastStep ? "Add" : "Next"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>
+        <ModalContent>
+          <ModalHeader>
+            Add Piece
+            <span className="ml-1 sm:hidden">
+              ({activeStep + 1}/{steps.length})
+            </span>
+          </ModalHeader>
+          <ModalBody>
+            <div className="mb-4 hidden sm:block">
+              <RowSteps
+                steps={steps.map((label) => ({
+                  title: label,
+                }))}
+                currentStep={activeStep}
+                onStepChange={handleOnStepChange}
+              />
+            </div>
+            {activeStep === 0 ? (
+              <SearchPiece
+                selectedPiece={selectedPiece}
+                setSelectedPiece={setSelectedPiece}
+              />
+            ) : activeStep === 1 ? (
+              <SetScore
+                setPdfUrl={setPdfUrl}
+                imslpResult={imslpResult}
+                getImslpScores={getImslpScores}
+                isGetImslpScoresPending={isGetImslpScoresPending}
+              />
+            ) : (
+              <SetInfo
+                selectedPiece={selectedPiece!}
+                dateAdded={dateAdded}
+                setDateAdded={setDateAdded}
+              />
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={handleBack}>
+              {isFirstStep ? "Cancel" : "Back"}
+            </Button>
+            <Button
+              color="primary"
+              onPress={handleNext}
+              isDisabled={!canNext()}
+              isLoading={
+                (activeStep === 0 && isGetImslpScoresPending) ||
+                (isLastStep && isAddingPiecePending)
+              }
+            >
+              {isLastStep ? "Add" : "Next"}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </>
   );
 };

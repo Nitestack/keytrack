@@ -38,23 +38,6 @@ export default defineConfig(
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
       ],
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: [
-            {
-              name: "@mui/material",
-              message:
-                "Please use a direct import instead. For example: import Button from '@mui/material/Button';",
-            },
-            {
-              name: "@mui/icons-material",
-              message:
-                "Please use a direct import instead. For example: import SearchIcon from '@mui/icons-material/Search';",
-            },
-          ],
-        },
-      ],
     },
   },
   {

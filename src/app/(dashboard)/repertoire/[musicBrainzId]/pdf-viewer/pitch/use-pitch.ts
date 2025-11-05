@@ -10,7 +10,7 @@ import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-
  * An efficient pitch creator hook using a single, persistent Tone.js oscillator
  */
 export default function usePitch() {
-  const frequency = usePitchStore((state) => state.frequency);
+  const frequency = usePitchStore((state) => state.frequency());
   const volume = usePitchStore((state) => state.volume);
   const isPlaying = usePitchStore((state) => state.isPlaying);
   const resetStore = usePitchStore((state) => state.resetStore);

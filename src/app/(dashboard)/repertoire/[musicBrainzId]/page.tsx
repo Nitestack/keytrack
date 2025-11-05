@@ -1,13 +1,9 @@
-import { PageContainer } from "@toolpad/core/PageContainer";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
-import Typography from "@mui/material/Typography";
+import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
 
 import { redirect } from "next/navigation";
 
 import PdfViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer";
+import DashboardLayout from "~/components/dashboard-layout";
 import { api } from "~/trpc/server";
 
 export default async function RepertoirePiecePage({
@@ -20,29 +16,28 @@ export default async function RepertoirePiecePage({
   if (!piece) redirect("/repertoire");
 
   return (
-    <PageContainer title={piece.musicBrainzPiece.title}>
+    <DashboardLayout
+      title={piece.musicBrainzPiece.title}
+      backHref="/repertoire"
+    >
       <Card>
-        <CardHeader
-          title="Information"
-          subheader={
-            piece.musicBrainzPiece.arrangement
-              ? `Arrangement ${piece.musicBrainzPiece.arrangement}`
-              : undefined
-          }
-        />
-        <CardContent>
-          <Typography>
-            Composer: {piece.musicBrainzPiece.composer.name}
-          </Typography>
-          <Typography>Type: </Typography>
-          <Typography>Genre: </Typography>
-          <Typography>Key: </Typography>
-          <Typography>Status: </Typography>
-        </CardContent>
-        <CardActions>
+        <CardHeader>
+          <div className="flex flex-col gap-1 items-start justify-center">
+            <h4 className="font-semibold leading-none text-default-600">
+              {piece.musicBrainzPiece.title}
+              {piece.musicBrainzPiece.arrangement
+                ? ` (${piece.musicBrainzPiece.arrangement})`
+                : ""}
+            </h4>
+            <h5 className="text-small tracking-tight text-default-400">
+              {piece.musicBrainzPiece.composer.name}
+            </h5>
+          </div>
+        </CardHeader>
+        <CardFooter>
           {piece.pdfUrl?.endsWith(".pdf") && <PdfViewer file={piece.pdfUrl} />}
-        </CardActions>
+        </CardFooter>
       </Card>
-    </PageContainer>
+    </DashboardLayout>
   );
 }

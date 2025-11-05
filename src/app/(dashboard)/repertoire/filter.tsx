@@ -1,10 +1,8 @@
 "use client";
 
-import ToggleButton from "@mui/material/ToggleButton";
-import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { Button, ButtonGroup } from "@heroui/button";
 
-import FilterListIcon from "@mui/icons-material/FilterList";
-import GridViewIcon from "@mui/icons-material/GridView";
+import { LayoutGrid, List } from "lucide-react";
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useOptimistic } from "react";
@@ -40,19 +38,22 @@ const RepertoireFilter: FC<{ listView: ReactNode; gridView: ReactNode }> = ({
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        <ToggleButtonGroup
-          value={currentView}
-          exclusive
-          onChange={(_, newView) => handleView(newView as "string")}
-          size="small"
-        >
-          <ToggleButton value="grid">
-            <GridViewIcon />
-          </ToggleButton>
-          <ToggleButton value="list">
-            <FilterListIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
+        <ButtonGroup>
+          <Button
+            isIconOnly
+            isDisabled={currentView === "grid"}
+            onPress={() => handleView("grid")}
+          >
+            <LayoutGrid />
+          </Button>
+          <Button
+            isIconOnly
+            isDisabled={currentView === "list"}
+            onPress={() => handleView("list")}
+          >
+            <List />
+          </Button>
+        </ButtonGroup>
       </div>
       {currentView === "list" ? listView : gridView}
     </div>

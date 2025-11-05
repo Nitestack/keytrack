@@ -14,11 +14,9 @@ const config = {
     "@ianvs/prettier-plugin-sort-imports",
   ],
   importOrder: [
-    "^@toolpad/core/.*$",
-    "^@mui/x-.*$",
-    "^@mui/material/.*$",
+    "^@heroui/.*$",
     "",
-    "^@mui/icons-material/.*$",
+    "^lucide-react$",
     "",
     "^next/.*$",
     "^react$",
@@ -36,7 +34,7 @@ const config = {
     "^(?!.*[.]css$)[./].*$",
     ".css$",
   ],
-  importOrderTypeScriptVersion: "5.8.3",
+  importOrderTypeScriptVersion: "5.9.3",
 };
 
 export default config;

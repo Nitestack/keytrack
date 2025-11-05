@@ -1,7 +1,6 @@
 "use client";
 
 import { create } from "zustand";
-import { createComputed } from "zustand-computed";
 
 import type { NonFunction } from "~/utils/types";
 
@@ -108,35 +107,35 @@ interface MetronomeStoreComputedProps {
   /**
    * The max beat depending on the numerator
    */
-  maxBeat: number;
+  maxBeat: () => number;
   /**
    * The denominator of the time signature (calculated from the exponent)
    */
-  denominator: number;
+  denominator: () => number;
   /**
    * Whether increasing the bpm is disabled (if bpm is at maxBpm)
    */
-  isIncreasingBpmDisabled: boolean;
+  isIncreasingBpmDisabled: () => boolean;
   /**
    * Whether decreasing the bpm is disabled (if bpm is at minBpm)
    */
-  isDecreasingBpmDisabled: boolean;
+  isDecreasingBpmDisabled: () => boolean;
   /**
    * Whether increasing the numerator is disabled (if numerator is at maxNumerator)
    */
-  isIncreasingNumeratorDisabled: boolean;
+  isIncreasingNumeratorDisabled: () => boolean;
   /**
    * Whether decreasing the numerator is disabled (if numerator is at minNumerator)
    */
-  isDecreasingNumeratorDisabled: boolean;
+  isDecreasingNumeratorDisabled: () => boolean;
   /**
    * Whether increasing the denominator is disabled (if denominator exponent is at maxDenominatorExponent)
    */
-  isIncreasingDenominatorDisabled: boolean;
+  isIncreasingDenominatorDisabled: () => boolean;
   /**
    * Whether decreasing the denominator is disabled (if denominator exponent is at minDenominatorExponent)
    */
-  isDecreasingDenominatorDisabled: boolean;
+  isDecreasingDenominatorDisabled: () => boolean;
 }
 
 /**
@@ -145,97 +144,85 @@ interface MetronomeStoreComputedProps {
 export type MetronomeStoreProps = MetronomeStoreBaseProps &
   MetronomeStoreComputedProps;
 
-const computedMetronomeStore = createComputed<
-  MetronomeStoreBaseProps,
-  MetronomeStoreComputedProps
->(
-  (state) => ({
-    maxBeat:
-      state.numerator % 3 === 0 && state.numerator !== 3
-        ? state.numerator / 3
-        : state.numerator,
-    denominator: Math.pow(2, state.denominatorExponent),
-    isIncreasingBpmDisabled: state.bpm >= maxBpm,
-    isDecreasingBpmDisabled: state.bpm <= minBpm,
-    isIncreasingNumeratorDisabled: state.numerator >= maxNumerator,
-    isDecreasingNumeratorDisabled: state.numerator <= minNumerator,
-    isIncreasingDenominatorDisabled:
-      state.denominatorExponent >= maxDenominatorExponent,
-    isDecreasingDenominatorDisabled:
-      state.denominatorExponent <= minDenominatorExponent,
-  }),
-  {
-    keys: ["numerator", "denominatorExponent", "bpm"],
+export const useMetronomeStore = create<MetronomeStoreProps>()((set, get) => ({
+  ...defaultValues,
+  maxBeat: () =>
+    get().numerator % 3 === 0 && get().numerator !== 3
+      ? get().numerator / 3
+      : get().numerator,
+  setBpm: (newBpm: number) => {
+    if (minBpm <= newBpm && newBpm <= maxBpm)
+      set({
+        bpm: newBpm,
+      });
   },
-);
-
-export const useMetronomeStore = create<MetronomeStoreBaseProps>()(
-  computedMetronomeStore((set, get) => ({
-    ...defaultValues,
-    setBpm: (newBpm: number) => {
-      if (minBpm <= newBpm && newBpm <= maxBpm)
-        set({
-          bpm: newBpm,
-        });
-    },
-    increaseBpm: () => {
-      if (!get().isIncreasingBpmDisabled)
-        set((state) => ({
-          bpm: state.bpm + 1,
-        }));
-    },
-    decreaseBpm: () => {
-      if (!get().isDecreasingBpmDisabled)
-        set((state) => ({
-          bpm: state.bpm - 1,
-        }));
-    },
-    increaseNumerator: () => {
-      if (!get().isIncreasingNumeratorDisabled)
-        set((state) => ({
-          numerator: state.numerator + 1,
-        }));
-    },
-    decreaseNumerator: () => {
-      if (!get().isDecreasingNumeratorDisabled)
-        set((state) => ({
-          numerator: state.numerator - 1,
-        }));
-    },
-
-    increaseDenominator: () => {
-      if (!get().isIncreasingDenominatorDisabled)
-        set((state) => ({
-          denominatorExponent: state.denominatorExponent + 1,
-        }));
-    },
-    decreaseDenominator: () => {
-      if (!get().isDecreasingDenominatorDisabled)
-        set((state) => ({
-          denominatorExponent: state.denominatorExponent - 1,
-        }));
-    },
-
-    setBeat: (newBeat) => {
-      if (1 <= newBeat && newBeat <= get().maxBeat) {
-        set({
-          beat: newBeat,
-        });
-      }
-    },
-
-    setVolume: (newVolume: number) => {
-      if (0 <= newVolume && newVolume <= 100)
-        set({
-          volume: newVolume,
-        });
-    },
-
-    toggleIsPlaying: () =>
+  increaseBpm: () => {
+    if (!get().isIncreasingBpmDisabled())
       set((state) => ({
-        isPlaying: !state.isPlaying,
-      })),
+        bpm: state.bpm + 1,
+      }));
+  },
+  decreaseBpm: () => {
+    if (!get().isDecreasingBpmDisabled())
+      set((state) => ({
+        bpm: state.bpm - 1,
+      }));
+  },
+  isIncreasingBpmDisabled: () => get().bpm >= maxBpm,
+  isDecreasingBpmDisabled: () => get().bpm <= minBpm,
 
-    resetStore: () => set(defaultValues),
-  })),
-);
+  increaseNumerator: () => {
+    if (!get().isIncreasingNumeratorDisabled())
+      set((state) => ({
+        numerator: state.numerator + 1,
+      }));
+  },
+  decreaseNumerator: () => {
+    if (!get().isDecreasingNumeratorDisabled())
+      set((state) => ({
+        numerator: state.numerator - 1,
+      }));
+  },
+  isIncreasingNumeratorDisabled: () => get().numerator >= maxNumerator,
+  isDecreasingNumeratorDisabled: () => get().numerator <= minNumerator,
+
+  denominator: () => Math.pow(2, get().denominatorExponent),
+  increaseDenominator: () => {
+    if (!get().isIncreasingDenominatorDisabled())
+      set((state) => ({
+        denominatorExponent: state.denominatorExponent + 1,
+      }));
+  },
+  decreaseDenominator: () => {
+    if (!get().isDecreasingDenominatorDisabled())
+      set((state) => ({
+        denominatorExponent: state.denominatorExponent - 1,
+      }));
+  },
+  isIncreasingDenominatorDisabled: () =>
+    get().denominatorExponent >= maxDenominatorExponent,
+  isDecreasingDenominatorDisabled: () =>
+    get().denominatorExponent <= minDenominatorExponent,
+
+  setBeat: (newBeat) => {
+    if (1 <= newBeat && newBeat <= get().maxBeat()) {
+      set({
+        beat: newBeat,
+      });
+    }
+  },
+
+  setVolume: (newVolume: number) => {
+    if (0 <= newVolume && newVolume <= 100)
+      set({
+        volume: newVolume,
+      });
+  },
+
+  toggleIsPlaying: () =>
+    set((state) => ({
+      isPlaying: !state.isPlaying,
+    })),
+
+  resetStore: () => set(defaultValues),
+}));

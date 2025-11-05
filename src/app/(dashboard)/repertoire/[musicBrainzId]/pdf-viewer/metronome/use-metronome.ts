@@ -28,7 +28,7 @@ const CLICK_SYNTH_CONFIG: ConstructorParameters<typeof Synth>["0"] = {
  * Metronome hook for initializing and management using Tone.js
  */
 export function useMetronome() {
-  const maxBeat = useMetronomeStore((state) => state.maxBeat);
+  const maxBeat = useMetronomeStore((state) => state.maxBeat());
   const setBeat = useMetronomeStore((state) => state.setBeat);
   const bpm = useMetronomeStore((state) => state.bpm);
   const volume = useMetronomeStore((state) => state.volume);

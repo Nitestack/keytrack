@@ -1,8 +1,8 @@
 "use client";
 
-import Box from "@mui/material/Box";
+import { cn } from "@heroui/react";
 
-import clsx from "clsx";
+import { useShallow } from "zustand/react/shallow";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
 
@@ -14,10 +14,12 @@ const INDICATOR_SCALE_FACTOR = 0.8;
 const TunerNeedle: FC = () => {
   const isListening = useTunerStore((state) => state.isListening);
   const detectedNote = useTunerStore((state) => state.detectedNote);
-  const tuningStatus = useTunerStore((state) => state.tuningStatus);
+  const tuningStatus = useTunerStore(
+    useShallow((state) => state.tuningStatus()),
+  );
   return (
     <div
-      className={clsx("transition-opacity relative w-full", {
+      className={cn("transition-opacity relative w-full", {
         "opacity-30": !isListening || !detectedNote,
       })}
       role="img"
@@ -28,20 +30,21 @@ const TunerNeedle: FC = () => {
           const isBigNeedle = !isMiddleNeedle && (i - 10) % 5 === 0;
           const isSmallNeedle = !isMiddleNeedle && (i - 10) % 5 !== 0;
           return (
-            <Box
+            <div
               key={i}
-              bgcolor={
+              className={cn(
+                "w-1 rounded-sm transition-all",
+                {
+                  "h-12": isMiddleNeedle,
+                  "h-8": isBigNeedle,
+                  "h-6": isSmallNeedle,
+                },
                 isMiddleNeedle
-                  ? "text.primary"
+                  ? "bg-primary"
                   : isBigNeedle
-                    ? "text.secondary"
-                    : "text.disabled"
-              }
-              className={clsx("w-1 rounded-sm transition-all", {
-                "h-12": isMiddleNeedle,
-                "h-8": isBigNeedle,
-                "h-6": isSmallNeedle,
-              })}
+                    ? "bg-secondary"
+                    : "bg-default",
+              )}
             />
           );
         })}
@@ -53,9 +56,8 @@ const TunerNeedle: FC = () => {
               transform: "translateX(-50%)",
             }}
           >
-            <Box
-              bgcolor={`${tuningStatus.color}.main`}
-              className="w-2 h-16 rounded-sm shadow-lg transition-colors"
+            <div
+              className={`w-2 h-16 rounded-sm shadow-lg transition-colors bg-${tuningStatus.color}`}
             />
           </div>
         )}

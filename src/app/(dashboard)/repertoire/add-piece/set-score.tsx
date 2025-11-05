@@ -1,20 +1,26 @@
 "use client";
 
-import Alert from "@mui/material/Alert";
-import Autocomplete from "@mui/material/Autocomplete";
-import IconButton from "@mui/material/IconButton";
-import Link from "@mui/material/Link";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import TextField from "@mui/material/TextField";
+import { Alert } from "@heroui/alert";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  AutocompleteSection,
+} from "@heroui/autocomplete";
+import { Button } from "@heroui/button";
+import { Input } from "@heroui/input";
+import { Link } from "@heroui/link";
 
-import OpenInNewIcon from "@mui/icons-material/OpenInNew";
-import SearchIcon from "@mui/icons-material/Search";
+import { Search, SquareArrowOutUpRight } from "lucide-react";
 
 import { useState } from "react";
 
+import type { Key } from "@react-types/shared";
 import type { Dispatch, FC, SetStateAction } from "react";
 import type { ImslpScore } from "~/services/imslp";
+
+function toInputValue(score: ImslpScore) {
+  return `${score.publisher.name} - ${score.title}${score.isUrtext ? " (Urtext Edition)" : ""}`;
+}
 
 const SetScore: FC<{
   imslpResult?: {
@@ -40,93 +46,116 @@ const SetScore: FC<{
     }
     setPdfInput(newPdfInput);
   }
-  function handleImslpScoreSelect(newImslpScore: ImslpScore | null) {
-    if (newImslpScore) setPdfUrl(newImslpScore.url);
-    setSelectedImslpScore(newImslpScore);
+  function handleSelectionChange(key: Key | null) {
+    if (!imslpResult || !key) return;
+
+    const imslpScore = imslpResult.scores.find((score) => score.id === key);
+    setPdfUrl(imslpScore?.url ?? null);
+    setSelectedImslpScore(imslpScore ?? null);
   }
+
+  const groupedByPublisher = Object.groupBy(
+    imslpResult?.scores ?? [],
+    (score) => (score.isUrtext ? "Urtext Edition" : score.publisher.name),
+  );
+
   if (imslpResult && imslpResult.scores.length > 1)
     return (
       <>
-        <Alert variant="outlined" severity="info">
-          Unsure which to choose?{" "}
-          <Link underline="none" target="_blank" href={imslpResult.imslpUrl}>
-            Preview the scores on IMSLP <OpenInNewIcon fontSize="small" />
-          </Link>
-          .
-          <br />
-          To help you find an authentic version,{" "}
-          <span className="font-bold">Urtext Edition</span> scores are listed
-          first.
-        </Alert>
-        <Autocomplete
-          clearOnBlur={false}
-          noOptionsText="No scores found"
-          handleHomeEndKeys
-          fullWidth
-          value={selectedImslpScore}
-          onChange={(_, newValue) => handleImslpScoreSelect(newValue)}
-          isOptionEqualToValue={(a, b) => a.id === b.id}
-          options={imslpResult.scores}
-          groupBy={(option) =>
-            option.isUrtext ? "Urtext Edition" : option.publisher.name
+        <Alert
+          color="primary"
+          title={
+            <p>
+              Unsure which to choose?{" "}
+              <Link
+                className="text-sm"
+                target="_blank"
+                href={imslpResult.imslpUrl}
+              >
+                Preview the scores on IMSLP{" "}
+                <SquareArrowOutUpRight className="ml-1" size={16} />
+              </Link>
+              <br />
+              To help you find an authentic version,{" "}
+              <span className="font-extrabold">Urtext Edition</span> scores are
+              listed first.
+            </p>
           }
-          getOptionLabel={(option) =>
-            `${option.publisher.name} - ${option.title}${option.isUrtext ? " (Urtext Edition)" : ""}`
-          }
-          renderOption={({ key, ...optionProps }, option) => (
-            <ListItem key={key + option.id} {...optionProps}>
-              <ListItemText
-                primary={option.title}
-                secondary={[
-                  option.isUrtext ? option.publisher.name : undefined,
-                  option.publisher.date,
-                  option.pages,
-                  option.fileSize,
-                ]
-                  .filter(Boolean)
-                  .join(" • ")}
-              />
-            </ListItem>
-          )}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              margin="normal"
-              placeholder="Select a score"
-              helperText="Powered by IMSLP"
-            />
-          )}
         />
+        <Autocomplete
+          fullWidth
+          defaultInputValue={
+            selectedImslpScore ? toInputValue(selectedImslpScore) : undefined
+          }
+          selectedKey={selectedImslpScore?.id ?? null}
+          onSelectionChange={handleSelectionChange}
+          listboxProps={{
+            emptyContent: "No scores found",
+          }}
+          description="Powered by IMSLP"
+          placeholder="Select a score"
+        >
+          {Object.keys(groupedByPublisher).map((publisher) => (
+            <AutocompleteSection
+              key={publisher}
+              title={publisher}
+              items={groupedByPublisher[publisher]}
+            >
+              {(piece) => (
+                <AutocompleteItem
+                  key={piece.id}
+                  description={[
+                    piece.isUrtext ? piece.publisher.name : undefined,
+                    piece.publisher.date,
+                    piece.pages,
+                    piece.fileSize,
+                  ]
+                    .filter(Boolean)
+                    .join(" • ")}
+                  textValue={toInputValue(piece)}
+                >
+                  {piece.title}
+                </AutocompleteItem>
+              )}
+            </AutocompleteSection>
+          ))}
+        </Autocomplete>
       </>
     );
   else
     return (
       <>
-        <Alert variant="outlined" severity="warning">
-          We couldn&apos;t find the score automatically, possibly because this
-          piece has multiple versions on IMSLP. Please paste a link to either
-          the correct <span className="font-bold">IMSLP page</span> or a direct{" "}
-          <span className="font-bold">PDF score</span> below.
-        </Alert>
+        <Alert
+          color="warning"
+          title={
+            <p>
+              We couldn&apos;t find the score automatically, possibly because
+              this piece has multiple versions on IMSLP. Please paste a link to
+              either the correct{" "}
+              <span className="font-extrabold">IMSLP page</span> or a direct{" "}
+              <span className="font-extrabold">PDF score</span> below.
+            </p>
+          }
+        />
         <div className="mt-4 mb-2 flex items-center gap-2">
-          <TextField
-            type="url"
+          <Input
+            fullWidth
             id="url"
             name="url"
-            fullWidth
+            type="url"
             placeholder="Paste IMSLP or PDF URL"
             value={pdfInput}
-            onChange={(event) => handlePdfInput(event.target.value)}
+            onValueChange={handlePdfInput}
           />
-          {pdfInput.includes("imslp.org/wiki/") && (
-            <IconButton
-              loading={isGetImslpScoresPending}
-              onClick={handleManualImslpScore}
-              type="submit"
-            >
-              <SearchIcon />
-            </IconButton>
-          )}
+          <Button
+            isIconOnly
+            isDisabled={!pdfInput.includes("imslp.org/wiki/")}
+            isLoading={isGetImslpScoresPending}
+            onPress={handleManualImslpScore}
+            type="submit"
+          >
+            <Search size={16} />
+          </Button>
         </div>
       </>
     );

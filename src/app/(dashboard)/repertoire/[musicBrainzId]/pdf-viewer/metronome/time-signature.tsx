@@ -1,10 +1,8 @@
 "use client";
 
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
+import { Button } from "@heroui/button";
 
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import { Minus, Plus } from "lucide-react";
 
 import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
 
@@ -14,53 +12,63 @@ const MetronomeTimeSignature: FC = () => {
   const num = useMetronomeStore((state) => state.numerator);
   const increaseNum = useMetronomeStore((state) => state.increaseNumerator);
   const decreaseNum = useMetronomeStore((state) => state.decreaseNumerator);
-  const isIncreasingNumDisabled = useMetronomeStore(
-    (state) => state.isIncreasingNumeratorDisabled,
+  const isIncreasingNumDisabled = useMetronomeStore((state) =>
+    state.isIncreasingNumeratorDisabled(),
   );
-  const isDecreasingNumDisabled = useMetronomeStore(
-    (state) => state.isDecreasingNumeratorDisabled,
+  const isDecreasingNumDisabled = useMetronomeStore((state) =>
+    state.isDecreasingNumeratorDisabled(),
   );
-  const denom = useMetronomeStore((state) => state.denominator);
+  const denom = useMetronomeStore((state) => state.denominator());
   const increaseDenom = useMetronomeStore((state) => state.increaseDenominator);
   const decreaseDenom = useMetronomeStore((state) => state.decreaseDenominator);
-  const isIncreasingDenomDisabled = useMetronomeStore(
-    (state) => state.isIncreasingDenominatorDisabled,
+  const isIncreasingDenomDisabled = useMetronomeStore((state) =>
+    state.isIncreasingDenominatorDisabled(),
   );
-  const isDecreasingDenomDisabled = useMetronomeStore(
-    (state) => state.isDecreasingDenominatorDisabled,
+  const isDecreasingDenomDisabled = useMetronomeStore((state) =>
+    state.isDecreasingDenominatorDisabled(),
   );
 
   return (
     <div className="flex justify-center">
       <div className="flex items-center select-none">
         <div className="flex flex-col">
-          <IconButton disabled={isDecreasingNumDisabled} onClick={decreaseNum}>
-            <RemoveIcon />
-          </IconButton>
-          <Typography className="text-center font-bold" variant="h4">
-            {num}
-          </Typography>
-          <IconButton disabled={isIncreasingNumDisabled} onClick={increaseNum}>
-            <AddIcon />
-          </IconButton>
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isDecreasingNumDisabled}
+            onPress={decreaseNum}
+          >
+            <Minus />
+          </Button>
+          <h4 className="text-center font-bold text-3xl">{num}</h4>
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isIncreasingNumDisabled}
+            onPress={increaseNum}
+          >
+            <Plus />
+          </Button>
         </div>
-        <Typography variant="h4">/</Typography>
+        <h4 className="text-3xl">/</h4>
         <div className="flex flex-col">
-          <IconButton
-            disabled={isDecreasingDenomDisabled}
-            onClick={decreaseDenom}
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isDecreasingDenomDisabled}
+            onPress={decreaseDenom}
           >
-            <RemoveIcon />
-          </IconButton>
-          <Typography className="text-center font-bold" variant="h4">
-            {denom}
-          </Typography>
-          <IconButton
-            disabled={isIncreasingDenomDisabled}
-            onClick={increaseDenom}
+            <Minus />
+          </Button>
+          <h4 className="text-center font-bold text-3xl">{denom}</h4>
+          <Button
+            isIconOnly
+            variant="light"
+            isDisabled={isIncreasingDenomDisabled}
+            onPress={increaseDenom}
           >
-            <AddIcon />
-          </IconButton>
+            <Plus />
+          </Button>
         </div>
       </div>
     </div>

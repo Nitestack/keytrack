@@ -1,10 +1,10 @@
 "use client";
 
-import Autocomplete from "@mui/material/Autocomplete";
-import CircularProgress from "@mui/material/CircularProgress";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import TextField from "@mui/material/TextField";
+import {
+  Autocomplete,
+  AutocompleteItem,
+  AutocompleteSection,
+} from "@heroui/autocomplete";
 
 import { useState } from "react";
 
@@ -12,15 +12,22 @@ import { useDebouncedCallback } from "use-debounce";
 
 import { api } from "~/trpc/react";
 
-import type { AutocompleteInputChangeReason } from "@mui/material/Autocomplete";
 import type { Dispatch, FC, SetStateAction } from "react";
 import type { MBWork } from "~/services/music-brainz";
+
+function toInputValue(piece: MBWork) {
+  return (
+    `${piece.composer} - ${piece.title}` +
+    (piece.arrangement ? ` (${piece.arrangement})` : "")
+  );
+}
 
 const SearchPiece: FC<{
   selectedPiece: MBWork | null;
   setSelectedPiece: Dispatch<SetStateAction<MBWork | null>>;
 }> = ({ selectedPiece, setSelectedPiece }) => {
   const [searchResultItems, setSearchResultItems] = useState<MBWork[]>([]);
+  const [isSelectionChange, setIsSelectionChange] = useState(false);
 
   const { data, isPending, mutate, variables } =
     api.repertoire.search.useMutation({
@@ -29,9 +36,8 @@ const SearchPiece: FC<{
       },
     });
 
-  const handleInputChange = useDebouncedCallback(
-    (newValue: string, reason: AutocompleteInputChangeReason) => {
-      if (reason === "selectOption") return; // if a piece was selected (no need to search again)
+  const handleInputChange = useDebouncedCallback((newValue: string) => {
+    if (!isSelectionChange) {
       if (variables?.work === newValue) {
         // if the last search query is the same as the current
         if (searchResultItems.length === 0 && data) setSearchResultItems(data); // use the last search result if available
@@ -42,60 +48,59 @@ const SearchPiece: FC<{
         return;
       }
       mutate({ work: newValue });
-    },
-    500,
+    }
+    setIsSelectionChange(false);
+  }, 500);
+
+  function handleSelectionChange(key: string | null) {
+    if (data && key)
+      setSelectedPiece(data.find((piece) => piece.id === key) ?? null);
+    setIsSelectionChange(true);
+  }
+
+  const groupedByComposer = Object.groupBy(
+    searchResultItems,
+    (piece) => piece.composer,
   );
 
   return (
     <Autocomplete
-      clearOnBlur={false}
-      noOptionsText="No pieces found"
-      handleHomeEndKeys
       fullWidth
-      loading={isPending}
-      value={selectedPiece}
-      onChange={(_, newValue) => setSelectedPiece(newValue)}
-      isOptionEqualToValue={(a, b) => a.id === b.id}
-      getOptionDisabled={(option) => option.isInRepertoire}
-      options={searchResultItems}
-      onInputChange={(_, value, reason) => handleInputChange(value, reason)}
-      groupBy={(option) => option.composer}
-      filterOptions={(option) => option}
-      getOptionLabel={(option) => {
-        let label = `${option.composer} - ${option.title}`;
-        if (option.arrangement) label += ` (${option.arrangement})`;
-        return label;
+      isLoading={isPending}
+      onInputChange={(value) => handleInputChange(value)}
+      defaultInputValue={
+        selectedPiece ? toInputValue(selectedPiece) : undefined
+      }
+      selectedKey={selectedPiece?.id ?? null}
+      onSelectionChange={(key) => handleSelectionChange(key as string | null)}
+      disabledKeys={searchResultItems
+        .filter((piece) => piece.isInRepertoire)
+        .map((piece) => piece.id)}
+      listboxProps={{
+        emptyContent: "No pieces found",
       }}
-      renderOption={({ key, ...optionProps }, option) => (
-        <ListItem key={key + option.id} {...optionProps}>
-          <ListItemText
-            primary={option.title + (option.isInRepertoire ? " (added)" : "")}
-            secondary={option.arrangement}
-          />
-        </ListItem>
-      )}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          margin="normal"
-          placeholder="Search a piece"
-          helperText="Powered by MusicBrainz"
-          slotProps={{
-            input: {
-              ...params.InputProps,
-              endAdornment: (
-                <>
-                  {isPending ? (
-                    <CircularProgress color="inherit" size={20} />
-                  ) : null}
-                  {params.InputProps.endAdornment}
-                </>
-              ),
-            },
-          }}
-        />
-      )}
-    />
+      description="Powered by MusicBrainz"
+      placeholder="Search a piece"
+    >
+      {Object.keys(groupedByComposer).map((composer) => (
+        <AutocompleteSection
+          key={composer}
+          title={composer}
+          items={groupedByComposer[composer]}
+        >
+          {(piece) => (
+            <AutocompleteItem
+              key={piece.id}
+              description={piece.arrangement}
+              textValue={toInputValue(piece)}
+            >
+              {piece.title}
+              {piece.isInRepertoire ? " (added)" : ""}
+            </AutocompleteItem>
+          )}
+        </AutocompleteSection>
+      ))}
+    </Autocomplete>
   );
 };
 

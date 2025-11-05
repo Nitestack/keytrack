@@ -2,11 +2,12 @@ import "~/styles/globals.css";
 
 import { Geist } from "next/font/google";
 
-import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { type Metadata } from "next";
 import { SessionProvider } from "next-auth/react";
 
-import AppProvider from "~/components/app-provider";
+import Providers from "~/app/providers";
+import Footer from "~/components/footer";
+import Navbar from "~/components/navbar";
 import { appDescription, appName } from "~/constants";
 import { auth } from "~/server/auth";
 import { TRPCReactProvider } from "~/trpc/react";
@@ -29,13 +30,21 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const session = await auth();
 
   return (
-    <html lang="en" className={`${geist.variable}`} suppressHydrationWarning>
-      <body>
+    <html
+      lang="en"
+      className={`${geist.variable} dark antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="bg-background relative flex min-h-dvh flex-col">
         <TRPCReactProvider>
           <SessionProvider session={session}>
-            <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-              <AppProvider session={session}>{children}</AppProvider>
-            </AppRouterCacheProvider>
+            <Providers bodyClassName="flex flex-col flex-1">
+              <Navbar />
+              <main className="container mx-auto mt-4 mb-8 w-full grow md:mt-12 px-6 flex flex-col">
+                {children}
+              </main>
+              <Footer />
+            </Providers>
           </SessionProvider>
         </TRPCReactProvider>
       </body>

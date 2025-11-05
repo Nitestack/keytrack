@@ -1,15 +1,10 @@
 "use client";
 
-import Alert from "@mui/material/Alert";
-import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardActions from "@mui/material/CardActions";
-import CardContent from "@mui/material/CardContent";
-import CardHeader from "@mui/material/CardHeader";
-import Popover from "@mui/material/Popover";
+import { Alert } from "@heroui/alert";
+import { Button } from "@heroui/button";
+import { Card, CardBody, CardFooter } from "@heroui/card";
 
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import StopIcon from "@mui/icons-material/Stop";
+import { Play, Square } from "lucide-react";
 
 import TunerFrequencyDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-display";
 import TunerFrequencySetter from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-setter";
@@ -25,61 +20,38 @@ import { useTuner } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewe
 import type { FC } from "react";
 
 const Tuner: FC<{
-  anchorEl: HTMLElement | null;
-  handleClose: () => void;
   fullScreenEl?: Element;
-}> = ({ anchorEl, handleClose, fullScreenEl }) => {
+}> = ({ fullScreenEl }) => {
   const isListening = useTunerStore((state) => state.isListening);
 
   const { error, handleToggleListening } = useTuner();
 
-  const open = Boolean(anchorEl);
-
   return (
-    <Popover
-      id="tuner"
-      container={fullScreenEl}
-      open={open}
-      anchorEl={anchorEl}
-      onClose={handleClose}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      transformOrigin={{ vertical: "bottom", horizontal: "center" }}
-    >
-      <Card>
-        <CardHeader
-          title="Tuner"
-          slotProps={{
-            title: {
-              textAlign: "center",
-            },
-          }}
-        />
-        <CardContent className="flex flex-col items-center gap-4 select-none max-w-90">
-          {error && <Alert severity="error">{error.message}</Alert>}
-          <TunerMicSelect fullScreenEl={fullScreenEl} />
-          <TunerNoteDisplay />
-          <TunerNeedle />
-          <TunerFrequencyDisplay />
-          <TunerMicVolume />
-          <TunerStatus />
-          <div className="grid grid-cols-2 gap-2 items-center justify-between w-full min-w-82">
-            <TunerTranspose />
-            <TunerFrequencySetter />
-          </div>
-        </CardContent>
-        <CardActions>
-          <Button
-            variant="contained"
-            fullWidth
-            color={isListening ? "error" : "primary"}
-            onClick={handleToggleListening}
-            startIcon={isListening ? <StopIcon /> : <PlayArrowIcon />}
-          >
-            {isListening ? "Stop" : "Start"}
-          </Button>
-        </CardActions>
-      </Card>
-    </Popover>
+    <Card shadow="none">
+      <CardBody className="flex flex-col items-center gap-4 select-none">
+        {error && <Alert color="danger" title={error.message} />}
+        <TunerMicSelect fullScreenEl={fullScreenEl} />
+        <TunerNoteDisplay />
+        <TunerNeedle />
+        <TunerFrequencyDisplay />
+        <TunerMicVolume />
+        <TunerStatus />
+        <div className="grid grid-cols-2 gap-2 items-center justify-between w-full min-w-82">
+          <TunerTranspose />
+          <TunerFrequencySetter />
+        </div>
+      </CardBody>
+      <CardFooter>
+        <Button
+          fullWidth
+          color={isListening ? "danger" : "primary"}
+          onPress={handleToggleListening}
+          startContent={isListening ? <Square size={16} /> : <Play size={16} />}
+        >
+          {isListening ? "Stop" : "Start"}
+        </Button>
+      </CardFooter>
+    </Card>
   );
 };
 
