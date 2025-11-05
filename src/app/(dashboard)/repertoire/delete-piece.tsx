@@ -31,7 +31,7 @@ const RemovePiece: FC<{
 
   const { mutate, isPending } = api.repertoire.removePiece.useMutation({
     onSuccess: () => {
-      router.push("/repertoire");
+      router.refresh();
       enqueueSnackbar(`Successfully removed "${title}" from the repertoire.`, {
         variant: "success",
       });

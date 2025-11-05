@@ -8,8 +8,6 @@ import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import NextLink from "next/link";
-
 import { signIn, useSession } from "next-auth/react";
 
 export default function HomePage() {
@@ -74,12 +72,7 @@ export default function HomePage() {
               turning daily sessions into measurable progress.
             </Typography>
             {session.status === "authenticated" ? (
-              <Button
-                href="/repertoire"
-                LinkComponent={NextLink}
-                variant="contained"
-                color="primary"
-              >
+              <Button href="/repertoire" variant="contained" color="primary">
                 Continue
               </Button>
             ) : (

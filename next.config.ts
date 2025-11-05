@@ -3,16 +3,16 @@
  * for Docker builds.
  */
 
+import type { NextConfig } from "next";
+
 import "./src/env.js";
 
-/** @type {import("next").NextConfig} */
-const config = {
+export default {
   output: "standalone",
   experimental: {
     browserDebugInfoInTerminal: true,
-    reactCompiler: true,
+    turbopackFileSystemCacheForDev: true,
   },
+  reactCompiler: true,
   typedRoutes: true,
-};
-
-export default config;
+} satisfies NextConfig;

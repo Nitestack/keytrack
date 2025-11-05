@@ -9,8 +9,6 @@ import "~/app/(dashboard)/repertoire/grid-item-component.scss";
 
 import CardActionArea from "@mui/material/CardActionArea";
 
-import Link from "next/link";
-
 import clsx from "clsx";
 import { Document, Page, pdfjs } from "react-pdf";
 
@@ -36,10 +34,7 @@ const RepertoireGridItemComponent: FC<{
         "aspect-square": pdfUrl,
       })}
     >
-      <CardActionArea
-        href={`/repertoire/${musicBrainzId}`}
-        LinkComponent={Link}
-      >
+      <CardActionArea href={`/repertoire/${musicBrainzId}`}>
         <CardHeader
           title={`${title}${arrangement ? ` (${arrangement})` : ""}`}
           subheader={composer}
