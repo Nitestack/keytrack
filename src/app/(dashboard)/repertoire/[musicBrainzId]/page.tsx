@@ -1,9 +1,11 @@
-import { Card, CardBody, CardFooter, CardHeader } from "@heroui/card";
+import { Card, CardFooter, CardHeader } from "@heroui/card";
 
-import { redirect } from "next/navigation";
+import { redirect, unauthorized } from "next/navigation";
 
 import PdfViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer";
 import DashboardLayout from "~/components/dashboard-layout";
+import { auth } from "~/server/auth";
+import { getScoreUrls } from "~/services/file-storage";
 import { api } from "~/trpc/server";
 
 export default async function RepertoirePiecePage({
@@ -11,9 +13,19 @@ export default async function RepertoirePiecePage({
 }: PageProps<"/repertoire/[musicBrainzId]">) {
   const { musicBrainzId } = await params;
 
+  const session = await auth();
+
+  if (!session) unauthorized();
+
   const piece = await api.repertoire.getPiece({ musicBrainzId });
 
   if (!piece) redirect("/repertoire");
+
+  const urls = await getScoreUrls(
+    session.user.id,
+    piece.musicBrainzId,
+    piece.scoreType,
+  );
 
   return (
     <DashboardLayout
@@ -35,7 +47,7 @@ export default async function RepertoirePiecePage({
           </div>
         </CardHeader>
         <CardFooter>
-          {piece.pdfUrl?.endsWith(".pdf") && <PdfViewer file={piece.pdfUrl} />}
+          {urls.length === 1 && <PdfViewer file={urls[0]!} />}
         </CardFooter>
       </Card>
     </DashboardLayout>

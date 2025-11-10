@@ -1,8 +1,10 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, primaryKey } from "drizzle-orm/pg-core";
+import { index, pgEnum, pgTable, primaryKey } from "drizzle-orm/pg-core";
 
 import { musicBrainzPieces } from "~/server/db/mbPieces";
 import { users } from "~/server/db/users";
+
+export const scoreTypeEnum = pgEnum("score_type", ["pdf", "images"]);
 
 export const repertoirePieces = pgTable(
   "repertoire_piece",
@@ -17,9 +19,8 @@ export const repertoirePieces = pgTable(
       .references(() => users.id, {
         onDelete: "cascade",
       }),
-    dateAdded: d.date().notNull().defaultNow(),
     updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
-    pdfUrl: d.text().notNull(),
+    scoreType: scoreTypeEnum().notNull(),
   }),
   (t) => [
     primaryKey({

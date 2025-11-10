@@ -1,0 +1,9 @@
+services:
+  app:
+    build:
+      dockerfile: Dockerfile.dev
+    environment:
+      NODE_ENV: "development"
+    volumes:
+      - .:/app
+    command: pnpm dev

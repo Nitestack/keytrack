@@ -16,14 +16,15 @@ const RepertoireList: FC<{
           description={piece.musicBrainzPiece.composer.name}
           href={`/repertoire/${piece.musicBrainzId}`}
         >
-          <div className="flex flex-col">
+          <p>
             {piece.musicBrainzPiece.title}
             {piece.musicBrainzPiece.arrangement && (
-              <span className="text-secondary text-sm">
-                Arrangement {piece.musicBrainzPiece.arrangement}
+              <span className="text-default-500 text-sm">
+                {" "}
+                ({piece.musicBrainzPiece.arrangement})
               </span>
             )}
-          </div>
+          </p>
         </ListboxItem>
       ))}
     </Listbox>

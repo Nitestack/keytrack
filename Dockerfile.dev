@@ -1,0 +1,11 @@
+FROM node:lts-alpine
+WORKDIR /app
+
+RUN corepack enable pnpm && \
+  mkdir -p /app/uploads/scores
+
+COPY package.json pnpm-lock.yaml* .npmrc* ./
+RUN pnpm install
+
+EXPOSE 3000
+CMD ["pnpm", "dev"]

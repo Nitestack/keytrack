@@ -10,9 +10,10 @@ import { useState } from "react";
 
 import { useDebouncedCallback } from "use-debounce";
 
+import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
 import { api } from "~/trpc/react";
 
-import type { Dispatch, FC, SetStateAction } from "react";
+import type { FC } from "react";
 import type { MBWork } from "~/services/music-brainz";
 
 function toInputValue(piece: MBWork) {
@@ -22,10 +23,22 @@ function toInputValue(piece: MBWork) {
   );
 }
 
-const SearchPiece: FC<{
-  selectedPiece: MBWork | null;
-  setSelectedPiece: Dispatch<SetStateAction<MBWork | null>>;
-}> = ({ selectedPiece, setSelectedPiece }) => {
+const SearchPiece: FC = () => {
+  const selectedPiece = useAddRepertoirePieceStore(
+    (state) => state.selectedPiece,
+    (a, b) => {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined || b === undefined) return false;
+      return a.id === b.id;
+    },
+  );
+  const setSelectedPiece = useAddRepertoirePieceStore(
+    (state) => state.setSelectedPiece,
+  );
+  const resetScoreSelection = useAddRepertoirePieceStore(
+    (state) => state.resetScoreSelection,
+  );
+
   const [searchResultItems, setSearchResultItems] = useState<MBWork[]>([]);
   const [isSelectionChange, setIsSelectionChange] = useState(false);
 
@@ -43,18 +56,20 @@ const SearchPiece: FC<{
         if (searchResultItems.length === 0 && data) setSearchResultItems(data); // use the last search result if available
         return;
       }
-      if (newValue === "") {
+      if (newValue.trim() === "") {
         setSearchResultItems([]);
         return;
       }
-      mutate({ work: newValue });
+      mutate({ work: newValue.trim() });
     }
     setIsSelectionChange(false);
   }, 500);
 
   function handleSelectionChange(key: string | null) {
-    if (data && key)
-      setSelectedPiece(data.find((piece) => piece.id === key) ?? null);
+    if (data && key) {
+      resetScoreSelection();
+      setSelectedPiece(data.find((piece) => piece.id === key)!);
+    }
     setIsSelectionChange(true);
   }
 

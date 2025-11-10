@@ -9,12 +9,17 @@ import {
   repertoirePieces,
 } from "~/server/db/schema";
 import { mbApi } from "~/server/musicbrainz";
+import {
+  downloadAndStoreImages,
+  downloadAndStorePdf,
+} from "~/services/file-storage";
 import { getPdfUrlByIndex, getScoresByWikiUrl } from "~/services/imslp";
 import {
   getImslpURLByWorkId,
   getWorkById,
   toMBWork,
 } from "~/services/music-brainz";
+import { validateImageUrl, validatePdfUrl } from "~/services/url-validator";
 
 import type { EntityType } from "musicbrainz-api";
 
@@ -39,8 +44,8 @@ export const repertoireRouter = createTRPCRouter({
         });
       const [searchResult, dbRepertoirePiecesResult] = await Promise.allSettled(
         [
-          await mbApi.search(entityType, { query }),
-          await db
+          mbApi.search(entityType, { query }),
+          db
             .select()
             .from(repertoirePieces)
             .where(eq(repertoirePieces.userId, session.user.id)),
@@ -86,11 +91,14 @@ export const repertoireRouter = createTRPCRouter({
     .input(
       z.object({
         musicBrainzId: z.string().nonempty(),
-        date: z.string().date().nonempty(),
-        pdfUrl: z.string().url(),
+        pdfUrl: z.string().url().optional(),
+        imslpIndexUrl: z.string().url().optional(),
+        imageUrls: z.array(z.string().url()).optional(),
+        scoreType: z.enum(["pdf", "images"]),
       }),
     )
     .mutation(async ({ input, ctx: { db, session } }) => {
+      // Ensure MusicBrainz piece exists in DB
       const mbPiece = await db.query.musicBrainzPieces.findFirst({
         where: eq(musicBrainzPieces.id, input.musicBrainzId),
       });
@@ -119,11 +127,90 @@ export const repertoireRouter = createTRPCRouter({
           .onConflictDoNothing();
       }
 
+      if (input.pdfUrl) {
+        // Direct PDF URL
+        const validation = await validatePdfUrl(input.pdfUrl);
+
+        if (!validation.valid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: validation.error ?? "Invalid PDF URL",
+          });
+        }
+
+        try {
+          await downloadAndStorePdf(
+            input.pdfUrl,
+            session.user.id,
+            input.musicBrainzId,
+          );
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              error instanceof Error
+                ? `Failed to download PDF: ${error.message}`
+                : "Failed to download PDF",
+          });
+        }
+      } else if (input.imslpIndexUrl) {
+        // IMSLP index URL - convert to direct PDF URL first
+        try {
+          const directPdfUrl = await getPdfUrlByIndex(input.imslpIndexUrl);
+
+          if (!directPdfUrl) throw new TRPCError({ code: "BAD_REQUEST" });
+
+          await downloadAndStorePdf(
+            directPdfUrl,
+            session.user.id,
+            input.musicBrainzId,
+          );
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              error instanceof Error
+                ? `Failed to process IMSLP URL: ${error.message}`
+                : "Failed to process IMSLP URL",
+          });
+        }
+      } else if (input.imageUrls && input.imageUrls.length > 0) {
+        // Multiple image URLs
+
+        // Validate all image URLs first
+        const validations = await Promise.all(
+          input.imageUrls.map((url) => validateImageUrl(url)),
+        );
+
+        const invalidUrl = validations.find((v) => !v.valid);
+        if (invalidUrl) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: invalidUrl.error ?? "Invalid image URL",
+          });
+        }
+
+        try {
+          await downloadAndStoreImages(
+            input.imageUrls,
+            session.user.id,
+            input.musicBrainzId,
+          );
+        } catch (error) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message:
+              error instanceof Error
+                ? `Failed to download images: ${error.message}`
+                : "Failed to download images",
+          });
+        }
+      }
+      // Insert into database
       await db.insert(repertoirePieces).values({
         musicBrainzId: input.musicBrainzId,
         userId: session.user.id,
-        dateAdded: input.date,
-        pdfUrl: input.pdfUrl,
+        scoreType: input.scoreType,
       });
     }),
   getPiece: protectedProcedure
@@ -132,8 +219,8 @@ export const repertoireRouter = createTRPCRouter({
         musicBrainzId: z.string().nonempty(),
       }),
     )
-    .query(async ({ input, ctx: { db, session } }) => {
-      const piece = await db.query.repertoirePieces.findFirst({
+    .query(({ input, ctx: { db, session } }) => {
+      return db.query.repertoirePieces.findFirst({
         where: and(
           eq(repertoirePieces.userId, session.user.id),
           eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
@@ -146,23 +233,6 @@ export const repertoireRouter = createTRPCRouter({
           },
         },
       });
-
-      if (
-        piece?.pdfUrl.startsWith(
-          "https://imslp.org/wiki/Special:ImagefromIndex",
-        )
-      ) {
-        try {
-          piece.pdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
-        } catch (error) {
-          console.error(
-            `Failed to fetch direct PDF URL for ${piece.pdfUrl}:`,
-            error,
-          );
-        }
-      }
-
-      return piece;
     }),
   removePiece: protectedProcedure
     .input(
@@ -193,15 +263,15 @@ export const repertoireRouter = createTRPCRouter({
     });
 
     const piecePromises = pieces.map(async (piece) => {
-      if (
-        piece.pdfUrl.startsWith("https://imslp.org/wiki/Special:ImagefromIndex")
-      ) {
-        const directPdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
-        return {
-          ...piece,
-          pdfUrl: directPdfUrl,
-        };
-      }
+      // if (
+      //   piece.pdfUrl.startsWith("https://imslp.org/wiki/Special:ImagefromIndex")
+      // ) {
+      //   const directPdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
+      //   return {
+      //     ...piece,
+      //     pdfUrl: directPdfUrl,
+      //   };
+      // }
       return piece;
     });
 
@@ -220,18 +290,20 @@ export const repertoireRouter = createTRPCRouter({
     .input(
       z.object({
         musicBrainzId: z.string().nonempty(),
-        imslpUrl: z.string().url().optional(),
       }),
     )
     .mutation(async ({ input }) => {
-      const imslpUrl =
-        input.imslpUrl ?? (await getImslpURLByWorkId(input.musicBrainzId));
+      const imslpUrl = await getImslpURLByWorkId(input.musicBrainzId);
 
       if (!imslpUrl) return undefined;
 
+      const scores = await getScoresByWikiUrl(imslpUrl);
+
+      if (scores.length <= 0) return undefined;
+
       return {
         imslpUrl,
-        scores: await getScoresByWikiUrl(imslpUrl),
+        scores,
       };
     }),
 });

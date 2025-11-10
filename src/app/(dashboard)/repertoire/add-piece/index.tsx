@@ -8,61 +8,100 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
+import { Progress } from "@heroui/progress";
+import { Tab, Tabs } from "@heroui/tabs";
 import { addToast } from "@heroui/toast";
 import { useDisclosure } from "@heroui/use-disclosure";
 
 import { Plus } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-import { getLocalTimeZone, today } from "@internationalized/date";
-
+import FileUpload from "~/app/(dashboard)/repertoire/add-piece/file-upload";
+import IMSLPDiscover from "~/app/(dashboard)/repertoire/add-piece/imslp-discover";
+import ScoreURL from "~/app/(dashboard)/repertoire/add-piece/score-url";
 import SearchPiece from "~/app/(dashboard)/repertoire/add-piece/search-piece";
-import SetInfo from "~/app/(dashboard)/repertoire/add-piece/set-info";
-import SetScore from "~/app/(dashboard)/repertoire/add-piece/set-score";
+import {
+  addRepertoirePieceSteps,
+  useAddRepertoirePieceStore,
+} from "~/app/(dashboard)/repertoire/add-piece/store";
+import AddPieceSummary from "~/app/(dashboard)/repertoire/add-piece/summary";
 import RowSteps from "~/components/row-steps";
 import { api } from "~/trpc/react";
+import { useScoreUpload } from "~/utils/hooks/use-upload";
 
-import type { DateValue } from "@internationalized/date";
+import type { Key } from "@react-types/shared";
 import type { FC } from "react";
-import type { MBWork } from "~/services/music-brainz";
-
-const steps = ["Search piece", "Set score", "Add information"];
+import type { ScoreSelectionMode } from "~/app/(dashboard)/repertoire/add-piece/store";
+import type { RouterInputs } from "~/trpc/react";
 
 const AddPiece: FC = () => {
-  const [selectedPiece, setSelectedPiece] = useState<MBWork | null>(null);
-  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
-  const [activeStep, setActiveStep] = useState(0);
-  const [dateAdded, setDateAdded] = useState<DateValue>(
-    today(getLocalTimeZone()),
+  const step = useAddRepertoirePieceStore((state) => state.step);
+  const setStep = useAddRepertoirePieceStore((state) => state.setStep);
+  const increaseStep = useAddRepertoirePieceStore(
+    (state) => state.increaseStep,
   );
-  const isFirstStep = activeStep === 0;
-  const isLastStep = steps.length - 1 === activeStep;
+  const decreaseStep = useAddRepertoirePieceStore(
+    (state) => state.decreaseStep,
+  );
+  const selectedPiece = useAddRepertoirePieceStore(
+    (state) => state.selectedPiece,
+    (a, b) => {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined || b === undefined) return false;
+      return a.id === b.id;
+    },
+  );
+  const mode = useAddRepertoirePieceStore((state) =>
+    state.scoreSelectionMode === "imslp" ? "pdf" : state.mode(),
+  );
+  const uploadedScoreFiles = useAddRepertoirePieceStore(
+    (state) => state.uploadedScoreFiles,
+    (a, b) => {
+      if (a === undefined && b === undefined) return true;
+      if (a === undefined || b === undefined) return false;
+      return a.length === b.length;
+    },
+  );
+  const selectedImslpScoreUrl = useAddRepertoirePieceStore(
+    (state) => state.selectedImslpScore?.url,
+  );
+  const scoreUrls = useAddRepertoirePieceStore(
+    (state) => state.scoreUrls,
+    (a, b) => a.length === b.length,
+  );
+
+  const canNext = useAddRepertoirePieceStore((state) => state.canNext());
+  const resetPieceSelection = useAddRepertoirePieceStore(
+    (state) => state.resetPieceSelection,
+  );
+  const resetScoreSelection = useAddRepertoirePieceStore(
+    (state) => state.resetScoreSelection,
+  );
+
+  const scoreSelectionMode = useAddRepertoirePieceStore(
+    (state) => state.scoreSelectionMode,
+  );
+  const setScoreSelectionMode = useAddRepertoirePieceStore(
+    (state) => state.setScoreSelectionMode,
+  );
+  const showImslpTab = useAddRepertoirePieceStore(
+    (state) => state.showImslpTab,
+  );
+
+  const { progress, isUploading, error, uploadImages, uploadPdf } =
+    useScoreUpload();
+
+  const isFirstStep = step === 0;
+  const isLastStep = addRepertoirePieceSteps.length - 1 === step;
 
   const { isOpen, onOpen, onClose, onOpenChange } = useDisclosure();
 
   const router = useRouter();
 
-  const {
-    data: imslpResult,
-    mutate: _getImslpScores,
-    isPending: isGetImslpScoresPending,
-    variables: lastImslpScoresVariables,
-  } = api.repertoire.getImslpScores.useMutation({
-    onSuccess: (newImslpResult) => {
-      if (newImslpResult && newImslpResult.scores.length < 1)
-        addToast({
-          title: "Couldn't find any scores to the IMSLP url.",
-          color: "danger",
-        });
-      if (activeStep !== 1) setActiveStep(1);
-    },
-  });
-
   const { mutate: addPiece, isPending: isAddingPiecePending } =
     api.repertoire.addPiece.useMutation({
-      onSuccess: async () => {
+      onSuccess: () => {
         router.refresh();
         addToast({
           title: `Successfully added "${selectedPiece!.title}" to the repertoire.`,
@@ -72,53 +111,52 @@ const AddPiece: FC = () => {
       },
     });
 
-  function getImslpScores(imslpUrl?: string) {
-    if (
-      selectedPiece &&
-      (imslpUrl
-        ? lastImslpScoresVariables?.imslpUrl !== imslpUrl
-        : lastImslpScoresVariables?.musicBrainzId !== selectedPiece.id)
-    )
-      _getImslpScores({ musicBrainzId: selectedPiece.id, imslpUrl });
-    else setActiveStep(1);
-  }
   function handleClose() {
     onClose();
-    setActiveStep(0);
-    setSelectedPiece(null);
-    setPdfUrl(null);
-    setDateAdded(today(getLocalTimeZone()));
+    resetPieceSelection();
+    resetScoreSelection();
   }
-  function canNext() {
-    if (activeStep === 0 && selectedPiece === null) return false;
-    else if (activeStep === 1 && pdfUrl === null) return false;
-    else if (activeStep === 2 && dateAdded === null) return false;
-    return true;
-  }
-  function handleNext() {
-    if (!canNext()) return;
-    if (activeStep === 0) {
-      getImslpScores();
-      return;
-    } else if (isLastStep) {
-      addPiece({
-        musicBrainzId: selectedPiece!.id,
-        pdfUrl: pdfUrl!,
-        date: dateAdded.toString().split("T")[0]!,
-      });
-      return;
+  async function handleNext() {
+    if (!canNext) return;
+    if (isLastStep && selectedPiece && mode) {
+      if (scoreSelectionMode === "upload" && uploadedScoreFiles) {
+        const files = Array.from(uploadedScoreFiles);
+        if (files.length === 1) {
+          await uploadPdf(selectedPiece.id, files[0]!);
+        } else {
+          await uploadImages(selectedPiece.id, files);
+        }
+      }
+
+      const params: RouterInputs["repertoire"]["addPiece"] = {
+        musicBrainzId: selectedPiece.id,
+        scoreType: mode,
+      };
+
+      if (scoreSelectionMode === "imslp" && selectedImslpScoreUrl)
+        params.imslpIndexUrl = selectedImslpScoreUrl;
+      else if (scoreSelectionMode === "input") {
+        if (mode === "pdf") params.pdfUrl = scoreUrls[0]!;
+        else params.imageUrls = scoreUrls;
+      }
+
+      addPiece(params);
+    } else {
+      increaseStep();
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
   }
   function handleBack() {
     if (isFirstStep) {
       handleClose();
       return;
     }
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    decreaseStep();
   }
-  function handleOnStepChange(step: number) {
-    if (activeStep > step || canNext()) setActiveStep(step);
+  function handleOnStepChange(newStep: number) {
+    if (step > newStep || canNext) setStep(newStep);
+  }
+  function handleScoreSelectionChange(value: Key) {
+    setScoreSelectionMode(value as ScoreSelectionMode);
   }
 
   return (
@@ -135,38 +173,43 @@ const AddPiece: FC = () => {
           <ModalHeader>
             Add Piece
             <span className="ml-1 sm:hidden">
-              ({activeStep + 1}/{steps.length})
+              ({step + 1}/{addRepertoirePieceSteps.length})
             </span>
           </ModalHeader>
           <ModalBody>
             <div className="mb-4 hidden sm:block">
               <RowSteps
-                steps={steps.map((label) => ({
+                steps={addRepertoirePieceSteps.map((label) => ({
                   title: label,
                 }))}
-                currentStep={activeStep}
+                currentStep={step}
                 onStepChange={handleOnStepChange}
               />
             </div>
-            {activeStep === 0 ? (
-              <SearchPiece
-                selectedPiece={selectedPiece}
-                setSelectedPiece={setSelectedPiece}
-              />
-            ) : activeStep === 1 ? (
-              <SetScore
-                setPdfUrl={setPdfUrl}
-                imslpResult={imslpResult}
-                getImslpScores={getImslpScores}
-                isGetImslpScoresPending={isGetImslpScoresPending}
-              />
+            {step === 0 ? (
+              <SearchPiece />
+            ) : step === 1 ? (
+              <Tabs
+                fullWidth
+                selectedKey={scoreSelectionMode}
+                onSelectionChange={handleScoreSelectionChange}
+              >
+                {showImslpTab && (
+                  <Tab key="imslp" title="IMSLP">
+                    <IMSLPDiscover />
+                  </Tab>
+                )}
+                <Tab key="input" title="URL">
+                  <ScoreURL />
+                </Tab>
+                <Tab key="upload" title="Upload">
+                  <FileUpload />
+                </Tab>
+              </Tabs>
             ) : (
-              <SetInfo
-                selectedPiece={selectedPiece!}
-                dateAdded={dateAdded}
-                setDateAdded={setDateAdded}
-              />
+              <AddPieceSummary />
             )}
+            {isUploading && <Progress value={progress.percentage} />}
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={handleBack}>
@@ -175,11 +218,8 @@ const AddPiece: FC = () => {
             <Button
               color="primary"
               onPress={handleNext}
-              isDisabled={!canNext()}
-              isLoading={
-                (activeStep === 0 && isGetImslpScoresPending) ||
-                (isLastStep && isAddingPiecePending)
-              }
+              isDisabled={!canNext}
+              isLoading={isLastStep && isAddingPiecePending}
             >
               {isLastStep ? "Add" : "Next"}
             </Button>

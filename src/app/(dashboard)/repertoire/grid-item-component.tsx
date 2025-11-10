@@ -3,12 +3,15 @@
 import "~/app/(dashboard)/repertoire/grid-item-component.scss";
 
 import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Checkbox } from "@heroui/checkbox";
 import { CircularProgress } from "@heroui/progress";
 import { User } from "@heroui/user";
 
 import NextLink from "next/link";
 
 import { Document, Page, pdfjs } from "react-pdf";
+
+import { useRepertoireStore } from "~/app/(dashboard)/repertoire/store";
 
 import type { Route } from "next";
 import type { FC } from "react";
@@ -25,24 +28,47 @@ const RepertoireGridItemComponent: FC<{
   arrangement: string | null;
   pdfUrl?: string;
 }> = ({ title, arrangement, composer, musicBrainzId, pdfUrl }) => {
+  const isSelected = useRepertoireStore((state) =>
+    state.isPieceSelected(musicBrainzId),
+  );
+  const isSelectMode = useRepertoireStore((state) => state.isSelectMode);
+  const toggleSelectPiece = useRepertoireStore(
+    (state) => state.toggleSelectPiece,
+  );
+
+  function handleValueChange() {
+    toggleSelectPiece(musicBrainzId);
+  }
   return (
-    <Card
-      className="aspect-square"
-      as={NextLink}
-      isPressable
-      href={`/repertoire/${musicBrainzId}` as Route}
-    >
+    <Card className="aspect-square" isPressable>
       <CardHeader>
-        <User
-          avatarProps={{
-            name: composer,
-            classNames: {
-              base: "hidden",
-            },
-          }}
-          name={`${title}${arrangement ? ` (${arrangement})` : ""}`}
-          description={composer}
-        />
+        {isSelectMode ? (
+          <Checkbox isSelected={isSelected} onValueChange={handleValueChange}>
+            <User
+              avatarProps={{
+                name: composer,
+                classNames: {
+                  base: "hidden",
+                },
+              }}
+              name={`${title}${arrangement ? ` (${arrangement})` : ""}`}
+              description={composer}
+            />
+          </Checkbox>
+        ) : (
+          <NextLink href={`/repertoire/${musicBrainzId}` as Route}>
+            <User
+              avatarProps={{
+                name: composer,
+                classNames: {
+                  base: "hidden",
+                },
+              }}
+              name={`${title}${arrangement ? ` (${arrangement})` : ""}`}
+              description={composer}
+            />
+          </NextLink>
+        )}
       </CardHeader>
       <CardBody>
         {pdfUrl && (

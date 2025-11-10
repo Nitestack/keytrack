@@ -7,6 +7,8 @@ import { LayoutGrid, List } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useCallback, useOptimistic } from "react";
 
+import RepertoireSelect from "~/app/(dashboard)/repertoire/select";
+
 import type { FC, ReactNode } from "react";
 
 const viewKey = "view";
@@ -37,7 +39,8 @@ const RepertoireFilter: FC<{ listView: ReactNode; gridView: ReactNode }> = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-4">
+        <RepertoireSelect />
         <ButtonGroup>
           <Button
             isIconOnly

@@ -19,7 +19,7 @@ import { api } from "~/trpc/react";
 
 import type { FC } from "react";
 
-const RemovePiece: FC<{
+const RemovePieces: FC<{
   title: string;
   musicBrainzId: string;
   composer: string;
@@ -80,4 +80,4 @@ const RemovePiece: FC<{
   );
 };
 
-export default RemovePiece;
+export default RemovePieces;
