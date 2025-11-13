@@ -22,6 +22,8 @@ import {
 
 import { useState } from "react";
 
+import { useMediaQuery } from "usehooks-ts";
+
 import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome";
 import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch";
 import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner";
@@ -29,12 +31,11 @@ import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
 
-const PdfToolbar: FC<{ isMobile: boolean; fullScreenEl?: Element }> = ({
-  isMobile,
-  fullScreenEl,
-}) => {
+const PdfToolbar: FC<{ fullScreenEl?: Element }> = ({ fullScreenEl }) => {
   const [activeTool, setActiveTool] = useState<Key>("metronome");
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
+
+  const isMobile = useMediaQuery("(max-width:1199.95px)");
 
   function handleOnAction(key: Key | null) {
     if (!key) return;
