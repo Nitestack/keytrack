@@ -8,7 +8,6 @@ import {
 } from "~/services/file-types";
 
 import type { Dispatch, SetStateAction } from "react";
-import type { FileType } from "~/services/file-types";
 import type { ImslpScore } from "~/services/imslp";
 import type { MBWork } from "~/services/music-brainz";
 
@@ -136,7 +135,7 @@ export interface AddRepertoirePieceStoreProps {
   /**
    * The current mode for the current selected score selection
    */
-  mode: () => FileType | undefined;
+  mode: () => ScoreType | undefined;
   /**
    * The currently uploaded score files
    */

@@ -1,3 +1,11 @@
+import { getScoreUrls } from "~/services/file-storage";
+
+import type { InferSelectModel } from "drizzle-orm";
+import type { musicBrainzComposers } from "~/server/db/mbComposer";
+import type { musicBrainzPieces } from "~/server/db/mbPieces";
+import type { repertoirePieces } from "~/server/db/repertoirePieces";
+import type { ScoreType } from "~/services/file-storage";
+
 /**
  * Repertoire piece object
  */
@@ -32,13 +40,32 @@ export interface RepertoirePiece {
    */
   arrangement?: string;
   /**
-   * The url of the score
-   * @example "https://imslp.org/wiki/Special:ImagefromIndex/34484/qraj"
+   * The type of score stored for the piece
    */
-  pdfUrl: string;
+  scoreType: ScoreType;
   /**
-   * The date when the piece was added to the repertoire
-   * @example "2025-08-21"
+   * The url(s) of the score
    */
-  dateAdded: string;
+  scoreUrls: string[];
+}
+
+export async function mapDbPieceToRepertoirePiece({
+  userId,
+  musicBrainzPiece: { id, title, arrangement, composerId, composer },
+  scoreType,
+}: InferSelectModel<typeof repertoirePieces> & {
+  musicBrainzPiece: InferSelectModel<typeof musicBrainzPieces> & {
+    composer: InferSelectModel<typeof musicBrainzComposers>;
+  };
+}): Promise<RepertoirePiece> {
+  return {
+    id,
+    title,
+    composerId,
+    scoreType,
+    arrangement: arrangement ?? undefined,
+    composer: composer.name,
+    composerSortedName: composer.sortedName,
+    scoreUrls: await getScoreUrls(userId, id, scoreType),
+  };
 }

@@ -17,6 +17,7 @@ const PitchSelector: FC = () => {
         <Button
           className="w-18 whitespace-nowrap"
           key={pitch}
+          color={pitch === selectedPitch ? "primary" : "default"}
           variant={pitch === selectedPitch ? "bordered" : "light"}
           onPress={() => setSelectedPitch(pitch)}
         >

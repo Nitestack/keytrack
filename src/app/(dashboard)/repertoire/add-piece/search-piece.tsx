@@ -8,7 +8,7 @@ import {
 
 import { useState } from "react";
 
-import { useDebouncedCallback } from "use-debounce";
+import { useDebounceCallback } from "usehooks-ts";
 
 import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
 import { api } from "~/trpc/react";
@@ -49,7 +49,7 @@ const SearchPiece: FC = () => {
       },
     });
 
-  const handleInputChange = useDebouncedCallback((newValue: string) => {
+  const handleInputChange = useDebounceCallback((newValue: string) => {
     if (!isSelectionChange) {
       if (variables?.work === newValue) {
         // if the last search query is the same as the current

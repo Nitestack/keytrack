@@ -49,7 +49,9 @@ export function useScoreUpload() {
 
       setProgress({ loaded: file.size, total: file.size, percentage: 100 });
     } catch (err) {
-      const message = axios.isAxiosError(err)
+      const message = axios.isAxiosError<{
+        error: string;
+      }>(err)
         ? (err.response?.data?.error ?? err.message)
         : "Upload failed";
       setError(message);
@@ -92,7 +94,9 @@ export function useScoreUpload() {
 
         setProgress({ loaded: totalSize, total: totalSize, percentage: 100 });
       } catch (err) {
-        const message = axios.isAxiosError(err)
+        const message = axios.isAxiosError<{
+          error: string;
+        }>(err)
           ? (err.response?.data?.error ?? err.message)
           : "Upload failed";
         setError(message);

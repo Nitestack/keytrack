@@ -89,8 +89,7 @@ const AddPiece: FC = () => {
     (state) => state.showImslpTab,
   );
 
-  const { progress, isUploading, error, uploadImages, uploadPdf } =
-    useScoreUpload();
+  const { progress, isUploading, uploadImages, uploadPdf } = useScoreUpload();
 
   const isFirstStep = step === 0;
   const isLastStep = addRepertoirePieceSteps.length - 1 === step;

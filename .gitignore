@@ -44,7 +44,3 @@ yarn-error.log*
 
 # idea files
 .idea
-
-# docker
-/db
-/uploads

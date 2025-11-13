@@ -18,14 +18,7 @@ export default async function RepertoirePage() {
           gridView={
             <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-2">
               {pieces.map((piece) => (
-                <RepertoireGridItem
-                  key={piece.musicBrainzId}
-                  musicBrainzId={piece.musicBrainzId}
-                  title={piece.musicBrainzPiece.title}
-                  arrangement={piece.musicBrainzPiece.arrangement}
-                  composer={piece.musicBrainzPiece.composer.name}
-                  pdfUrl={piece.pdfUrl}
-                />
+                <RepertoireGridItem key={piece.id} {...piece} />
               ))}
             </div>
           }

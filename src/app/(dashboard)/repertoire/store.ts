@@ -35,14 +35,17 @@ export const useRepertoireStore = create<RepertoireStoreProps>()(
     toggleSelectMode: () =>
       set((state) => ({
         isSelectMode: !state.isSelectMode,
+        selectedPieceIds: [],
       })),
     selectedPieceIds: [],
-    toggleSelectPiece: (pieceId) =>
-      set((state) => ({
-        selectedPieceIds: state.selectedPieceIds.includes(pieceId)
-          ? state.selectedPieceIds.filter((p) => p !== pieceId)
-          : [...state.selectedPieceIds, pieceId],
-      })),
+    toggleSelectPiece: (pieceId) => {
+      if (get().isSelectMode)
+        set((state) => ({
+          selectedPieceIds: state.selectedPieceIds.includes(pieceId)
+            ? state.selectedPieceIds.filter((p) => p !== pieceId)
+            : [...state.selectedPieceIds, pieceId],
+        }));
+    },
     isPieceSelected: (pieceId: string) =>
       get().selectedPieceIds.includes(pieceId),
   }),

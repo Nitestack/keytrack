@@ -19,6 +19,7 @@ import {
   getWorkById,
   toMBWork,
 } from "~/services/music-brainz";
+import { mapDbPieceToRepertoirePiece } from "~/services/repertoire";
 import { validateImageUrl, validatePdfUrl } from "~/services/url-validator";
 
 import type { EntityType } from "musicbrainz-api";
@@ -51,8 +52,10 @@ export const repertoireRouter = createTRPCRouter({
             .where(eq(repertoirePieces.userId, session.user.id)),
         ],
       );
-      if (searchResult.status === "rejected")
+      if (searchResult.status === "rejected") {
+        console.error(searchResult.reason);
         throw new TRPCError({ code: "NOT_FOUND" });
+      }
       if (dbRepertoirePiecesResult.status === "rejected")
         throw new TRPCError({
           message: "Couldn't fetch pieces from user",
@@ -219,8 +222,8 @@ export const repertoireRouter = createTRPCRouter({
         musicBrainzId: z.string().nonempty(),
       }),
     )
-    .query(({ input, ctx: { db, session } }) => {
-      return db.query.repertoirePieces.findFirst({
+    .query(async ({ input, ctx: { db, session } }) => {
+      const piece = await db.query.repertoirePieces.findFirst({
         where: and(
           eq(repertoirePieces.userId, session.user.id),
           eq(repertoirePieces.musicBrainzId, input.musicBrainzId),
@@ -233,6 +236,10 @@ export const repertoireRouter = createTRPCRouter({
           },
         },
       });
+
+      if (!piece) throw new TRPCError({ code: "NOT_FOUND" });
+
+      return mapDbPieceToRepertoirePiece(piece);
     }),
   removePiece: protectedProcedure
     .input(
@@ -262,29 +269,20 @@ export const repertoireRouter = createTRPCRouter({
       },
     });
 
-    const piecePromises = pieces.map(async (piece) => {
-      // if (
-      //   piece.pdfUrl.startsWith("https://imslp.org/wiki/Special:ImagefromIndex")
-      // ) {
-      //   const directPdfUrl = await getPdfUrlByIndex(piece.pdfUrl);
-      //   return {
-      //     ...piece,
-      //     pdfUrl: directPdfUrl,
-      //   };
-      // }
-      return piece;
-    });
+    const results = await Promise.allSettled(
+      pieces.map(mapDbPieceToRepertoirePiece),
+    );
 
-    const results = await Promise.allSettled(piecePromises);
-
-    return results.map((result, index) => {
-      if (result.status === "fulfilled") return result.value;
-      console.error(
-        `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
-        result.reason,
-      );
-      return pieces[index]!;
-    });
+    return results
+      .map((result, index) => {
+        if (result.status === "fulfilled") return result.value;
+        console.error(
+          `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
+          result.reason,
+        );
+        return undefined;
+      })
+      .filter(Boolean);
   }),
   getImslpScores: protectedProcedure
     .input(

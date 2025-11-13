@@ -12,16 +12,16 @@ const RepertoireList: FC<{
     <Listbox variant="faded">
       {pieces.map((piece) => (
         <ListboxItem
-          key={piece.musicBrainzId}
-          description={piece.musicBrainzPiece.composer.name}
-          href={`/repertoire/${piece.musicBrainzId}`}
+          key={piece.id}
+          description={piece.composer}
+          href={`/repertoire/${piece.id}`}
         >
           <p>
-            {piece.musicBrainzPiece.title}
-            {piece.musicBrainzPiece.arrangement && (
+            {piece.title}
+            {piece.arrangement && (
               <span className="text-default-500 text-sm">
                 {" "}
-                ({piece.musicBrainzPiece.arrangement})
+                ({piece.arrangement})
               </span>
             )}
           </p>

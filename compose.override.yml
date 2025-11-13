@@ -1,4 +1,7 @@
 services:
+  db:
+    volumes:
+      - ../keytrack-data/db:/var/lib/postgresql/data
   app:
     build:
       dockerfile: Dockerfile.dev
@@ -6,4 +9,5 @@ services:
       NODE_ENV: "development"
     volumes:
       - .:/app
+      - ../keytrack-data/uploads:/app/uploads
     command: pnpm dev

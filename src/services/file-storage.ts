@@ -128,11 +128,16 @@ export async function getScoreUrls(
   if (scoreType === "pdf") {
     return [`/api/files/${userId}/${musicBrainzId}.pdf`];
   } else {
-    const imagePaths = await getImagePaths(userId, musicBrainzId);
-    return imagePaths.map((p) => {
-      const relativePath = p.replace(SCORES_DIR, "");
-      return `/api/files${relativePath.replace(/\\/g, "/")}`;
-    });
+    try {
+      const imagePaths = await getImagePaths(userId, musicBrainzId);
+      return imagePaths.map((p) => {
+        const relativePath = p.replace(SCORES_DIR, "");
+        return `/api/files${relativePath.replace(/\\/g, "/")}`;
+      });
+    } catch (err) {
+      console.error("Error getting image paths:", err);
+      return [];
+    }
   }
 }
 

@@ -5,13 +5,10 @@ import { Button } from "@heroui/button";
 import { X } from "lucide-react";
 
 import dynamic from "next/dynamic";
-import { useRef } from "react";
+import { useState } from "react";
 
-import useEmblaCarousel from "embla-carousel-react";
-import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { browserName, isIOS, isMacOs, isSafari } from "react-device-detect";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
-import { useMediaQuery } from "usehooks-ts";
 
 import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/toolbar";
 
@@ -20,29 +17,11 @@ import type { DocumentProps } from "react-pdf";
 
 const PdfDocument = dynamic(() => import("./document"), { ssr: false });
 
-const PdfViewer: FC<Required<Pick<DocumentProps, "file">>> = ({ file }) => {
+const PdfViewer: FC<Pick<DocumentProps, "file">> = ({ file }) => {
   const handle = useFullScreenHandle();
 
-  const breakpoint = "(max-width:1199.95px)";
-  const isMobile = useMediaQuery(breakpoint);
-
-  const fullScreenRef = useRef<HTMLDivElement>(null);
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      align: "center",
-      slidesToScroll: 2,
-      breakpoints: {
-        [breakpoint]: {
-          slidesToScroll: 1,
-        },
-      },
-    },
-    [
-      WheelGesturesPlugin({
-        forceWheelAxis: "y",
-      }),
-    ],
+  const [fullScreenNode, setFullScreenNode] = useState<HTMLDivElement | null>(
+    null,
   );
 
   const hasNativeCloseButton =
@@ -57,7 +36,7 @@ const PdfViewer: FC<Required<Pick<DocumentProps, "file">>> = ({ file }) => {
       </Button>
       <FullScreen handle={handle}>
         {handle.active && (
-          <div className="bg-white relative h-full" ref={fullScreenRef}>
+          <div className="bg-white relative h-full" ref={setFullScreenNode}>
             {!hasNativeCloseButton && (
               <Button
                 isIconOnly
@@ -68,16 +47,8 @@ const PdfViewer: FC<Required<Pick<DocumentProps, "file">>> = ({ file }) => {
                 <X />
               </Button>
             )}
-            <PdfDocument
-              file={file}
-              emblaApi={emblaApi}
-              emblaRef={emblaRef}
-              isMobile={isMobile}
-            />
-            <PdfToolbar
-              isMobile={isMobile}
-              fullScreenEl={fullScreenRef.current ?? undefined}
-            />
+            <PdfDocument file={file} />
+            <PdfToolbar fullScreenEl={fullScreenNode ?? undefined} />
           </div>
         )}
       </FullScreen>

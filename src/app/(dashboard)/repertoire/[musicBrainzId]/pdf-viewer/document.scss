@@ -1,6 +1,6 @@
-.react-pdf__Document:has(.react-pdf__message):not(:has(.embla__slide)),
-.embla__slide:has(.react-pdf__Page > .react-pdf__message):not(
-    :has(.react-pdf__Page > canvas)
-  ) {
-  justify-content: center;
+.page-frame canvas {
+  display: block;
+  width: auto !important;
+  max-width: 100%;
+  max-height: 100%;
 }
