@@ -46,5 +46,5 @@ yarn-error.log*
 .idea
 
 # docker
-db/
-uploads/
+/db
+/uploads
