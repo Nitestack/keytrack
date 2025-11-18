@@ -12,7 +12,7 @@ import {
   Synth,
 } from "tone";
 
-import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
+import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/store";
 
 const ACCENT_SYNTH_CONFIG: ConstructorParameters<typeof Synth>["0"] = {
   oscillator: { type: "sine" },

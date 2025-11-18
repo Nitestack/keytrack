@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 
 import { Minus, Plus } from "lucide-react";
 
-import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
+import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/store";
 
 import type { FC } from "react";
 

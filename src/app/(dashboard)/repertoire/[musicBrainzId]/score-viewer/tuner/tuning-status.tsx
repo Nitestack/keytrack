@@ -6,7 +6,7 @@ import { CircleArrowDown, CircleArrowUp, CircleCheck } from "lucide-react";
 
 import { useShallow } from "zustand/react/shallow";
 
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
 
 import type { FC } from "react";
 

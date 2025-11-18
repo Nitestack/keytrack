@@ -10,14 +10,17 @@ import { useState } from "react";
 import { browserName, isIOS, isMacOs, isSafari } from "react-device-detect";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
-import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/toolbar";
+import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/toolbar";
 
 import type { FC } from "react";
-import type { DocumentProps } from "react-pdf";
+import type { ScoreType } from "~/services/file-storage";
 
 const PdfDocument = dynamic(() => import("./document"), { ssr: false });
 
-const PdfViewer: FC<Pick<DocumentProps, "file">> = ({ file }) => {
+const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
+  scoreUrls,
+  scoreType,
+}) => {
   const handle = useFullScreenHandle();
 
   const [fullScreenNode, setFullScreenNode] = useState<HTMLDivElement | null>(
@@ -47,7 +50,7 @@ const PdfViewer: FC<Pick<DocumentProps, "file">> = ({ file }) => {
                 <X />
               </Button>
             )}
-            <PdfDocument file={file} />
+            {scoreType === "pdf" ? <PdfDocument file={scoreUrls[0]} /> : <></>}
             <PdfToolbar fullScreenEl={fullScreenNode ?? undefined} />
           </div>
         )}
@@ -56,4 +59,4 @@ const PdfViewer: FC<Pick<DocumentProps, "file">> = ({ file }) => {
   );
 };
 
-export default PdfViewer;
+export default ScoreViewer;

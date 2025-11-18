@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 
 import { Minus, Plus } from "lucide-react";
 
-import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/store";
 
 import type { FC } from "react";
 

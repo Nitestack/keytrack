@@ -9,7 +9,7 @@ import {
   maxBpm,
   minBpm,
   useMetronomeStore,
-} from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
+} from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/store";
 
 import type { FC } from "react";
 

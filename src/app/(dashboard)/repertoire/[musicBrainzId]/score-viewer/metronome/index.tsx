@@ -5,12 +5,12 @@ import { Card, CardBody, CardFooter } from "@heroui/card";
 
 import { Play, Square } from "lucide-react";
 
-import MetronomeBeats from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/beats";
-import MetronomeBpm from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/bpm";
-import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
-import MetronomeTimeSignature from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/time-signature";
-import { useMetronome } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/use-metronome";
-import MetronomeVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/volume";
+import MetronomeBeats from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/beats";
+import MetronomeBpm from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/bpm";
+import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/store";
+import MetronomeTimeSignature from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/time-signature";
+import { useMetronome } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/use-metronome";
+import MetronomeVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome/volume";
 
 import type { FC } from "react";
 

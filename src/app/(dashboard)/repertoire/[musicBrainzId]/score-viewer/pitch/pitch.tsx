@@ -2,7 +2,7 @@
 
 import { Button } from "@heroui/button";
 
-import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/store";
 import { chromaticNotes } from "~/services/music-theory";
 
 import type { FC } from "react";

@@ -24,9 +24,9 @@ import { useState } from "react";
 
 import { useMediaQuery } from "usehooks-ts";
 
-import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome";
-import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch";
-import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner";
+import Metronome from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/metronome";
+import Pitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch";
+import Tuner from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";

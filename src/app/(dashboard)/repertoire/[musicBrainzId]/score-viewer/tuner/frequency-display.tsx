@@ -2,7 +2,7 @@
 
 import { cn } from "@heroui/react";
 
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
 
 import type { FC } from "react";
 

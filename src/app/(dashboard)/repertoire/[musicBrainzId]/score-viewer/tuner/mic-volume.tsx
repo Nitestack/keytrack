@@ -4,7 +4,7 @@ import { Progress } from "@heroui/progress";
 
 import { Mic, MicOff } from "lucide-react";
 
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
 
 import type { FC } from "react";
 

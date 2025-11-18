@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 
 import { Context, Oscillator, setContext, start } from "tone";
 
-import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/store";
 
 /**
  * An efficient pitch creator hook using a single, persistent Tone.js oscillator

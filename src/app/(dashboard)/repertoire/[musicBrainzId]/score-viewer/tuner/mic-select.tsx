@@ -4,7 +4,7 @@ import { Select, SelectItem } from "@heroui/select";
 
 import { Mic } from "lucide-react";
 
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
 
 import type { SharedSelection } from "@heroui/react";
 import type { FC } from "react";

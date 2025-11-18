@@ -6,16 +6,16 @@ import { Card, CardBody, CardFooter } from "@heroui/card";
 
 import { Play, Square } from "lucide-react";
 
-import TunerFrequencyDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-display";
-import TunerFrequencySetter from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/frequency-setter";
-import TunerMicSelect from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/mic-select";
-import TunerMicVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/mic-volume";
-import TunerNeedle from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/needle";
-import TunerNoteDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/note-display";
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
-import TunerTranspose from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/transpose";
-import TunerStatus from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/tuning-status";
-import { useTuner } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/use-tuner";
+import TunerFrequencyDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/frequency-display";
+import TunerFrequencySetter from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/frequency-setter";
+import TunerMicSelect from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/mic-select";
+import TunerMicVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/mic-volume";
+import TunerNeedle from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/needle";
+import TunerNoteDisplay from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/note-display";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
+import TunerTranspose from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/transpose";
+import TunerStatus from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/tuning-status";
+import { useTuner } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/use-tuner";
 
 import type { FC } from "react";
 

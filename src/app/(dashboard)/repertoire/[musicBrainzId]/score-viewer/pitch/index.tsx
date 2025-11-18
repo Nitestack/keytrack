@@ -5,12 +5,12 @@ import { Card, CardBody, CardFooter } from "@heroui/card";
 
 import { Play, Square } from "lucide-react";
 
-import PitchFrequency from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/frequency";
-import PitchOctave from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/octave";
-import PitchSelector from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/pitch";
-import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/store";
-import usePitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/use-pitch";
-import PitchVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/pitch/volume";
+import PitchFrequency from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/frequency";
+import PitchOctave from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/octave";
+import PitchSelector from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/pitch";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/store";
+import usePitch from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/use-pitch";
+import PitchVolume from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/volume";
 
 import type { FC } from "react";
 

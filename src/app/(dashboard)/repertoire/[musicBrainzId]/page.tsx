@@ -2,7 +2,7 @@ import { Card, CardFooter, CardHeader } from "@heroui/card";
 
 import { redirect, unauthorized } from "next/navigation";
 
-import PdfViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer";
+import ScoreViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer";
 import DashboardLayout from "~/components/dashboard-layout";
 import { auth } from "~/server/auth";
 import { api } from "~/trpc/server";
@@ -35,7 +35,10 @@ export default async function RepertoirePiecePage({
           </div>
         </CardHeader>
         <CardFooter>
-          {piece.scoreType === "pdf" && <PdfViewer file={piece.scoreUrls[0]} />}
+          <ScoreViewer
+            scoreUrls={piece.scoreUrls}
+            scoreType={piece.scoreType}
+          />
         </CardFooter>
       </Card>
     </DashboardLayout>

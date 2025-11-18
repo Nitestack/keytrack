@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PitchDetector } from "pitchy";
 import { Analyser, getContext, Meter, start, UserMedia } from "tone";
 
-import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/tuner/store";
+import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
 import {
   frequencyToNote,
   getSemitonesByTransposeKey,

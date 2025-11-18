@@ -4,13 +4,13 @@ import { Slider } from "@heroui/slider";
 
 import { Volume2, VolumeOff } from "lucide-react";
 
-import { useMetronomeStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/pdf-viewer/metronome/store";
+import { usePitchStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/pitch/store";
 
 import type { FC } from "react";
 
-const MetronomeVolume: FC = () => {
-  const volume = useMetronomeStore((state) => state.volume);
-  const setVolume = useMetronomeStore((state) => state.setVolume);
+const PitchVolume: FC = () => {
+  const volume = usePitchStore((state) => state.volume);
+  const setVolume = usePitchStore((state) => state.setVolume);
 
   return (
     <Slider
@@ -32,4 +32,4 @@ const MetronomeVolume: FC = () => {
   );
 };
 
-export default MetronomeVolume;
+export default PitchVolume;
