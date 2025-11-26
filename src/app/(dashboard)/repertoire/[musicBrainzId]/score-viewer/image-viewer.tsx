@@ -24,12 +24,8 @@ const ImageViewer: FC<{
       className="size-full relative overflow-hidden flex items-center justify-center"
       ref={containerRef}
     >
-      <EmblaCarouselStructure
-        emblaRef={emblaRef}
-        slides={slides}
-        currentSlideIndex={currentSlideIndex}
-      >
-        {(imageIndices, isCloseToView) =>
+      <EmblaCarouselStructure emblaRef={emblaRef} slides={slides}>
+        {(imageIndices) =>
           imageIndices.map((index) => (
             <div
               key={index}
@@ -39,20 +35,18 @@ const ImageViewer: FC<{
                 maxWidth: itemDimensions.width,
               }}
             >
-              {isCloseToView && (
-                <Image
-                  src={imageUrls[index]}
-                  alt={`Page ${index + 1}`}
-                  classNames={{
-                    wrapper: "size-full",
-                    img: "size-full object-contain rounded-none",
-                  }}
-                  style={{
-                    maxHeight: itemDimensions.height,
-                    maxWidth: itemDimensions.width,
-                  }}
-                />
-              )}
+              <Image
+                src={imageUrls[index]}
+                alt={`Page ${index + 1}`}
+                classNames={{
+                  wrapper: "size-full",
+                  img: "size-full object-contain rounded-none",
+                }}
+                style={{
+                  maxHeight: itemDimensions.height,
+                  maxWidth: itemDimensions.width,
+                }}
+              />
             </div>
           ))
         }

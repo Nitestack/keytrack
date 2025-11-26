@@ -59,12 +59,8 @@ export default function PdfViewerDocument({
           </div>
         }
       >
-        <EmblaCarouselStructure
-          emblaRef={emblaRef}
-          slides={slides}
-          currentSlideIndex={currentSlideIndex}
-        >
-          {(pageIds, isCloseToView) =>
+        <EmblaCarouselStructure emblaRef={emblaRef} slides={slides}>
+          {(pageIds) =>
             pageIds.map((pageIndex) => (
               <div
                 key={pageIndex + 1}
@@ -74,29 +70,27 @@ export default function PdfViewerDocument({
                   aspectRatio: assumedPageRatio,
                 }}
               >
-                {isCloseToView && (
-                  <Page
-                    pageNumber={pageIndex + 1}
-                    {...itemDimensions}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    loading={<CircularProgress size="lg" />}
-                    error={
-                      <Alert
-                        className="light"
-                        color="danger"
-                        title={`Could not load page ${pageIndex + 1}`}
-                      />
-                    }
-                    noData={
-                      <Alert
-                        className="light"
-                        color="warning"
-                        title={`No data for page ${pageIndex + 1}`}
-                      />
-                    }
-                  />
-                )}
+                <Page
+                  pageNumber={pageIndex + 1}
+                  {...itemDimensions}
+                  renderTextLayer={false}
+                  renderAnnotationLayer={false}
+                  loading={<CircularProgress size="lg" />}
+                  error={
+                    <Alert
+                      className="light"
+                      color="danger"
+                      title={`Could not load page ${pageIndex + 1}`}
+                    />
+                  }
+                  noData={
+                    <Alert
+                      className="light"
+                      color="warning"
+                      title={`No data for page ${pageIndex + 1}`}
+                    />
+                  }
+                />
               </div>
             ))
           }
