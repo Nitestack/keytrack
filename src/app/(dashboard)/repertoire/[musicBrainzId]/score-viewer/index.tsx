@@ -10,12 +10,13 @@ import { useState } from "react";
 import { browserName, isIOS, isMacOs, isSafari } from "react-device-detect";
 import { FullScreen, useFullScreenHandle } from "react-full-screen";
 
+import ImageViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/image-viewer";
 import PdfToolbar from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/toolbar";
 
 import type { FC } from "react";
 import type { ScoreType } from "~/services/file-storage";
 
-const PdfDocument = dynamic(() => import("./document"), { ssr: false });
+const PdfDocument = dynamic(() => import("./pdf-document"), { ssr: false });
 
 const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
   scoreUrls,
@@ -39,7 +40,10 @@ const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
       </Button>
       <FullScreen handle={handle}>
         {handle.active && (
-          <div className="bg-white relative h-full" ref={setFullScreenNode}>
+          <div
+            className="bg-background relative h-full"
+            ref={setFullScreenNode}
+          >
             {!hasNativeCloseButton && (
               <Button
                 isIconOnly
@@ -50,7 +54,11 @@ const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
                 <X />
               </Button>
             )}
-            {scoreType === "pdf" ? <PdfDocument file={scoreUrls[0]} /> : <></>}
+            {scoreType === "pdf" ? (
+              <PdfDocument file={scoreUrls[0]} />
+            ) : (
+              <ImageViewer imageUrls={scoreUrls} />
+            )}
             <PdfToolbar fullScreenEl={fullScreenNode ?? undefined} />
           </div>
         )}

@@ -4,7 +4,7 @@ WORKDIR /app
 RUN corepack enable pnpm && \
   mkdir -p /app/uploads/scores
 
-COPY package.json pnpm-lock.yaml* .npmrc* ./
+COPY package.json pnpm-lock.yaml* .npmrc* pnpm-workspace.yaml ./
 RUN pnpm install
 
 EXPOSE 3000

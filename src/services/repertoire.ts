@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getScoreUrls } from "~/services/file-storage";
 
 import type { InferSelectModel } from "drizzle-orm";

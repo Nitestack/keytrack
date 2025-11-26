@@ -1,3 +1,5 @@
+import "server-only";
+
 import { mbApi } from "~/server/musicbrainz";
 
 import type { IWork, IWorkMatch } from "musicbrainz-api";
