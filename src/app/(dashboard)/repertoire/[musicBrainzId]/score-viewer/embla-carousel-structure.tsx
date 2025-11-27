@@ -13,7 +13,7 @@ const Slide = memo(function Slide({
 }) {
   return (
     <div className="embla__slide flex-[0_0_100%] min-w-0 flex items-center justify-center h-full">
-      <div className="flex items-center justify-center gap-0.5 w-full">
+      <div className="flex items-center justify-center gap-0.5 size-full">
         {children(itemIndices)}
       </div>
     </div>
