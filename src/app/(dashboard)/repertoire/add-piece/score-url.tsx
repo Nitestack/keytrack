@@ -35,7 +35,7 @@ const ScoreURL: FC = () => {
   function handleAddUrl() {
     setError(undefined);
 
-    const { success, data } = z.string().url().safeParse(currentUrl.trim());
+    const { success, data } = z.url().safeParse(currentUrl.trim());
     if (!success) return;
 
     if (scoreUrls.includes(data)) return;

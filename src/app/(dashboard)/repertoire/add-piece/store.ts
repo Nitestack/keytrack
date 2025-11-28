@@ -8,11 +8,12 @@ import {
 } from "~/services/file-types";
 
 import type { Dispatch, SetStateAction } from "react";
+import type { ScoreType } from "~/services/file-storage";
 import type { ImslpScore } from "~/services/imslp";
 import type { MBWork } from "~/services/music-brainz";
 
-export type ScoreType = "upload" | "input";
-export type ScoreSelectionMode = "imslp" | ScoreType;
+export type ScoreAddType = "upload" | "input";
+export type ScoreSelectionMode = "imslp" | ScoreAddType;
 
 export const addRepertoirePieceSteps = [
   "Search piece",
@@ -33,7 +34,7 @@ function isImage(item: string | File) {
 }
 
 export function validateItems(
-  type: ScoreType,
+  type: ScoreAddType,
   items: string[] | FileList,
   setError: Dispatch<SetStateAction<string | undefined>>,
 ) {

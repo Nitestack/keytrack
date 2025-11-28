@@ -13,11 +13,11 @@ export const env = createEnv({
         : z.string().optional(),
     AUTH_GOOGLE_ID: z.string(),
     AUTH_GOOGLE_SECRET: z.string(),
-    DB_URL: z.string().url(),
+    DB_URL: z.url(),
     DB_PASSWORD: z.string(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
-      .default("development"),
+      .prefault("development"),
   },
 
   /**

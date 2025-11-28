@@ -94,9 +94,9 @@ export const repertoireRouter = createTRPCRouter({
     .input(
       z.object({
         musicBrainzId: z.string().nonempty(),
-        pdfUrl: z.string().url().optional(),
-        imslpIndexUrl: z.string().url().optional(),
-        imageUrls: z.array(z.string().url()).optional(),
+        pdfUrl: z.url().optional(),
+        imslpIndexUrl: z.url().optional(),
+        imageUrls: z.array(z.url()).optional(),
         scoreType: z.enum(["pdf", "images"]),
       }),
     )
