@@ -33,7 +33,7 @@ import { useScoreUpload } from "~/utils/hooks/use-upload";
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
 import type { ScoreSelectionMode } from "~/app/(dashboard)/repertoire/add-piece/store";
-import type { RouterInputs } from "~/trpc/react";
+import type { RouterInputs } from "~/server/api/routers";
 
 const AddPiece: FC = () => {
   const step = useAddRepertoirePieceStore((state) => state.step);
