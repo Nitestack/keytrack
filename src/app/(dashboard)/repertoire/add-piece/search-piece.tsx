@@ -70,7 +70,7 @@ const SearchPiece: FC = () => {
   function handleSelectionChange(key: string | null) {
     if (data && key) {
       resetScoreSelection();
-      setSelectedPiece(data.find((piece) => piece.id === key));
+      setSelectedPiece(data.find((piece) => piece.id === key)!);
     }
     setIsSelectionChange(true);
   }
