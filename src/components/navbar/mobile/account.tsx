@@ -30,23 +30,22 @@ const NavbarMobileAccount: FC = () => {
         </NavbarMenuItem>
       )}
       <NavbarMenuItem className="mb-4">
-        {!isPending && (
-          <Button
-            fullWidth
-            className={session ? "bg-red-500" : "bg-foreground text-background"}
-            onPress={() => {
-              if (session)
-                void auth.signOut({
-                  fetchOptions: {
-                    onSuccess: () => router.push("/"),
-                  },
-                });
-              else void signIn();
-            }}
-          >
-            {session ? "Log Out" : "Get Started"}
-          </Button>
-        )}
+        <Button
+          fullWidth
+          className={session ? "bg-red-500" : "bg-foreground text-background"}
+          onPress={() => {
+            if (session)
+              void auth.signOut({
+                fetchOptions: {
+                  onSuccess: () => router.push("/"),
+                },
+              });
+            else void signIn();
+          }}
+          isLoading={isPending}
+        >
+          {isPending ? null : session ? "Log Out" : "Get Started"}
+        </Button>
       </NavbarMenuItem>
     </>
   );

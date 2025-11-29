@@ -8,6 +8,7 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { NavbarContent, NavbarItem } from "@heroui/navbar";
+import { CircularProgress } from "@heroui/progress";
 import { User } from "@heroui/user";
 
 import { ChevronRight } from "lucide-react";
@@ -74,7 +75,9 @@ const NavbarAccount: FC = () => {
           >
             Get Started
           </Button>
-        ) : null}
+        ) : (
+          <CircularProgress size="sm" />
+        )}
       </NavbarItem>
     </NavbarContent>
   );
