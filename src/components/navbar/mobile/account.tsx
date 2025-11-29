@@ -4,12 +4,12 @@ import { Button } from "@heroui/button";
 import { NavbarMenuItem } from "@heroui/navbar";
 import { User } from "@heroui/user";
 
-import { auth } from "~/lib/auth/client";
+import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarMobileAccount: FC = () => {
-  const { data: session } = auth.useSession();
+  const { data: session, isPending } = auth.useSession();
   return (
     <>
       {session && (
@@ -27,20 +27,18 @@ const NavbarMobileAccount: FC = () => {
         </NavbarMenuItem>
       )}
       <NavbarMenuItem className="mb-4">
-        <Button
-          fullWidth
-          className={session ? "bg-red-500" : "bg-foreground text-background"}
-          onPress={() => {
-            if (session) void auth.signOut();
-            else
-              void auth.signIn.social({
-                provider: "google",
-                callbackURL: "/repertoire",
-              });
-          }}
-        >
-          {session ? "Log Out" : "Get Started"}
-        </Button>
+        {!isPending && (
+          <Button
+            fullWidth
+            className={session ? "bg-red-500" : "bg-foreground text-background"}
+            onPress={() => {
+              if (session) void auth.signOut();
+              else void signIn();
+            }}
+          >
+            {session ? "Log Out" : "Get Started"}
+          </Button>
+        )}
       </NavbarMenuItem>
     </>
   );
