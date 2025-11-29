@@ -1,8 +1,5 @@
-.react-pdf__Document:has(.react-pdf__message) {
-  justify-content: center;
-}
-
 .react-pdf__Page__canvas {
   max-width: 100%;
+  width: unset !important;
   height: auto !important;
 }
