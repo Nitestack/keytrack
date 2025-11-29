@@ -12,12 +12,12 @@ import { User } from "@heroui/user";
 
 import { ChevronRight } from "lucide-react";
 
-import { auth } from "~/lib/auth/client";
+import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarAccount: FC = () => {
-  const { data: session } = auth.useSession();
+  const { data: session, isPending } = auth.useSession();
   return (
     <NavbarContent className="hidden md:flex" justify="end">
       <NavbarItem className="ml-2">
@@ -54,23 +54,18 @@ const NavbarAccount: FC = () => {
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-        ) : (
+        ) : !isPending ? (
           <Button
             className="bg-default-foreground text-background font-medium"
             color="secondary"
-            onPress={() =>
-              auth.signIn.social({
-                provider: "google",
-                callbackURL: "/repertoire",
-              })
-            }
+            onPress={signIn}
             endContent={<ChevronRight />}
             radius="full"
             variant="flat"
           >
             Get Started
           </Button>
-        )}
+        ) : null}
       </NavbarItem>
     </NavbarContent>
   );
