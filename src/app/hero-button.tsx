@@ -4,7 +4,7 @@ import { Button } from "@heroui/button";
 
 import NextLink from "next/link";
 
-import { auth } from "~/lib/auth/client";
+import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
@@ -23,15 +23,10 @@ const HeroButton: FC = () => {
     <Button
       className="bg-default-foreground text-small text-background h-10 w-[163px] px-[16px] py-[10px] leading-5 font-medium"
       radius="full"
-      onPress={() =>
-        auth.signIn.social({
-          provider: "google",
-          callbackURL: "/repertoire",
-        })
-      }
+      onPress={signIn}
       isLoading={isPending}
     >
-      Get Started
+      {!isPending && "Get Started"}
     </Button>
   );
 };
