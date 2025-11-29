@@ -24,7 +24,7 @@ const geist = Geist({
   variable: "--font-geist-sans",
 });
 
-export default async function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
