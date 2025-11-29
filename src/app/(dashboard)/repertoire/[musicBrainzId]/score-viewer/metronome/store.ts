@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 
-import type { NonFunction } from "~/utils/types";
+import type { NonFunction } from "~/lib/types";
 
 export const minBpm = 30;
 export const maxBpm = 280;

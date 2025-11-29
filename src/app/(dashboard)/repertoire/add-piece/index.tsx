@@ -29,8 +29,8 @@ import {
 } from "~/app/(dashboard)/repertoire/add-piece/store";
 import AddPieceSummary from "~/app/(dashboard)/repertoire/add-piece/summary";
 import RowSteps from "~/components/row-steps";
+import { useScoreUpload } from "~/lib/hooks/use-upload";
 import { orpc } from "~/server/api/react";
-import { useScoreUpload } from "~/utils/hooks/use-upload";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";

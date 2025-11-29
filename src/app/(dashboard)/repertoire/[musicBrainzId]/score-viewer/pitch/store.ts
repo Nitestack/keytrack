@@ -9,8 +9,8 @@ import {
   noteToFrequency,
 } from "~/services/music-theory";
 
+import type { NonFunction } from "~/lib/types";
 import type { ChromaticNote } from "~/services/music-theory";
-import type { NonFunction } from "~/utils/types";
 
 export const minOctave = 2;
 export const maxOctave = 6;
