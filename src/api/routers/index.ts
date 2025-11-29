@@ -1,4 +1,4 @@
-import { repertoireRouter } from "~/server/api/routers/repertoire";
+import { repertoireRouter } from "~/api/routers/repertoire";
 
 import type { InferRouterInputs, InferRouterOutputs } from "@orpc/server";
 

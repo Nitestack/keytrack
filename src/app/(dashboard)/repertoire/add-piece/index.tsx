@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import { useMutation } from "@tanstack/react-query";
 
+import { orpc } from "~/api/react";
 import FileUpload from "~/app/(dashboard)/repertoire/add-piece/file-upload";
 import IMSLPDiscover from "~/app/(dashboard)/repertoire/add-piece/imslp-discover";
 import ScoreURL from "~/app/(dashboard)/repertoire/add-piece/score-url";
@@ -30,12 +31,11 @@ import {
 import AddPieceSummary from "~/app/(dashboard)/repertoire/add-piece/summary";
 import RowSteps from "~/components/row-steps";
 import { useScoreUpload } from "~/lib/hooks/use-upload";
-import { orpc } from "~/server/api/react";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
+import type { RouterInputs } from "~/api/routers";
 import type { ScoreSelectionMode } from "~/app/(dashboard)/repertoire/add-piece/store";
-import type { RouterInputs } from "~/server/api/routers";
 
 const AddPiece: FC = () => {
   const step = useAddRepertoirePieceStore((state) => state.step);

@@ -2,7 +2,7 @@ import { ORPCError } from "@orpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { protectedProcedure } from "~/server/api";
+import { protectedProcedure } from "~/api";
 import {
   musicBrainzComposers,
   musicBrainzPieces,

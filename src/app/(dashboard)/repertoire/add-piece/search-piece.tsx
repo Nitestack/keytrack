@@ -11,8 +11,8 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useDebounceCallback } from "usehooks-ts";
 
+import { orpc } from "~/api/react";
 import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
-import { orpc } from "~/server/api/react";
 
 import type { FC } from "react";
 import type { MBWork } from "~/services/music-brainz";

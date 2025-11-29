@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 
 import { useMutation } from "@tanstack/react-query";
 
-import { orpc } from "~/server/api/react";
+import { orpc } from "~/api/react";
 
 import type { FC } from "react";
 

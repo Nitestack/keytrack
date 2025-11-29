@@ -3,7 +3,7 @@
 import { Listbox, ListboxItem } from "@heroui/listbox";
 
 import type { FC } from "react";
-import type { RouterOutputs } from "~/server/api/routers";
+import type { RouterOutputs } from "~/api/routers";
 
 const RepertoireList: FC<{
   pieces: RouterOutputs["repertoire"]["getPieces"];

@@ -1,8 +1,8 @@
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 
-import { createRPCContext } from "~/server/api";
-import { router } from "~/server/api/routers";
+import { createRPCContext } from "~/api";
+import { router } from "~/api/routers";
 
 import type { NextRequest } from "next/server";
 
