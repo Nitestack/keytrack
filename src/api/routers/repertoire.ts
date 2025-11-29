@@ -12,6 +12,8 @@ import { mbApi } from "~/server/musicbrainz";
 import {
   downloadAndStoreImages,
   downloadAndStorePdf,
+  storeImages,
+  storePdf,
 } from "~/services/file-storage";
 import { getPdfUrlByIndex, getScoresByWikiUrl } from "~/services/imslp";
 import {
@@ -96,6 +98,7 @@ export const repertoireRouter = {
         imslpIndexUrl: z.url().optional(),
         imageUrls: z.array(z.url()).optional(),
         scoreType: z.enum(["pdf", "images"]),
+        files: z.array(z.file()).optional(),
       }),
     )
     .handler(async ({ input, context: { db, session } }) => {
@@ -200,6 +203,20 @@ export const repertoireRouter = {
                 ? `Failed to download images: ${error.message}`
                 : "Failed to download images",
           });
+        }
+      } else if (input.files) {
+        if (input.scoreType === "pdf") {
+          const buffer = Buffer.from(await input.files[0]!.arrayBuffer());
+          await storePdf(buffer, session.user.id, input.musicBrainzId);
+        } else {
+          const imageBuffers = await Promise.all(
+            input.files.map(async (file) => ({
+              buffer: Buffer.from(await file.arrayBuffer()),
+              filename: file.name,
+            })),
+          );
+
+          await storeImages(imageBuffers, session.user.id, input.musicBrainzId);
         }
       }
       // Insert into database

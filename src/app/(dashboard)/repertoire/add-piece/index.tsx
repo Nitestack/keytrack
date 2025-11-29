@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/modal";
-import { Progress } from "@heroui/progress";
 import { Tab, Tabs } from "@heroui/tabs";
 import { addToast } from "@heroui/toast";
 import { useDisclosure } from "@heroui/use-disclosure";
@@ -30,7 +29,6 @@ import {
 } from "~/app/(dashboard)/repertoire/add-piece/store";
 import AddPieceSummary from "~/app/(dashboard)/repertoire/add-piece/summary";
 import RowSteps from "~/components/row-steps";
-import { useScoreUpload } from "~/lib/hooks/use-upload";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
@@ -91,8 +89,6 @@ const AddPiece: FC = () => {
     (state) => state.showImslpTab,
   );
 
-  const { progress, isUploading, uploadImages, uploadPdf } = useScoreUpload();
-
   const isFirstStep = step === 0;
   const isLastStep = addRepertoirePieceSteps.length - 1 === step;
 
@@ -121,15 +117,6 @@ const AddPiece: FC = () => {
   async function handleNext() {
     if (!canNext) return;
     if (isLastStep && selectedPiece && mode) {
-      if (scoreSelectionMode === "upload" && uploadedScoreFiles) {
-        const files = Array.from(uploadedScoreFiles);
-        if (files.length === 1) {
-          await uploadPdf(selectedPiece.id, files[0]!);
-        } else {
-          await uploadImages(selectedPiece.id, files);
-        }
-      }
-
       const params: RouterInputs["repertoire"]["addPiece"] = {
         musicBrainzId: selectedPiece.id,
         scoreType: mode,
@@ -140,8 +127,9 @@ const AddPiece: FC = () => {
       else if (scoreSelectionMode === "input") {
         if (mode === "pdf") params.pdfUrl = scoreUrls[0]!;
         else params.imageUrls = scoreUrls;
+      } else if (scoreSelectionMode === "upload" && uploadedScoreFiles) {
+        params.files = Array.from(uploadedScoreFiles);
       }
-
       addPiece(params);
     } else {
       increaseStep();
@@ -211,7 +199,6 @@ const AddPiece: FC = () => {
             ) : (
               <AddPieceSummary />
             )}
-            {isUploading && <Progress value={progress.percentage} />}
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={handleBack}>
