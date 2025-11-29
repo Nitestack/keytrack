@@ -1,18 +1,21 @@
 import { Card, CardFooter, CardHeader } from "@heroui/card";
 
+import { headers } from "next/headers";
 import { redirect, unauthorized } from "next/navigation";
 
 import { client } from "~/api/orpc";
 import ScoreViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer";
 import DashboardLayout from "~/components/dashboard-layout";
-import { auth } from "~/server/auth";
+import { auth } from "~/lib/auth/server";
 
 export default async function RepertoirePiecePage({
   params,
 }: PageProps<"/repertoire/[musicBrainzId]">) {
   const { musicBrainzId } = await params;
 
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
 
   if (!session) unauthorized();
 

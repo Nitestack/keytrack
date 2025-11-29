@@ -1,83 +1,102 @@
-import { relations, sql } from "drizzle-orm";
-import { index, pgTable, primaryKey } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { index, pgTable } from "drizzle-orm/pg-core";
 
 import { repertoirePieces } from "~/server/db/repertoirePieces";
 
-import type { AdapterAccount } from "next-auth/adapters";
-
 export const users = pgTable("user", (d) => ({
-  id: d
-    .varchar({ length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: d.varchar({ length: 255 }),
-  email: d.varchar({ length: 255 }).notNull(),
-  emailVerified: d
-    .timestamp({
-      mode: "date",
-      withTimezone: true,
-    })
-    .default(sql`CURRENT_TIMESTAMP`),
-  image: d.varchar({ length: 255 }),
-}));
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-  repertoirePieces: many(repertoirePieces),
-}));
-
-export const accounts = pgTable(
-  "account",
-  (d) => ({
-    userId: d
-      .varchar({ length: 255 })
-      .notNull()
-      .references(() => users.id),
-    type: d.varchar({ length: 255 }).$type<AdapterAccount["type"]>().notNull(),
-    provider: d.varchar({ length: 255 }).notNull(),
-    providerAccountId: d.varchar({ length: 255 }).notNull(),
-    refresh_token: d.text(),
-    access_token: d.text(),
-    expires_at: d.integer(),
-    token_type: d.varchar({ length: 255 }),
-    scope: d.varchar({ length: 255 }),
-    id_token: d.text(),
-    session_state: d.varchar({ length: 255 }),
-  }),
-  (t) => [
-    primaryKey({ columns: [t.provider, t.providerAccountId] }),
-    index("account_user_id_idx").on(t.userId),
-  ],
-);
-
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
+  id: d.text("id").primaryKey(),
+  name: d.text("name").notNull(),
+  email: d.text("email").notNull().unique(),
+  emailVerified: d.boolean("email_verified").default(false).notNull(),
+  image: d.text("image"),
+  createdAt: d.timestamp("created_at").defaultNow().notNull(),
+  updatedAt: d
+    .timestamp("updated_at")
+    .defaultNow()
+    .$onUpdate(() => /* @__PURE__ */ new Date())
+    .notNull(),
 }));
 
 export const sessions = pgTable(
   "session",
   (d) => ({
-    sessionToken: d.varchar({ length: 255 }).notNull().primaryKey(),
+    id: d.text("id").primaryKey(),
+    expiresAt: d.timestamp("expires_at").notNull(),
+    token: d.text("token").notNull().unique(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    ipAddress: d.text("ip_address"),
+    userAgent: d.text("user_agent"),
     userId: d
-      .varchar({ length: 255 })
+      .text("user_id")
       .notNull()
-      .references(() => users.id),
-    expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
+      .references(() => users.id, { onDelete: "cascade" }),
   }),
-  (t) => [index("t_user_id_idx").on(t.userId)],
+  (t) => [index("session_userId_idx").on(t.userId)],
 );
 
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
+export const accounts = pgTable(
+  "account",
+  (d) => ({
+    id: d.text("id").primaryKey(),
+    accountId: d.text("account_id").notNull(),
+    providerId: d.text("provider_id").notNull(),
+    userId: d
+      .text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    accessToken: d.text("access_token"),
+    refreshToken: d.text("refresh_token"),
+    idToken: d.text("id_token"),
+    accessTokenExpiresAt: d.timestamp("access_token_expires_at"),
+    refreshTokenExpiresAt: d.timestamp("refresh_token_expires_at"),
+    scope: d.text("scope"),
+    password: d.text("password"),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }),
+  (table) => [index("account_userId_idx").on(table.userId)],
+);
+
+export const verifications = pgTable(
+  "verification",
+  (d) => ({
+    id: d.text("id").primaryKey(),
+    identifier: d.text("identifier").notNull(),
+    value: d.text("value").notNull(),
+    expiresAt: d.timestamp("expires_at").notNull(),
+    createdAt: d.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: d
+      .timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }),
+  (table) => [index("verification_identifier_idx").on(table.identifier)],
+);
+
+export const userRelations = relations(users, ({ many }) => ({
+  sessions: many(sessions),
+  accounts: many(accounts),
+  repertoirePieces: many(repertoirePieces),
 }));
 
-export const verificationTokens = pgTable(
-  "verification_token",
-  (d) => ({
-    identifier: d.varchar({ length: 255 }).notNull(),
-    token: d.varchar({ length: 255 }).notNull(),
-    expires: d.timestamp({ mode: "date", withTimezone: true }).notNull(),
+export const sessionRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
   }),
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
-);
+}));
+
+export const accountRelations = relations(accounts, ({ one }) => ({
+  user: one(users, {
+    fields: [accounts.userId],
+    references: [users.id],
+  }),
+}));

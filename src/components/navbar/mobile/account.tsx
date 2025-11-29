@@ -4,12 +4,12 @@ import { Button } from "@heroui/button";
 import { NavbarMenuItem } from "@heroui/navbar";
 import { User } from "@heroui/user";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { auth } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarMobileAccount: FC = () => {
-  const { data: session } = useSession();
+  const { data: session } = auth.useSession();
   return (
     <>
       {session && (
@@ -21,8 +21,8 @@ const NavbarMobileAccount: FC = () => {
               src: session.user.image ?? undefined,
             }}
             className="transition-transform"
-            description={session.user.email ?? undefined}
-            name={session.user.name ?? undefined}
+            description={session.user.email}
+            name={session.user.name}
           />
         </NavbarMenuItem>
       )}
@@ -31,8 +31,12 @@ const NavbarMobileAccount: FC = () => {
           fullWidth
           className={session ? "bg-red-500" : "bg-foreground text-background"}
           onPress={() => {
-            if (session) void signOut();
-            else void signIn("google", { redirectTo: "/repertoire" });
+            if (session) void auth.signOut();
+            else
+              void auth.signIn.social({
+                provider: "google",
+                callbackURL: "/repertoire",
+              });
           }}
         >
           {session ? "Log Out" : "Get Started"}

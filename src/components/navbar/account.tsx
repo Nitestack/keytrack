@@ -12,12 +12,12 @@ import { User } from "@heroui/user";
 
 import { ChevronRight } from "lucide-react";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { auth } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarAccount: FC = () => {
-  const { data: session } = useSession();
+  const { data: session } = auth.useSession();
   return (
     <NavbarContent className="hidden md:flex" justify="end">
       <NavbarItem className="ml-2">
@@ -31,8 +31,8 @@ const NavbarAccount: FC = () => {
                   src: session.user.image ?? undefined,
                 }}
                 className="transition-transform"
-                description={session.user.email ?? undefined}
-                name={session.user.name ?? undefined}
+                description={session.user.email}
+                name={session.user.name}
               />
             </DropdownTrigger>
             <DropdownMenu
@@ -46,7 +46,7 @@ const NavbarAccount: FC = () => {
                 <p>{session.user.email}</p>
               </DropdownItem>
               <DropdownItem
-                onPress={() => signOut()}
+                onPress={() => auth.signOut()}
                 key="logout"
                 color="danger"
               >
@@ -58,7 +58,12 @@ const NavbarAccount: FC = () => {
           <Button
             className="bg-default-foreground text-background font-medium"
             color="secondary"
-            onPress={() => signIn("google", { redirectTo: "/repertoire" })}
+            onPress={() =>
+              auth.signIn.social({
+                provider: "google",
+                callbackURL: "/repertoire",
+              })
+            }
             endContent={<ChevronRight />}
             radius="full"
             variant="flat"
