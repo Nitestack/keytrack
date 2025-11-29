@@ -12,12 +12,15 @@ import { User } from "@heroui/user";
 
 import { ChevronRight } from "lucide-react";
 
+import { useRouter } from "next/navigation";
+
 import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarAccount: FC = () => {
   const { data: session, isPending } = auth.useSession();
+  const router = useRouter();
   return (
     <NavbarContent className="hidden md:flex" justify="end">
       <NavbarItem className="ml-2">
@@ -46,7 +49,13 @@ const NavbarAccount: FC = () => {
                 <p>{session.user.email}</p>
               </DropdownItem>
               <DropdownItem
-                onPress={() => auth.signOut()}
+                onPress={() =>
+                  auth.signOut({
+                    fetchOptions: {
+                      onSuccess: () => router.push("/"),
+                    },
+                  })
+                }
                 key="logout"
                 color="danger"
               >
