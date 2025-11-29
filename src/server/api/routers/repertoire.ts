@@ -1,8 +1,8 @@
-import { TRPCError } from "@trpc/server";
+import { ORPCError } from "@orpc/server";
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
-import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { protectedProcedure } from "~/orpc/server";
 import {
   musicBrainzComposers,
   musicBrainzPieces,
@@ -24,14 +24,14 @@ import { validateImageUrl, validatePdfUrl } from "~/services/url-validator";
 
 import type { EntityType } from "musicbrainz-api";
 
-export const repertoireRouter = createTRPCRouter({
+export const repertoireRouter = {
   search: protectedProcedure
     .input(
       z.object({
         work: z.string().nonempty(),
       }),
     )
-    .mutation(async ({ input, ctx: { db, session } }) => {
+    .handler(async ({ input, context: { db, session } }) => {
       let query = "";
       let entityType: EntityType | undefined = undefined;
       if (input.work) {
@@ -39,9 +39,8 @@ export const repertoireRouter = createTRPCRouter({
         query = input.work;
       }
       if (!entityType)
-        throw new TRPCError({
+        throw new ORPCError("BAD_REQUEST", {
           message: "No query provided",
-          code: "BAD_REQUEST",
         });
       const [searchResult, dbRepertoirePiecesResult] = await Promise.allSettled(
         [
@@ -54,12 +53,11 @@ export const repertoireRouter = createTRPCRouter({
       );
       if (searchResult.status === "rejected") {
         console.error(searchResult.reason);
-        throw new TRPCError({ code: "NOT_FOUND" });
+        throw new ORPCError("NOT_FOUND");
       }
       if (dbRepertoirePiecesResult.status === "rejected")
-        throw new TRPCError({
+        throw new ORPCError("BAD_REQUEST", {
           message: "Couldn't fetch pieces from user",
-          code: "BAD_REQUEST",
         });
       const works = searchResult.value.works;
       const addedRepertoirePieceIds = dbRepertoirePiecesResult.value.map(
@@ -100,7 +98,7 @@ export const repertoireRouter = createTRPCRouter({
         scoreType: z.enum(["pdf", "images"]),
       }),
     )
-    .mutation(async ({ input, ctx: { db, session } }) => {
+    .handler(async ({ input, context: { db, session } }) => {
       // Ensure MusicBrainz piece exists in DB
       const mbPiece = await db.query.musicBrainzPieces.findFirst({
         where: eq(musicBrainzPieces.id, input.musicBrainzId),
@@ -108,7 +106,7 @@ export const repertoireRouter = createTRPCRouter({
 
       if (!mbPiece) {
         const mbWork = await getWorkById(input.musicBrainzId);
-        if (!mbWork) throw new TRPCError({ code: "BAD_REQUEST" });
+        if (!mbWork) throw new ORPCError("BAD_REQUEST");
 
         await db
           .insert(musicBrainzComposers)
@@ -135,8 +133,7 @@ export const repertoireRouter = createTRPCRouter({
         const validation = await validatePdfUrl(input.pdfUrl);
 
         if (!validation.valid) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new ORPCError("BAD_REQUEST", {
             message: validation.error ?? "Invalid PDF URL",
           });
         }
@@ -148,8 +145,7 @@ export const repertoireRouter = createTRPCRouter({
             input.musicBrainzId,
           );
         } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
               error instanceof Error
                 ? `Failed to download PDF: ${error.message}`
@@ -161,7 +157,7 @@ export const repertoireRouter = createTRPCRouter({
         try {
           const directPdfUrl = await getPdfUrlByIndex(input.imslpIndexUrl);
 
-          if (!directPdfUrl) throw new TRPCError({ code: "BAD_REQUEST" });
+          if (!directPdfUrl) throw new ORPCError("BAD_REQUEST");
 
           await downloadAndStorePdf(
             directPdfUrl,
@@ -169,8 +165,7 @@ export const repertoireRouter = createTRPCRouter({
             input.musicBrainzId,
           );
         } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
               error instanceof Error
                 ? `Failed to process IMSLP URL: ${error.message}`
@@ -187,8 +182,7 @@ export const repertoireRouter = createTRPCRouter({
 
         const invalidUrl = validations.find((v) => !v.valid);
         if (invalidUrl) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
+          throw new ORPCError("BAD_REQUEST", {
             message: invalidUrl.error ?? "Invalid image URL",
           });
         }
@@ -200,8 +194,7 @@ export const repertoireRouter = createTRPCRouter({
             input.musicBrainzId,
           );
         } catch (error) {
-          throw new TRPCError({
-            code: "INTERNAL_SERVER_ERROR",
+          throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
               error instanceof Error
                 ? `Failed to download images: ${error.message}`
@@ -222,7 +215,7 @@ export const repertoireRouter = createTRPCRouter({
         musicBrainzId: z.string().nonempty(),
       }),
     )
-    .query(async ({ input, ctx: { db, session } }) => {
+    .handler(async ({ input, context: { db, session } }) => {
       const piece = await db.query.repertoirePieces.findFirst({
         where: and(
           eq(repertoirePieces.userId, session.user.id),
@@ -237,7 +230,7 @@ export const repertoireRouter = createTRPCRouter({
         },
       });
 
-      if (!piece) throw new TRPCError({ code: "NOT_FOUND" });
+      if (!piece) throw new ORPCError("NOT_FOUND");
 
       return mapDbPieceToRepertoirePiece(piece);
     }),
@@ -247,7 +240,7 @@ export const repertoireRouter = createTRPCRouter({
         musicBrainzId: z.string().nonempty(),
       }),
     )
-    .mutation(async ({ input, ctx: { db, session } }) => {
+    .handler(async ({ input, context: { db, session } }) => {
       return await db
         .delete(repertoirePieces)
         .where(
@@ -257,40 +250,42 @@ export const repertoireRouter = createTRPCRouter({
           ),
         );
     }),
-  getPieces: protectedProcedure.query(async ({ ctx: { db, session } }) => {
-    const pieces = await db.query.repertoirePieces.findMany({
-      where: eq(repertoirePieces.userId, session.user.id),
-      with: {
-        musicBrainzPiece: {
-          with: {
-            composer: true,
+  getPieces: protectedProcedure.handler(
+    async ({ context: { db, session } }) => {
+      const pieces = await db.query.repertoirePieces.findMany({
+        where: eq(repertoirePieces.userId, session.user.id),
+        with: {
+          musicBrainzPiece: {
+            with: {
+              composer: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    const results = await Promise.allSettled(
-      pieces.map(mapDbPieceToRepertoirePiece),
-    );
+      const results = await Promise.allSettled(
+        pieces.map(mapDbPieceToRepertoirePiece),
+      );
 
-    return results
-      .map((result, index) => {
-        if (result.status === "fulfilled") return result.value;
-        console.error(
-          `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
-          result.reason,
-        );
-        return undefined;
-      })
-      .filter(Boolean);
-  }),
+      return results
+        .map((result, index) => {
+          if (result.status === "fulfilled") return result.value;
+          console.error(
+            `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
+            result.reason,
+          );
+          return undefined;
+        })
+        .filter(Boolean);
+    },
+  ),
   getImslpScores: protectedProcedure
     .input(
       z.object({
         musicBrainzId: z.string().nonempty(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .handler(async ({ input }) => {
       const imslpUrl = await getImslpURLByWorkId(input.musicBrainzId);
 
       if (!imslpUrl) return undefined;
@@ -304,4 +299,4 @@ export const repertoireRouter = createTRPCRouter({
         scores,
       };
     }),
-});
+};
