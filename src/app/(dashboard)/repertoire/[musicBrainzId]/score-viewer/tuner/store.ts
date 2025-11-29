@@ -8,8 +8,8 @@ import {
   transposeKeys,
 } from "~/services/music-theory";
 
+import type { NonFunction } from "~/lib/types";
 import type { NoteInfo, TransposeKey } from "~/services/music-theory";
-import type { NonFunction } from "~/utils/types";
 
 const IN_TUNE_THRESHOLD_CENTS = 5; // +/- cents to be considered "in tune"
 const CLOSE_THRESHOLD_CENTS = 10; // +/- cents to be considered "close"
