@@ -4,13 +4,11 @@ import { env } from "~/env";
 import { auth } from "~/server/auth";
 import { db } from "~/server/db";
 
-import type { NextRequest } from "next/server";
-
-export async function createRPCContext(request: NextRequest) {
+export async function createRPCContext({ headers }: { headers: Headers }) {
   const session = await auth();
 
   return {
-    headers: request.headers,
+    headers,
     session,
     db,
   };

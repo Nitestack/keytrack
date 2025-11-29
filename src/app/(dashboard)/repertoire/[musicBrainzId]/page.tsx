@@ -2,9 +2,9 @@ import { Card, CardFooter, CardHeader } from "@heroui/card";
 
 import { redirect, unauthorized } from "next/navigation";
 
+import { client } from "~/api/orpc";
 import ScoreViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer";
 import DashboardLayout from "~/components/dashboard-layout";
-import { client } from "~/server/api/client";
 import { auth } from "~/server/auth";
 
 export default async function RepertoirePiecePage({

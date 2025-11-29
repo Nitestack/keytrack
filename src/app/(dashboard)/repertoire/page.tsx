@@ -1,11 +1,11 @@
 import { Alert } from "@heroui/alert";
 
+import { client } from "~/api/orpc";
 import AddPiece from "~/app/(dashboard)/repertoire/add-piece";
 import RepertoireFilter from "~/app/(dashboard)/repertoire/filter";
 import RepertoireGridItem from "~/app/(dashboard)/repertoire/grid-item";
 import RepertoireList from "~/app/(dashboard)/repertoire/list";
 import DashboardLayout from "~/components/dashboard-layout";
-import { client } from "~/server/api/client";
 
 export default async function RepertoirePage() {
   const pieces = await client.repertoire.getPieces();

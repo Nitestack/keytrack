@@ -1,3 +1,4 @@
+import "~/api/orpc.server";
 import "~/styles/globals.css";
 
 import { Geist } from "next/font/google";

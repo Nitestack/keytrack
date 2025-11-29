@@ -13,8 +13,8 @@ import { Search, SquareArrowOutUpRight } from "lucide-react";
 
 import { useMutation } from "@tanstack/react-query";
 
+import { orpc } from "~/api/react";
 import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
-import { orpc } from "~/server/api/react";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
