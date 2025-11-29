@@ -4,13 +4,11 @@ import "~/styles/globals.css";
 import { Geist } from "next/font/google";
 
 import { type Metadata } from "next";
-import { SessionProvider } from "next-auth/react";
 
 import Providers from "~/app/providers";
 import Footer from "~/components/footer";
 import Navbar from "~/components/navbar";
 import { appDescription, appName } from "~/constants";
-import { auth } from "~/server/auth";
 
 export const metadata: Metadata = {
   title: {
@@ -27,8 +25,6 @@ const geist = Geist({
 });
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const session = await auth();
-
   return (
     <html
       lang="en"
@@ -36,15 +32,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       suppressHydrationWarning
     >
       <body className="bg-background relative flex min-h-dvh flex-col">
-        <SessionProvider session={session}>
-          <Providers bodyClassName="flex flex-col flex-1">
-            <Navbar />
-            <main className="container mx-auto mt-4 mb-8 w-full grow md:mt-12 px-6 flex flex-col">
-              {children}
-            </main>
-            <Footer />
-          </Providers>
-        </SessionProvider>
+        <Providers bodyClassName="flex flex-col flex-1">
+          <Navbar />
+          <main className="container mx-auto mt-4 mb-8 w-full grow md:mt-12 px-6 flex flex-col">
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

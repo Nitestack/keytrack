@@ -1,11 +1,13 @@
 import { ORPCError, os } from "@orpc/server";
 
 import { env } from "~/env";
-import { auth } from "~/server/auth";
+import { auth } from "~/lib/auth/server";
 import { db } from "~/server/db";
 
 export async function createRPCContext({ headers }: { headers: Headers }) {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers,
+  });
 
   return {
     headers,

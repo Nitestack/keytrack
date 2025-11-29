@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { basename, extname, join, normalize } from "node:path";
 
-import { auth } from "~/server/auth";
+import { auth } from "~/lib/auth/server";
 import { getContentType } from "~/services/file-storage";
 
 import type { NextRequest } from "next/server";
@@ -15,10 +15,12 @@ import type { NextRequest } from "next/server";
  * GET /api/files/{userId}/{musicBrainzId}/1.webp
  */
 export async function GET(
-  _: NextRequest,
+  { headers }: NextRequest,
   { params }: RouteContext<"/api/files/[...path]">,
 ) {
-  const session = await auth();
+  const session = await auth.api.getSession({
+    headers: headers,
+  });
 
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
