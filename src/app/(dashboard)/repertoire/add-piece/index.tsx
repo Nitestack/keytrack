@@ -17,6 +17,8 @@ import { Plus } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
+import { useMutation } from "@tanstack/react-query";
+
 import FileUpload from "~/app/(dashboard)/repertoire/add-piece/file-upload";
 import IMSLPDiscover from "~/app/(dashboard)/repertoire/add-piece/imslp-discover";
 import ScoreURL from "~/app/(dashboard)/repertoire/add-piece/score-url";
@@ -27,7 +29,7 @@ import {
 } from "~/app/(dashboard)/repertoire/add-piece/store";
 import AddPieceSummary from "~/app/(dashboard)/repertoire/add-piece/summary";
 import RowSteps from "~/components/row-steps";
-import { api } from "~/trpc/react";
+import { orpc } from "~/server/api/react";
 import { useScoreUpload } from "~/utils/hooks/use-upload";
 
 import type { Key } from "@react-types/shared";
@@ -98,8 +100,8 @@ const AddPiece: FC = () => {
 
   const router = useRouter();
 
-  const { mutate: addPiece, isPending: isAddingPiecePending } =
-    api.repertoire.addPiece.useMutation({
+  const { mutate: addPiece, isPending: isAddingPiecePending } = useMutation(
+    orpc.repertoire.addPiece.mutationOptions({
       onSuccess: () => {
         router.refresh();
         addToast({
@@ -108,7 +110,8 @@ const AddPiece: FC = () => {
         });
         handleClose();
       },
-    });
+    }),
+  );
 
   function handleClose() {
     onClose();

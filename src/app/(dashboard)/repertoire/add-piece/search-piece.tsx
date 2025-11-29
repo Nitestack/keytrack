@@ -8,10 +8,11 @@ import {
 
 import { useState } from "react";
 
+import { useMutation } from "@tanstack/react-query";
 import { useDebounceCallback } from "usehooks-ts";
 
 import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
-import { api } from "~/trpc/react";
+import { orpc } from "~/server/api/react";
 
 import type { FC } from "react";
 import type { MBWork } from "~/services/music-brainz";
@@ -42,12 +43,13 @@ const SearchPiece: FC = () => {
   const [searchResultItems, setSearchResultItems] = useState<MBWork[]>([]);
   const [isSelectionChange, setIsSelectionChange] = useState(false);
 
-  const { data, isPending, mutate, variables } =
-    api.repertoire.search.useMutation({
+  const { data, isPending, mutate, variables } = useMutation(
+    orpc.repertoire.search.mutationOptions({
       onSuccess: (data) => {
         setSearchResultItems(data);
       },
-    });
+    }),
+  );
 
   const handleInputChange = useDebounceCallback((newValue: string) => {
     if (!isSelectionChange) {
@@ -68,7 +70,7 @@ const SearchPiece: FC = () => {
   function handleSelectionChange(key: string | null) {
     if (data && key) {
       resetScoreSelection();
-      setSelectedPiece(data.find((piece) => piece.id === key)!);
+      setSelectedPiece(data.find((piece) => piece.id === key));
     }
     setIsSelectionChange(true);
   }

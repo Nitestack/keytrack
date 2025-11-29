@@ -4,8 +4,8 @@ import { redirect, unauthorized } from "next/navigation";
 
 import ScoreViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer";
 import DashboardLayout from "~/components/dashboard-layout";
+import { client } from "~/server/api/client";
 import { auth } from "~/server/auth";
-import { api } from "~/trpc/server";
 
 export default async function RepertoirePiecePage({
   params,
@@ -16,7 +16,7 @@ export default async function RepertoirePiecePage({
 
   if (!session) unauthorized();
 
-  const piece = await api.repertoire.getPiece({ musicBrainzId });
+  const piece = await client.repertoire.getPiece({ musicBrainzId });
 
   if (!piece) redirect("/repertoire");
 
