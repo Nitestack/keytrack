@@ -4,12 +4,15 @@ import { Button } from "@heroui/button";
 import { NavbarMenuItem } from "@heroui/navbar";
 import { User } from "@heroui/user";
 
+import { useRouter } from "next/navigation";
+
 import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
 
 const NavbarMobileAccount: FC = () => {
   const { data: session, isPending } = auth.useSession();
+  const router = useRouter();
   return (
     <>
       {session && (
@@ -32,7 +35,12 @@ const NavbarMobileAccount: FC = () => {
             fullWidth
             className={session ? "bg-red-500" : "bg-foreground text-background"}
             onPress={() => {
-              if (session) void auth.signOut();
+              if (session)
+                void auth.signOut({
+                  fetchOptions: {
+                    onSuccess: () => router.push("/"),
+                  },
+                });
               else void signIn();
             }}
           >
