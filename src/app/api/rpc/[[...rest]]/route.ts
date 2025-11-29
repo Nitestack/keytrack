@@ -4,8 +4,6 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { createRPCContext } from "~/api";
 import { router } from "~/api/routers";
 
-import type { NextRequest } from "next/server";
-
 const handler = new RPCHandler(router, {
   interceptors: [
     onError((error) => {
@@ -14,7 +12,7 @@ const handler = new RPCHandler(router, {
   ],
 });
 
-async function handleRequest(request: NextRequest) {
+async function handleRequest(request: Request) {
   const { response } = await handler.handle(request, {
     prefix: "/api/rpc",
     context: await createRPCContext(request),
