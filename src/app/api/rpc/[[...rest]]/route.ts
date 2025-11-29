@@ -16,7 +16,7 @@ const handler = new RPCHandler(router, {
 
 async function handleRequest(request: NextRequest) {
   const { response } = await handler.handle(request, {
-    prefix: "/api/orpc",
+    prefix: "/api/rpc",
     context: await createRPCContext(request),
   });
 
