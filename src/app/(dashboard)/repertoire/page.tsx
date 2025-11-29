@@ -5,10 +5,10 @@ import RepertoireFilter from "~/app/(dashboard)/repertoire/filter";
 import RepertoireGridItem from "~/app/(dashboard)/repertoire/grid-item";
 import RepertoireList from "~/app/(dashboard)/repertoire/list";
 import DashboardLayout from "~/components/dashboard-layout";
-import { api } from "~/trpc/server";
+import { client } from "~/server/api/client";
 
 export default async function RepertoirePage() {
-  const pieces = await api.repertoire.getPieces();
+  const pieces = await client.repertoire.getPieces();
 
   return (
     <DashboardLayout title="Repertoire" actionNode={<AddPiece />}>

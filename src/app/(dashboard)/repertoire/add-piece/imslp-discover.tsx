@@ -11,8 +11,10 @@ import { Link } from "@heroui/link";
 
 import { Search, SquareArrowOutUpRight } from "lucide-react";
 
+import { useMutation } from "@tanstack/react-query";
+
 import { useAddRepertoirePieceStore } from "~/app/(dashboard)/repertoire/add-piece/store";
-import { api } from "~/trpc/react";
+import { orpc } from "~/server/api/react";
 
 import type { Key } from "@react-types/shared";
 import type { FC } from "react";
@@ -52,13 +54,14 @@ const IMSLPDiscover: FC = () => {
     (state) => state.hideImslpTab,
   );
 
-  const { mutate, isPending, isSuccess, data } =
-    api.repertoire.getImslpScores.useMutation({
+  const { mutate, isPending, isSuccess, data } = useMutation(
+    orpc.repertoire.getImslpScores.mutationOptions({
       onSuccess: (newData) => {
         if (newData) setImslpScores(newData.scores);
         else hideImslpTab();
       },
-    });
+    }),
+  );
 
   const groupedByPublisher = Object.groupBy(imslpScores, (score) =>
     score.isUrtext ? "Urtext Edition" : score.publisher.name,

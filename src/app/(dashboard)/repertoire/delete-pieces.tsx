@@ -15,7 +15,9 @@ import { Trash } from "lucide-react";
 
 import { useRouter } from "next/navigation";
 
-import { api } from "~/trpc/react";
+import { useMutation } from "@tanstack/react-query";
+
+import { orpc } from "~/server/api/react";
 
 import type { FC } from "react";
 
@@ -29,16 +31,18 @@ const RemovePieces: FC<{
 
   const router = useRouter();
 
-  const { mutate, isPending } = api.repertoire.removePiece.useMutation({
-    onSuccess: () => {
-      router.refresh();
-      addToast({
-        title: `Successfully removed "${title}" from the repertoire.`,
-        color: "success",
-      });
-      onClose();
-    },
-  });
+  const { mutate, isPending } = useMutation(
+    orpc.repertoire.removePiece.mutationOptions({
+      onSuccess: () => {
+        router.refresh();
+        addToast({
+          title: `Successfully removed "${title}" from the repertoire.`,
+          color: "success",
+        });
+        onClose();
+      },
+    }),
+  );
 
   function handleDelete() {
     mutate({
