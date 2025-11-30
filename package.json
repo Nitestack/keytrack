@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "next build --turbopack",
-    "check": "eslint && tsc --noEmit",
+    "check": "next typegen && eslint && tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
@@ -13,8 +13,8 @@
     "dev": "next dev --turbo",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
     "format:write": "prettier --write \"**/*.{ts,tsx,js,jsx,mdx}\" --cache",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "lint": "next typegen && eslint",
+    "lint:fix": "next typegen && eslint --fix",
     "preview": "next build --turbopack && next start",
     "start": "next start",
     "typecheck": "next typegen && tsc --noEmit"
