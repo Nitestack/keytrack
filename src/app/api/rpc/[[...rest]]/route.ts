@@ -1,10 +1,17 @@
+import { LoggingHandlerPlugin } from "@orpc/experimental-pino";
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 
 import { createRPCContext } from "~/api";
 import { router } from "~/api/routers";
+import { logger } from "~/lib/logger";
 
 const handler = new RPCHandler(router, {
+  plugins: [
+    new LoggingHandlerPlugin({
+      logger,
+    }),
+  ],
   interceptors: [
     onError((error) => {
       console.error(error);
