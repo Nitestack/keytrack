@@ -3,14 +3,13 @@ services:
     image: postgres:17-alpine
     container_name: keytrack-db
     restart: unless-stopped
+    env_file: .env
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME:-keytrack}
     volumes:
       - ./db:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
     healthcheck:
       test: pg_isready -q -d ${DB_NAME:-keytrack} -U ${DB_USER:-postgres}
       interval: 10s
@@ -26,14 +25,10 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    env_file: .env
     environment:
-      NODE_ENV: production
-      DB_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-keytrack}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
-      GOOGLE_ID: ${GOOGLE_ID}
-      GOOGLE_SECRET: ${GOOGLE_SECRET}
+      DB_HOST: "db" # must match service name of the PostgreSQL container
     volumes:
       - ./uploads:/app/uploads
     ports:
-      - "3000:3000" # Next.js App
+      - "${PORT:-3000}:3000"
