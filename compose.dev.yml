@@ -3,17 +3,10 @@ services:
     extends:
       file: compose.yml
       service: db
+    ports:
+      - ${DB_PORT:-5432}:5432
     volumes:
-      - ../keytrack-data/db:/var/lib/postgresql/data
-  app:
-    extends:
-      file: compose.yml
-      service: app
-    build:
-      dockerfile: Dockerfile.dev
-    environment:
-      NODE_ENV: "development"
-    volumes:
-      - .:/app
-      - ../keytrack-data/uploads:/app/uploads
-    command: pnpm dev
+      - postgres:/var/lib/postgresql/data
+
+volumes:
+  postgres:
