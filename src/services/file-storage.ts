@@ -260,9 +260,7 @@ export async function downloadAndStoreImages(
   } catch (error) {
     // Cleanup on failure
     for (const filePath of createdFiles) {
-      if (fs.existsSync(filePath)) {
-        await fs.unlink(filePath);
-      }
+      await fs.remove(filePath);
     }
     throw error;
   }
@@ -329,9 +327,7 @@ export async function storeImages(
   } catch (error) {
     // Cleanup on failure
     for (const filePath of createdFiles) {
-      if (fs.existsSync(filePath)) {
-        await fs.unlink(filePath);
-      }
+      await fs.remove(filePath);
     }
     throw error;
   }
@@ -365,9 +361,7 @@ export async function deleteScore(
   try {
     if (scoreType === "pdf") {
       const pdfPath = getPdfPath(userId, musicBrainzId);
-      if (fs.existsSync(pdfPath)) {
-        await fs.unlink(pdfPath);
-      }
+      await fs.remove(pdfPath);
     } else {
       const imagesDir = getImagesDir(userId, musicBrainzId);
       if (fs.existsSync(imagesDir)) {
