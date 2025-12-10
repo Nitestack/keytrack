@@ -15,7 +15,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Disable Next.js telemetry during the build
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN corepack enable pnpm && pnpm run build
@@ -25,19 +24,22 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Disable Next.js telemetry during runtime
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs && \
-  adduser --system --uid 1001 nextjs && \
-  mkdir -p /app/uploads/scores && \
-  chown -R nextjs:nodejs /app/uploads
+  adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Copy files for Drizzle migrations
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle ./drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/entrypoint.sh ./entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle.config.ts ./drizzle.config.ts
 
 USER nextjs
 
@@ -48,4 +50,5 @@ ENV PORT=3000
 # server.js is created by next build from the standalone output
 # https://nextjs.org/docs/pages/api-reference/config/next-config-js/output
 ENV HOSTNAME="0.0.0.0"
-CMD ["node", "server.js"]
+
+CMD ["sh", "/app/entrypoint.sh"]

@@ -1,8 +1,14 @@
 services:
   db:
+    extends:
+      file: compose.yml
+      service: db
     volumes:
       - ../keytrack-data/db:/var/lib/postgresql/data
   app:
+    extends:
+      file: compose.yml
+      service: app
     build:
       dockerfile: Dockerfile.dev
     environment:

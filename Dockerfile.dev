@@ -1,11 +1,22 @@
-FROM node:lts-alpine
+FROM node:lts
+
+# ── Dependencies ──────────────────────────────────────────────────────
+FROM base AS deps
+
 WORKDIR /app
-
-RUN corepack enable pnpm && \
-  mkdir -p /app/uploads/scores
-
 COPY package.json pnpm-lock.yaml* .npmrc* pnpm-workspace.yaml ./
-RUN pnpm install
+RUN corepack enable pnpm && pnpm i --frozen-lockfile
+
+# ── Start ─────────────────────────────────────────────────────────────
+FROM base AS start
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+RUN mkdir -p /app/uploads/scores
 
 EXPOSE 3000
+
+RUN corepack enable pnpm
+ENV NEXT_TELEMETRY_DISABLED=1
 CMD ["pnpm", "dev"]
