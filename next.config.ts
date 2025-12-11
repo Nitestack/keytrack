@@ -5,7 +5,7 @@
 
 import type { NextConfig } from "next";
 
-import "./src/env.js";
+import "./src/env";
 
 export default {
   output: "standalone",

@@ -1,12 +1,12 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-set -xe
+set -e
 
-echo "Creating necessary directories"
+# Creating necessary directories
 mkdir -p /app/uploads/scores
 
-echo "Running database migrations"
-npm run db:migrate
+# Running database migrations
+node migrate.js
 
-echo "Starting the server"
-node server.js
+# Running the command passed to the entrypoint
+exec "$@"
