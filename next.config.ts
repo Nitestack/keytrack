@@ -11,7 +11,6 @@ export default {
   output: "standalone",
   experimental: {
     browserDebugInfoInTerminal: true,
-    turbopackFileSystemCacheForDev: true,
   },
   reactCompiler: true,
 } satisfies NextConfig;
