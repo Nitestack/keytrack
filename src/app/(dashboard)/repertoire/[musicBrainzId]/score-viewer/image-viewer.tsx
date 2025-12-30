@@ -1,65 +1,52 @@
 import { Image } from "@heroui/image";
+import { cn } from "@heroui/react";
 
-import EmblaCarouselStructure from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/embla-carousel-structure";
-import NavigationButtons from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/navigation-buttons";
-import { useCarouselViewer } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/use-carousel-viewer";
+import { memo } from "react";
 
-import type { FC } from "react";
+import type { CSSProperties, FC } from "react";
 
 const ImageViewer: FC<{
   imageUrls: string[];
-}> = ({ imageUrls }) => {
-  const {
-    containerRef,
-    emblaRef,
-    emblaApi,
-    slides,
-    currentSlideIndex,
-    itemDimensions,
-    pagesToShow,
-  } = useCarouselViewer(imageUrls.length);
+  pageIndex: number;
+  nextPageIndex?: number;
+  height?: CSSProperties["height"];
+  width?: CSSProperties["width"];
+}> = ({ imageUrls, height, width, pageIndex, nextPageIndex }) => {
+  const indices = [pageIndex, nextPageIndex].filter(Boolean);
 
   return (
-    <div
-      className="size-full relative overflow-hidden flex items-center justify-center"
-      ref={containerRef}
-    >
-      <EmblaCarouselStructure emblaRef={emblaRef} slides={slides}>
-        {(imageIndices) =>
-          imageIndices.map((index) => (
-            <div
-              key={index}
-              className="flex items-center justify-center h-full"
-              style={{
-                maxHeight: itemDimensions.height,
-                maxWidth: itemDimensions.width,
-              }}
-            >
-              <Image
-                src={imageUrls[index]}
-                alt={`Page ${index + 1}`}
-                classNames={{
-                  wrapper: "size-full",
-                  img: "size-full object-contain rounded-none",
-                }}
-                style={{
-                  maxHeight: itemDimensions.height,
-                  maxWidth: itemDimensions.width,
-                }}
-              />
-            </div>
-          ))
-        }
-      </EmblaCarouselStructure>
-
-      <NavigationButtons
-        emblaApi={emblaApi}
-        currentSlideIndex={currentSlideIndex}
-        totalSlides={slides.length}
-        pagesToShow={pagesToShow}
-      />
+    <div className="flex size-full items-center justify-center gap-1">
+      {indices.map((pageNum) => (
+        <div
+          key={pageNum}
+          className="flex items-center justify-center"
+          style={{
+            height,
+            width,
+          }}
+        >
+          <Image
+            src={imageUrls[pageNum - 1]}
+            alt={`Page ${pageNum}`}
+            classNames={{
+              wrapper: "size-full",
+              img: cn(
+                "size-full object-contain rounded-none pointer-events-none",
+                nextPageIndex
+                  ? {
+                      "object-right": pageNum === pageIndex,
+                      "object-left": pageNum === nextPageIndex,
+                    }
+                  : "object-center",
+              ),
+            }}
+            height={height}
+            width={width}
+          />
+        </div>
+      ))}
     </div>
   );
 };
 
-export default ImageViewer;
+export default memo(ImageViewer);
