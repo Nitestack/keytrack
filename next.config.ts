@@ -12,5 +12,17 @@ export default {
   experimental: {
     browserDebugInfoInTerminal: true,
   },
+  images: {
+    localPatterns: [
+      {
+        pathname: "/logo.png",
+        search: "",
+      },
+      {
+        pathname: "/api/files/**",
+        search: "",
+      },
+    ],
+  },
   reactCompiler: true,
 } satisfies NextConfig;
