@@ -3,6 +3,8 @@ import { cn } from "@heroui/react";
 
 import { memo } from "react";
 
+import ScorePage from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/score-page";
+
 import type { CSSProperties, FC } from "react";
 
 const ImageViewer: FC<{
@@ -11,14 +13,17 @@ const ImageViewer: FC<{
   nextPageIndex?: number;
   height?: CSSProperties["height"];
   width?: CSSProperties["width"];
-}> = ({ imageUrls, height, width, pageIndex, nextPageIndex }) => {
+  isThumbnail?: boolean;
+}> = ({ imageUrls, height, width, pageIndex, nextPageIndex, isThumbnail }) => {
   const indices = [pageIndex, nextPageIndex].filter(Boolean);
 
   return (
     <div className="flex size-full items-center justify-center gap-1">
       {indices.map((pageNum) => (
-        <div
+        <ScorePage
           key={pageNum}
+          pageNum={pageNum}
+          isThumbnail={isThumbnail}
           className="flex items-center justify-center"
           style={{
             height,
@@ -29,7 +34,7 @@ const ImageViewer: FC<{
             src={imageUrls[pageNum - 1]}
             alt={`Page ${pageNum}`}
             classNames={{
-              wrapper: "size-full",
+              wrapper: "size-full rounded-none",
               img: cn(
                 "size-full object-contain rounded-none pointer-events-none",
                 nextPageIndex
@@ -43,7 +48,7 @@ const ImageViewer: FC<{
             height={height}
             width={width}
           />
-        </div>
+        </ScorePage>
       ))}
     </div>
   );

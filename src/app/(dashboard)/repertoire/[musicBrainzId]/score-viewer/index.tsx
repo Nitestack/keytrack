@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useWindowSize } from "usehooks-ts";
 
-import ImageViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/image-viewer";
+import ScoreViewerSlide from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/slide";
 
 import type { FC } from "react";
 import type { GenericSlide } from "yet-another-react-lightbox";
@@ -26,11 +26,7 @@ declare module "yet-another-react-lightbox" {
   }
 }
 
-const PdfDocument = dynamic(() => import("./pdf-document"), { ssr: false });
-
 const Lightbox = dynamic(() => import("./lightbox"), { ssr: false });
-
-const ASSUMED_PAGE_RATIO = 210 / 297;
 
 const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
   scoreUrls,
@@ -98,37 +94,32 @@ const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
           finite: true,
           preload: 2,
         }}
+        thumbnails={{
+          showToggle: true,
+        }}
         slides={slides}
         render={{
-          slide: ({ slide, rect }) => {
-            if (slide.type !== "score") return null;
-
-            const gap = pagesToShow > 1 ? 2 : 0; // gap of 4px between pages
-            const maxHeight = rect.height;
-            const maxWidth = rect.width / pagesToShow - gap;
-
-            const dims =
-              maxHeight * ASSUMED_PAGE_RATIO <= maxWidth
-                ? {
-                    primary: { height: maxHeight },
-                    secondary: { width: "100%" },
-                  }
-                : {
-                    primary: { width: maxWidth },
-                    secondary: { height: "100%" },
-                  };
-
-            return scoreType === "pdf" ? (
-              <PdfDocument {...slide} {...dims.primary} file={scoreUrls[0]} />
-            ) : (
-              <ImageViewer
-                {...slide}
-                {...dims.primary}
-                {...dims.secondary}
-                imageUrls={scoreUrls}
-              />
-            );
-          },
+          slide: ({ slide, rect }) => (
+            <ScoreViewerSlide
+              slide={slide}
+              rect={rect}
+              pagesToShow={pagesToShow}
+              scoreType={scoreType}
+              scoreUrls={scoreUrls}
+            />
+          ),
+          thumbnail: ({ slide, rect }) => (
+            <ScoreViewerSlide
+              slide={slide}
+              rect={rect}
+              pagesToShow={pagesToShow}
+              scoreType={scoreType}
+              scoreUrls={scoreUrls}
+              isThumbnail
+            />
+          ),
+          buttonPrev: slides.length <= 1 ? () => null : undefined,
+          buttonNext: slides.length <= 1 ? () => null : undefined,
         }}
       />
     </>

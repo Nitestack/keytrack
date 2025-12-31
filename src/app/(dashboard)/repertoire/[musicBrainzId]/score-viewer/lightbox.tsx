@@ -16,7 +16,7 @@ import type { LightboxExternalProps } from "yet-another-react-lightbox";
 const Lightbox: FC<Omit<LightboxExternalProps, "plugins">> = (props) => {
   return (
     <LightboxComponent
-      plugins={[Captions, Download, Fullscreen, /*Thumbnails,*/ Zoom]}
+      plugins={[Captions, Download, Fullscreen, Thumbnails, Zoom]}
       {...props}
     />
   );
