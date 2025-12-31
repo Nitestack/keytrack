@@ -39,6 +39,9 @@ export default async function RepertoirePiecePage({
         </CardHeader>
         <CardFooter>
           <ScoreViewer
+            musicBrainzId={piece.id}
+            userId={session.user.id}
+            fileName={`${piece.title}${piece.arrangement ? ` (${piece.arrangement})` : ""} - ${piece.composer}`}
             scoreUrls={piece.scoreUrls}
             scoreType={piece.scoreType}
           />

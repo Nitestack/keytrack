@@ -11,16 +11,16 @@ import { useWindowSize } from "usehooks-ts";
 import ScoreViewerSlide from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/slide";
 
 import type { FC } from "react";
-import type { GenericSlide } from "yet-another-react-lightbox";
+import type { Slide } from "yet-another-react-lightbox";
 import type { ScoreType } from "~/services/file-storage";
 
-interface ScoreSlide extends GenericSlide {
-  type: "score";
-  pageIndex: number;
-  nextPageIndex?: number;
-}
-
 declare module "yet-another-react-lightbox" {
+  interface ScoreSlide extends GenericSlide {
+    type: "score";
+    pageIndex: number;
+    nextPageIndex?: number;
+  }
+
   interface SlideTypes {
     score: ScoreSlide;
   }
@@ -28,10 +28,13 @@ declare module "yet-another-react-lightbox" {
 
 const Lightbox = dynamic(() => import("./lightbox"), { ssr: false });
 
-const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
-  scoreUrls,
-  scoreType,
-}) => {
+const ScoreViewer: FC<{
+  fileName: string;
+  musicBrainzId: string;
+  userId: string;
+  scoreUrls: string[];
+  scoreType: ScoreType;
+}> = ({ fileName, musicBrainzId, userId, scoreUrls, scoreType }) => {
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
 
@@ -62,7 +65,9 @@ const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
   const showTwoPages = screenRatio > 1.2; // safe middle ground between portrait and landscape
   const pagesToShow = showTwoPages ? 2 : 1;
 
-  const slides = useMemo<ScoreSlide[]>(() => {
+  const downloadUrl = `/api/files/${userId}/${musicBrainzId}/download?filename=${fileName}`;
+
+  const slides = useMemo<Slide[]>(() => {
     if (pageCount === 0) return [];
 
     const chunks: number[][] = [];
@@ -79,8 +84,9 @@ const ScoreViewer: FC<{ scoreUrls: string[]; scoreType: ScoreType }> = ({
       type: "score",
       pageIndex: chunk[0]!,
       nextPageIndex: chunk[1],
+      download: downloadUrl,
     }));
-  }, [pageCount, pagesToShow, showTwoPages]);
+  }, [pageCount, pagesToShow, showTwoPages, downloadUrl]);
 
   return (
     <>
