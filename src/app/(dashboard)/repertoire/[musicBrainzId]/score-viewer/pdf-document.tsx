@@ -11,6 +11,8 @@ import "./pdf-document.scss";
 
 import { memo } from "react";
 
+import ScorePage from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/score-page";
+
 import type { FC } from "react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -24,7 +26,8 @@ const PdfViewerDocument: FC<{
   nextPageIndex?: number;
   height?: number;
   width?: number;
-}> = ({ file, height, width, pageIndex, nextPageIndex }) => {
+  isThumbnail?: boolean;
+}> = ({ file, height, width, pageIndex, nextPageIndex, isThumbnail }) => {
   const indices = [pageIndex, nextPageIndex].filter(Boolean);
 
   return (
@@ -39,8 +42,10 @@ const PdfViewerDocument: FC<{
     >
       <div className="flex size-full items-center justify-center gap-1">
         {indices.map((pageNum) => (
-          <div
+          <ScorePage
             key={pageNum}
+            pageNum={pageNum}
+            isThumbnail={isThumbnail}
             className="flex items-center justify-center bg-white shadow-2xl page-frame"
             style={{
               height,
@@ -69,7 +74,7 @@ const PdfViewerDocument: FC<{
                 />
               }
             />
-          </div>
+          </ScorePage>
         ))}
       </div>
     </Document>
