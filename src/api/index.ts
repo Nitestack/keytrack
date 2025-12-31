@@ -22,12 +22,6 @@ const timingMiddleware = o.middleware(async ({ next, path }) => {
   const start = Date.now();
 
   try {
-    if (env.NODE_ENV === "development") {
-      // artificial delay in dev
-      const waitMs = Math.floor(Math.random() * 400) + 100;
-      await new Promise((resolve) => setTimeout(resolve, waitMs));
-    }
-
     const result = await next();
 
     return result;
