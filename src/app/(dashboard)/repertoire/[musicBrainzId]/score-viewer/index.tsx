@@ -8,7 +8,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useWindowSize } from "usehooks-ts";
 
+import { useScoreViewerControls } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/context";
+import ScoreViewerSettingsMenu from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/settings-menu";
 import ScoreViewerSlide from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/slide";
+import ScoreViewerToolsMenu from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tools-menu";
 
 import type { FC } from "react";
 import type { Slide } from "yet-another-react-lightbox";
@@ -37,6 +40,8 @@ const ScoreViewer: FC<{
 }> = ({ fileName, musicBrainzId, userId, scoreUrls, scoreType }) => {
   const [pdfPageCount, setPdfPageCount] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const { fullscreenRef, thumbnailsRef } = useScoreViewerControls();
 
   useEffect(() => {
     if (scoreType !== "pdf" || !scoreUrls[0]) return;
@@ -100,8 +105,18 @@ const ScoreViewer: FC<{
           finite: true,
           preload: 2,
         }}
+        fullscreen={{
+          ref: fullscreenRef,
+        }}
         thumbnails={{
-          showToggle: true,
+          ref: thumbnailsRef,
+        }}
+        toolbar={{
+          buttons: [
+            <ScoreViewerToolsMenu key="tools" />,
+            <ScoreViewerSettingsMenu key="settings" />,
+            "close",
+          ],
         }}
         slides={slides}
         render={{
@@ -124,8 +139,12 @@ const ScoreViewer: FC<{
               isThumbnail
             />
           ),
-          buttonPrev: slides.length <= 1 ? () => null : undefined,
+          buttonDownload: () => null,
+          buttonFullscreen: () => null,
           buttonNext: slides.length <= 1 ? () => null : undefined,
+          buttonPrev: slides.length <= 1 ? () => null : undefined,
+          buttonThumbnails: () => null,
+          buttonZoom: () => null,
         }}
       />
     </>

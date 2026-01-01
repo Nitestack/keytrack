@@ -19,9 +19,7 @@ import { useTuner } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-vie
 
 import type { FC } from "react";
 
-const Tuner: FC<{
-  fullScreenEl?: Element;
-}> = ({ fullScreenEl }) => {
+const Tuner: FC = () => {
   const isListening = useTunerStore((state) => state.isListening);
 
   const { error, handleToggleListening } = useTuner();
@@ -30,7 +28,7 @@ const Tuner: FC<{
     <Card shadow="none">
       <CardBody className="flex flex-col items-center gap-4 select-none">
         {error && <Alert color="danger" title={error.message} />}
-        <TunerMicSelect fullScreenEl={fullScreenEl} />
+        <TunerMicSelect />
         <TunerNoteDisplay />
         <TunerNeedle />
         <TunerFrequencyDisplay />
