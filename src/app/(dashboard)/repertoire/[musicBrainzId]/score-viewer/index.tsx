@@ -113,6 +113,7 @@ const ScoreViewer: FC<{
         }}
         toolbar={{
           buttons: [
+            "download",
             <ScoreViewerToolsMenu key="tools" />,
             <ScoreViewerSettingsMenu key="settings" />,
             "close",
@@ -139,7 +140,6 @@ const ScoreViewer: FC<{
               isThumbnail
             />
           ),
-          buttonDownload: () => null,
           buttonFullscreen: () => null,
           buttonNext: slides.length <= 1 ? () => null : undefined,
           buttonPrev: slides.length <= 1 ? () => null : undefined,
