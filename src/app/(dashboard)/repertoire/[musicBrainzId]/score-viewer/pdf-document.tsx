@@ -46,7 +46,7 @@ const PdfViewerDocument: FC<{
             key={pageNum}
             pageNum={pageNum}
             isThumbnail={isThumbnail}
-            className="flex items-center justify-center bg-white shadow-2xl page-frame"
+            className="flex items-center justify-center bg-white page-frame"
             style={{
               height,
               width,
