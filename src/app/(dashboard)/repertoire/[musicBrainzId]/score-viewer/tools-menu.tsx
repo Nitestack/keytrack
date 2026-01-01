@@ -10,14 +10,7 @@ import { Modal, ModalContent } from "@heroui/modal";
 import { Tab, Tabs } from "@heroui/tabs";
 import { useDisclosure } from "@heroui/use-disclosure";
 
-import {
-  AudioLines,
-  Ellipsis,
-  Music,
-  Music3,
-  SlidersVertical,
-  Timer,
-} from "lucide-react";
+import { AudioLines, Music3, SlidersVertical, Timer } from "lucide-react";
 
 import { useState } from "react";
 
