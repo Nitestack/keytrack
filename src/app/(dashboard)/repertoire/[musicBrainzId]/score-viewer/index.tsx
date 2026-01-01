@@ -144,7 +144,6 @@ const ScoreViewer: FC<{
           buttonNext: slides.length <= 1 ? () => null : undefined,
           buttonPrev: slides.length <= 1 ? () => null : undefined,
           buttonThumbnails: () => null,
-          buttonZoom: () => null,
         }}
       />
     </>
