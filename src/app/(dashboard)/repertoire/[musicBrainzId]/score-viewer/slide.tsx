@@ -39,14 +39,16 @@ const ScoreViewerSlide: FC<{
 
   return scoreType === "pdf" ? (
     <PdfDocument
-      {...slide}
+      pageIndex={slide.pageIndex}
+      nextPageIndex={slide.nextPageIndex}
       {...dims.primary}
       file={scoreUrls[0]}
       isThumbnail={isThumbnail}
     />
   ) : (
     <ImageViewer
-      {...slide}
+      pageIndex={slide.pageIndex}
+      nextPageIndex={slide.nextPageIndex}
       {...dims.primary}
       {...dims.secondary}
       imageUrls={scoreUrls}
