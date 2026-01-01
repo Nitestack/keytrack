@@ -1,3 +1,5 @@
+import { NextResponse } from "next/server";
+
 import { onError } from "@orpc/server";
 import { RPCHandler } from "@orpc/server/fetch";
 
@@ -18,7 +20,7 @@ async function handleRequest(request: Request) {
     context: await createRPCContext(request),
   });
 
-  return response ?? new Response("Not found", { status: 404 });
+  return response ?? new NextResponse("Not found", { status: 404 });
 }
 
 // https://nextjs.org/docs/app/api-reference/file-conventions/route#http-methods

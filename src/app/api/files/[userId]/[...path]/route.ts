@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { basename, extname, join, normalize } from "node:path";
-import { PassThrough } from "node:stream";
+import { Readable } from "node:stream";
 
 import archiver from "archiver";
 
@@ -69,16 +69,14 @@ export async function GET(
       statSync(normalizedPath).isDirectory()
     ) {
       const archive = archiver("zip", { zlib: { level: 9 } });
-      const stream = new PassThrough();
 
-      archive.pipe(stream);
       archive.directory(normalizedPath, false);
       archive.finalize().catch((err) => console.error("Archiver failed:", err));
 
       let downloadName = customFilename ?? "score.zip";
       if (!downloadName.endsWith(".zip")) downloadName += ".zip";
 
-      return new NextResponse(stream, {
+      return new NextResponse(Readable.toWeb(archive) as BodyInit, {
         headers: {
           "Content-Type": "application/zip",
           "Content-Disposition": `attachment; filename="${encodeURIComponent(downloadName)}"`,
