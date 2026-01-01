@@ -1,6 +1,5 @@
 import { ORPCError, os } from "@orpc/server";
 
-import { env } from "~/env";
 import { auth } from "~/lib/auth/server";
 import { db } from "~/server/db";
 
