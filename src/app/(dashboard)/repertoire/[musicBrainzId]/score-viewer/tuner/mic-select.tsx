@@ -5,19 +5,20 @@ import { Select, SelectItem } from "@heroui/select";
 import { Mic } from "lucide-react";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
+import { useLightboxPortalTarget } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/use-lightbox-portal";
 
 import type { SharedSelection } from "@heroui/react";
 import type { FC } from "react";
 
-const TunerMicSelect: FC<{
-  fullScreenEl?: Element;
-}> = ({ fullScreenEl }) => {
+const TunerMicSelect: FC = () => {
   const audioDevices = useTunerStore((state) => state.audioDevices);
   const selectedDeviceId = useTunerStore((state) => state.selectedDeviceId);
   const setSelectedDeviceId = useTunerStore(
     (state) => state.setSelectedDeviceId,
   );
   const isListening = useTunerStore((state) => state.isListening);
+
+  const portalContainer = useLightboxPortalTarget();
 
   function handleSelectionChange(keys: SharedSelection) {
     const selectedKey =
@@ -38,7 +39,7 @@ const TunerMicSelect: FC<{
         onSelectionChange={handleSelectionChange}
         isDisabled={isListening}
         popoverProps={{
-          portalContainer: fullScreenEl,
+          portalContainer,
         }}
         items={audioDevices}
         startContent={<Mic size={16} />}

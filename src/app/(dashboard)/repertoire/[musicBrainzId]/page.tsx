@@ -5,6 +5,7 @@ import { redirect, unauthorized } from "next/navigation";
 
 import { client } from "~/api/orpc";
 import ScoreViewer from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer";
+import { ScoreViewerProvider } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/context";
 import DashboardLayout from "~/components/dashboard-layout";
 import { auth } from "~/lib/auth/server";
 
@@ -38,13 +39,15 @@ export default async function RepertoirePiecePage({
           </div>
         </CardHeader>
         <CardFooter>
-          <ScoreViewer
-            musicBrainzId={piece.id}
-            userId={session.user.id}
-            fileName={`${piece.title}${piece.arrangement ? ` (${piece.arrangement})` : ""} - ${piece.composer}`}
-            scoreUrls={piece.scoreUrls}
-            scoreType={piece.scoreType}
-          />
+          <ScoreViewerProvider>
+            <ScoreViewer
+              musicBrainzId={piece.id}
+              userId={session.user.id}
+              fileName={`${piece.title}${piece.arrangement ? ` (${piece.arrangement})` : ""} - ${piece.composer}`}
+              scoreUrls={piece.scoreUrls}
+              scoreType={piece.scoreType}
+            />
+          </ScoreViewerProvider>
         </CardFooter>
       </Card>
     </DashboardLayout>
