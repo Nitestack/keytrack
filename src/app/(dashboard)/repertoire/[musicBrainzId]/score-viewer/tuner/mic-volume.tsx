@@ -29,6 +29,7 @@ const TunerMicVolume: FC = () => {
         value={volume}
         className="flex-1"
         color={volume > 70 ? "danger" : volume > 30 ? "primary" : "default"}
+        aria-label="Microphone volume"
       />
       <span className="min-w-8 text-right text-sm">{Math.round(volume)}%</span>
     </div>

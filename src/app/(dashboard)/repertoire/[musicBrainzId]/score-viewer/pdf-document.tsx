@@ -36,7 +36,11 @@ const PdfViewerDocument: FC<{
       className="size-full"
       loading={
         <div className="flex items-center justify-center size-full">
-          <Progress isIndeterminate size="sm" />
+          <Progress
+            isIndeterminate
+            size="sm"
+            aria-label="Loading PDF document..."
+          />
         </div>
       }
     >
@@ -58,7 +62,12 @@ const PdfViewerDocument: FC<{
               pageNumber={pageNum}
               renderTextLayer={false}
               renderAnnotationLayer={false}
-              loading={<CircularProgress size="lg" />}
+              loading={
+                <CircularProgress
+                  size="lg"
+                  aria-label={`Loading page ${pageNum}...`}
+                />
+              }
               error={
                 <Alert
                   className="light"
