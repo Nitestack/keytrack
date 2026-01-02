@@ -82,6 +82,7 @@ const IMSLPDiscover: FC = () => {
   return imslpScores.length >= 1 ? (
     <div className="space-y-4">
       <Autocomplete
+        aria-label="Select IMSLP score"
         fullWidth
         defaultInputValue={
           selectedImslpScore ? toInputValue(selectedImslpScore) : undefined

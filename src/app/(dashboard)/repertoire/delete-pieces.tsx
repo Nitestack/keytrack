@@ -52,7 +52,12 @@ const RemovePieces: FC<{
 
   return (
     <>
-      <Button isIconOnly color="danger" onPress={onOpen}>
+      <Button
+        aria-label="Delete piece"
+        isIconOnly
+        color="danger"
+        onPress={onOpen}
+      >
         <Trash size={16} />
       </Button>
       <Modal size="xl" isOpen={isOpen} onOpenChange={onOpenChange}>

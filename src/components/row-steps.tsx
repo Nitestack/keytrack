@@ -202,12 +202,12 @@ const RowSteps: FC<
                         transition={{ duration: 0.25 }}
                         variants={{
                           inactive: {
-                            backgroundColor: "transparent",
+                            backgroundColor: "rgba(0, 0, 0, 0)",
                             borderColor: "var(--inactive-border-color)",
                             color: "var(--inactive-color)",
                           },
                           active: {
-                            backgroundColor: "transparent",
+                            backgroundColor: "rgba(0, 0, 0, 0)",
                             borderColor: "var(--active-border-color)",
                             color: "var(--active-color)",
                           },

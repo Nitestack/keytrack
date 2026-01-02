@@ -44,7 +44,11 @@ const RepertoireGridItemCard: FC<RepertoirePiece> = ({
     >
       <CardHeader>
         {isSelectMode ? (
-          <Checkbox isSelected={isSelected} onValueChange={handleValueChange}>
+          <Checkbox
+            aria-label={title}
+            isSelected={isSelected}
+            onValueChange={handleValueChange}
+          >
             <RepertoireGridItemUserContent
               title={title}
               composer={composer}

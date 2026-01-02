@@ -43,6 +43,7 @@ const RepertoireFilter: FC<{ listView: ReactNode; gridView: ReactNode }> = ({
         <RepertoireSelect />
         <ButtonGroup>
           <Button
+            aria-label="Grid view"
             isIconOnly
             isDisabled={currentView === "grid"}
             onPress={() => handleView("grid")}
@@ -50,6 +51,7 @@ const RepertoireFilter: FC<{ listView: ReactNode; gridView: ReactNode }> = ({
             <LayoutGrid />
           </Button>
           <Button
+            aria-label="List view"
             isIconOnly
             isDisabled={currentView === "list"}
             onPress={() => handleView("list")}

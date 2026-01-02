@@ -82,6 +82,7 @@ const SearchPiece: FC = () => {
 
   return (
     <Autocomplete
+      aria-label="Search piece"
       fullWidth
       isLoading={isPending}
       onInputChange={(value) => handleInputChange(value)}
