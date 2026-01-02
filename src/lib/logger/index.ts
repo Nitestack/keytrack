@@ -4,7 +4,9 @@ import { env } from "~/env";
 
 export const logger = pino({
   level:
-    typeof window === "undefined" ? env.LOG_LEVEL : env.NEXT_PUBLIC_LOG_LEVEL,
+    typeof window === "undefined"
+      ? (env.LOG_LEVEL ?? "info")
+      : (env.NEXT_PUBLIC_LOG_LEVEL ?? "error"),
   browser: {
     asObject: true,
   },
