@@ -22,7 +22,7 @@ const Navbar: FC = async () => {
       <NavbarLinks />
       <NavbarAccount initialUser={session?.user} />
       <NavbarMenuToggle className="text-default-400 md:hidden" />
-      <NavbarMobile initialUser={session?.user} />
+      <NavbarMobile />
     </NavbarWrapper>
   );
 };
