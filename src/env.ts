@@ -3,15 +3,11 @@ import { z } from "zod";
 
 import type { LevelWithSilentOrString } from "pino";
 
-const logLevelSchema = z.enum<LevelWithSilentOrString[]>([
-  "fatal",
-  "error",
-  "warn",
-  "info",
-  "debug",
-  "trace",
-  "silent",
-]);
+const logLevelSchema = z
+  .enum<
+    LevelWithSilentOrString[]
+  >(["fatal", "error", "warn", "info", "debug", "trace", "silent"])
+  .optional();
 
 export const env = createEnv({
   server: {
@@ -29,7 +25,7 @@ export const env = createEnv({
         : z.string().prefault("localhost"), // must be required because of Drizzle
     DB_NAME: z.string(), // must be required because of Drizzle
     DB_PORT: z.string().optional(),
-    LOG_LEVEL: logLevelSchema.prefault("info"),
+    LOG_LEVEL: logLevelSchema,
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .prefault("development"),
@@ -38,7 +34,7 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    NEXT_PUBLIC_LOG_LEVEL: logLevelSchema.prefault("error"),
+    NEXT_PUBLIC_LOG_LEVEL: logLevelSchema,
   },
   runtimeEnv: {
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
