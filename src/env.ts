@@ -26,7 +26,7 @@ export const env = createEnv({
         : z.string().prefault("localhost"), // must be required because of Drizzle
     DB_NAME: z.string(), // must be required because of Drizzle
     DB_PORT: z.string().optional(),
-    PORT: z.coerce.number(),
+    PORT: z.coerce.number().optional(),
     LOG_LEVEL: logLevelSchema,
     NODE_ENV: z
       .enum(["development", "test", "production"])
