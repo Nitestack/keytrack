@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs-extra";
 import sharp from "sharp";
 
+import { logger } from "~/lib/logger";
 import {
   SUPPORTED_IMAGE_CONTENT_TYPES,
   SUPPORTED_IMAGE_FORMATS,
@@ -137,7 +138,7 @@ export async function getScoreUrls(
         return `/api/files${relativePath.replace(/\\/g, "/")}`;
       });
     } catch (err) {
-      console.error("Error getting image paths:", err);
+      logger.error(err, "Error getting image paths:");
       return [];
     }
   }
@@ -369,7 +370,7 @@ export async function deleteScore(
       }
     }
   } catch (error) {
-    console.error("Failed to delete score files:", error);
+    logger.error(error, "Failed to delete score files");
     // Don't throw - we still want to delete from DB even if file deletion fails
   }
 }

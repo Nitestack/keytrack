@@ -12,6 +12,7 @@ import { useScoreViewerControls } from "~/app/(dashboard)/repertoire/[musicBrain
 import ScoreViewerSettingsMenu from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/settings-menu";
 import ScoreViewerSlide from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/slide";
 import ScoreViewerToolsMenu from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tools-menu";
+import { logger } from "~/lib/logger";
 
 import type { FC } from "react";
 import type { Slide } from "yet-another-react-lightbox";
@@ -57,7 +58,7 @@ const ScoreViewer: FC<{
         const pdf = await pdfjs.getDocument(scoreUrls[0]).promise;
         setPdfPageCount(pdf.numPages);
       } catch (error) {
-        console.error("Failed to load PDF metadata", error);
+        logger.error(error, "Failed to load PDF metadata");
       }
     };
 

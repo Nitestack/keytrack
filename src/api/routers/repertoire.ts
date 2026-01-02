@@ -54,7 +54,6 @@ export const repertoireRouter = {
         ],
       );
       if (searchResult.status === "rejected") {
-        console.error(searchResult.reason);
         throw new ORPCError("NOT_FOUND");
       }
       if (dbRepertoirePiecesResult.status === "rejected")
@@ -285,12 +284,8 @@ export const repertoireRouter = {
       );
 
       return results
-        .map((result, index) => {
+        .map((result) => {
           if (result.status === "fulfilled") return result.value;
-          console.error(
-            `Failed to process piece PDF URL for ${pieces[index]?.musicBrainzId}:`,
-            result.reason,
-          );
           return undefined;
         })
         .filter(Boolean);

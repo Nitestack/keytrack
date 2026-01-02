@@ -8,6 +8,7 @@ import { Readable } from "node:stream";
 import archiver from "archiver";
 
 import { auth } from "~/lib/auth/server";
+import { logger } from "~/lib/logger";
 import { getContentType } from "~/services/file-storage";
 
 import type { NextRequest } from "next/server";
@@ -71,7 +72,7 @@ export async function GET(
       const archive = archiver("zip", { zlib: { level: 9 } });
 
       archive.directory(normalizedPath, false);
-      archive.finalize().catch((err) => console.error("Archiver failed:", err));
+      archive.finalize().catch((err) => logger.error(err, "Archiver failed:"));
 
       let downloadName = customFilename ?? "score.zip";
       if (!downloadName.endsWith(".zip")) downloadName += ".zip";
@@ -123,7 +124,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("File serving error:", error);
+    logger.error(error, "File serving error:");
     return NextResponse.json(
       { error: "Failed to serve file" },
       { status: 500 },
