@@ -23,7 +23,7 @@ const NavbarLinks: FC = () => {
             className="data-[active='true']:font-medium[date-active='true']"
           >
             <NextLink
-              aria-current="page"
+              aria-current={isActive ? "page" : undefined}
               className={cn(
                 "text-sm",
                 isActive ? "text-default-foreground" : "text-default-500",
