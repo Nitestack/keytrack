@@ -6,6 +6,7 @@ import { PitchDetector } from "pitchy";
 import { Analyser, getContext, Meter, start, UserMedia } from "tone";
 
 import { useTunerStore } from "~/app/(dashboard)/repertoire/[musicBrainzId]/score-viewer/tuner/store";
+import { logger } from "~/lib/logger";
 import {
   frequencyToNote,
   getSemitonesByTransposeKey,
@@ -163,7 +164,7 @@ export function useTuner() {
       };
       updatePitch();
     } catch (err) {
-      console.error("Error accessing microphone:", err);
+      logger.error(err, "Error accessing microphone:");
       if (err instanceof DOMException) {
         switch (err.name) {
           case "NotAllowedError":
@@ -237,7 +238,7 @@ export function useTuner() {
       try {
         await start();
       } catch (e) {
-        console.error("Error starting AudioContext:", e);
+        logger.error(e, "Error starting AudioContext:");
         setError({
           type: "unknown",
           message: "Could not initialize audio. Please try again.",

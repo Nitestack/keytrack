@@ -1,5 +1,6 @@
 import "server-only";
 
+import { logger } from "~/lib/logger";
 import { mbApi } from "~/server/musicbrainz";
 
 import type { IWork, IWorkMatch } from "musicbrainz-api";
@@ -99,7 +100,7 @@ export async function getWorkById(id: string) {
   try {
     return toMBWork(await mbApi.lookup("work", id, ["artist-rels"]));
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return undefined;
   }
 }
@@ -149,7 +150,7 @@ export async function getImslpURLByWorkId(id: string) {
 
     return imslpUrl;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return undefined;
   }
 }

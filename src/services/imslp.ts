@@ -2,6 +2,8 @@ import "server-only";
 
 import { load } from "cheerio";
 
+import { logger } from "~/lib/logger";
+
 /**
  * IMSLP score object (scraped from IMSLP wiki page)
  */
@@ -102,7 +104,7 @@ export async function getPdfUrlByIndex(url: string) {
 
     return alternativeFileUrl;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     return undefined;
   }
 }
@@ -216,7 +218,7 @@ export async function getScoresByWikiUrl(
           });
       });
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
   /**
    * Sorting Rules:

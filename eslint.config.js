@@ -40,6 +40,14 @@ export default defineConfig(
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
       ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "CallExpression[callee.object.name='console']",
+          message:
+            "⚠️ Don't use console. Please use the 'pino' logger for structured logging.",
+        },
+      ],
     },
   },
   {
