@@ -8,7 +8,6 @@ import {
   DropdownTrigger,
 } from "@heroui/dropdown";
 import { NavbarContent, NavbarItem } from "@heroui/navbar";
-import { CircularProgress } from "@heroui/progress";
 import { User } from "@heroui/user";
 
 import { ChevronRight } from "lucide-react";
@@ -18,25 +17,31 @@ import { useRouter } from "next/navigation";
 import { auth, signIn } from "~/lib/auth/client";
 
 import type { FC } from "react";
+import type { ServerSession } from "~/lib/auth/server";
 
-const NavbarAccount: FC = () => {
+const NavbarAccount: FC<{ initialUser?: ServerSession["user"] }> = ({
+  initialUser,
+}) => {
   const { data: session, isPending } = auth.useSession();
   const router = useRouter();
+
+  const user = isPending ? initialUser : session?.user;
+
   return (
     <NavbarContent className="hidden md:flex" justify="end">
       <NavbarItem className="ml-2">
-        {session ? (
+        {user ? (
           <Dropdown placement="bottom-end">
             <DropdownTrigger>
               <User
                 as="button"
                 avatarProps={{
                   isBordered: true,
-                  src: session.user.image ?? undefined,
+                  src: user.image ?? undefined,
                 }}
                 className="transition-transform"
-                description={session.user.email}
-                name={session.user.name}
+                description={user.email}
+                name={user.name}
               />
             </DropdownTrigger>
             <DropdownMenu
@@ -46,8 +51,8 @@ const NavbarAccount: FC = () => {
             >
               <DropdownItem key="profile" className="gap-2">
                 <p className="font-semibold">Signed in as</p>
-                <p className="font-semibold">{session.user.name}</p>
-                <p>{session.user.email}</p>
+                <p className="font-semibold">{user.name}</p>
+                <p>{user.email}</p>
               </DropdownItem>
               <DropdownItem
                 onPress={() =>
@@ -64,7 +69,7 @@ const NavbarAccount: FC = () => {
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
-        ) : !isPending ? (
+        ) : (
           <Button
             className="bg-default-foreground text-background font-medium"
             color="secondary"
@@ -75,8 +80,6 @@ const NavbarAccount: FC = () => {
           >
             Get Started
           </Button>
-        ) : (
-          <CircularProgress size="sm" />
         )}
       </NavbarItem>
     </NavbarContent>
