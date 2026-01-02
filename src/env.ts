@@ -11,6 +11,7 @@ const logLevelSchema = z
 
 export const env = createEnv({
   server: {
+    BETTER_AUTH_URL: z.url(),
     BETTER_AUTH_SECRET:
       process.env.NODE_ENV === "production"
         ? z.string()
@@ -25,6 +26,7 @@ export const env = createEnv({
         : z.string().prefault("localhost"), // must be required because of Drizzle
     DB_NAME: z.string(), // must be required because of Drizzle
     DB_PORT: z.string().optional(),
+    PORT: z.coerce.number(),
     LOG_LEVEL: logLevelSchema,
     NODE_ENV: z
       .enum(["development", "test", "production"])
@@ -37,6 +39,7 @@ export const env = createEnv({
     NEXT_PUBLIC_LOG_LEVEL: logLevelSchema,
   },
   runtimeEnv: {
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
     GOOGLE_ID: process.env.GOOGLE_ID,
     GOOGLE_SECRET: process.env.GOOGLE_SECRET,
@@ -45,6 +48,7 @@ export const env = createEnv({
     DB_HOST: process.env.DB_HOST,
     DB_NAME: process.env.DB_NAME,
     DB_PORT: process.env.DB_PORT,
+    PORT: process.env.PORT,
     NODE_ENV: process.env.NODE_ENV,
     LOG_LEVEL: process.env.LOG_LEVEL,
     NEXT_PUBLIC_LOG_LEVEL: process.env.NEXT_PUBLIC_LOG_LEVEL,
