@@ -49,7 +49,11 @@ const NavbarAccount: FC<{ initialUser?: ServerSession["user"] }> = ({
               aria-label="Profile Actions"
               variant="flat"
             >
-              <DropdownItem key="profile" className="gap-2">
+              <DropdownItem
+                key="profile"
+                className="gap-2"
+                textValue={`Signed in as ${user.name}`}
+              >
                 <p className="font-semibold">Signed in as</p>
                 <p className="font-semibold">{user.name}</p>
                 <p>{user.email}</p>
