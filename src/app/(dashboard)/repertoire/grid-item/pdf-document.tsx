@@ -16,7 +16,10 @@ const RepertoireGridItemPdfDocument: FC<{ file: DocumentProps["file"] }> = ({
   file,
 }) => {
   return (
-    <Document file={file} loading={<CircularProgress />}>
+    <Document
+      file={file}
+      loading={<CircularProgress aria-label="Loading PDF preview..." />}
+    >
       <Page
         pageNumber={1}
         renderTextLayer={false}

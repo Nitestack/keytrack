@@ -44,6 +44,7 @@ const ScoreURL: FC = () => {
 
     if (validateItems("input", newScoreUrls, setError)) {
       setScoreUrls(newScoreUrls);
+      setCurrentUrl("");
     }
   }
 
@@ -53,7 +54,6 @@ const ScoreURL: FC = () => {
         <Input
           type="url"
           aria-label="Score URL"
-          labelPlacement="outside"
           placeholder="Enter URL"
           value={currentUrl}
           onValueChange={setCurrentUrl}
@@ -63,7 +63,9 @@ const ScoreURL: FC = () => {
         <Button
           color="primary"
           onPress={handleAddUrl}
-          isDisabled={!currentUrl.trim()}
+          isDisabled={
+            !currentUrl.trim() || scoreUrls.includes(currentUrl.trim())
+          }
         >
           Add
         </Button>

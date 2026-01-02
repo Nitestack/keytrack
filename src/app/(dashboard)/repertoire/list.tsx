@@ -9,12 +9,13 @@ const RepertoireList: FC<{
   pieces: RouterOutputs["repertoire"]["getPieces"];
 }> = ({ pieces }) => {
   return (
-    <Listbox variant="faded">
+    <Listbox variant="faded" aria-label="Repertoire list">
       {pieces.map((piece) => (
         <ListboxItem
           key={piece.id}
           description={piece.composer}
           href={`/repertoire/${piece.id}`}
+          textValue={piece.title}
         >
           <p>
             {piece.title}
