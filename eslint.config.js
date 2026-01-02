@@ -47,6 +47,17 @@ export default defineConfig(
           message:
             "⚠️ Don't use console. Please use the 'pino' logger for structured logging.",
         },
+        {
+          selector:
+            // any import from '@heroui/react' except type imports
+            "ImportDeclaration[source.value='@heroui/react'][importKind!='type'] " +
+            // any named import except named type imports
+            "> ImportSpecifier[importKind!='type']" +
+            // exclude allowed names
+            ":not([imported.name='cn'])",
+          message:
+            "❌ RSC Warning: Importing from '@heroui/react' forces 'use client'. Please import this component directly from its package (e.g., '@heroui/button') to keep server component support.",
+        },
       ],
     },
   },
