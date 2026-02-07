@@ -80,29 +80,15 @@ export async function getPdfUrlByIndex(url: string) {
     const response = await fetch(url, {
       method: "GET",
       headers: {
-        Cookie: "imslpdisclaimeraccepted=yes; disclaimer_bypass=OK", // `imslpdisclaimeraccepted` is set when accepting the IMSLP disclaimer with the button
+        Cookie:
+          "imslpdisclaimeraccepted=yes; redirectPassed=1; disclaimer_bypass=OK",
       },
       redirect: "follow",
     });
 
     if (!response.ok) return undefined;
 
-    const $ = load(await response.text());
-
-    let alternativeFileUrl: string | undefined;
-
-    // clicking on index link automatically redirects to this path
-    const fileUrlPath = $("a.bigbutton").attr("href");
-
-    if (fileUrlPath) {
-      return new URL(response.url).origin + fileUrlPath;
-    } else {
-      // clicking on index link and then clicking on download link
-      alternativeFileUrl ??=
-        decodeURI($("body center span").attr("data-id") ?? "") || undefined;
-    }
-
-    return alternativeFileUrl;
+    return response.url;
   } catch (err) {
     logger.error(err);
     return undefined;
