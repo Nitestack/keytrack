@@ -8,19 +8,19 @@ import * as schema from "~/server/db/schema";
  * Cache the database connection in development. This avoids creating a new connection on every HMR
  * update.
  */
-const globalForDb = globalThis as unknown as {
+const globalForDatabase = globalThis as unknown as {
   conn: postgres.Sql | undefined;
 };
 
 const conn =
-  globalForDb.conn ??
+  globalForDatabase.conn ??
   postgres({
     user: env.DB_USER,
     password: env.DB_PASSWORD,
     database: env.DB_NAME,
-    port: env.DB_PORT ? parseInt(env.DB_PORT) : undefined,
+    port: env.DB_PORT ? Number.parseInt(env.DB_PORT) : undefined,
     host: env.DB_HOST,
   });
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
+if (env.NODE_ENV !== "production") globalForDatabase.conn = conn;
 
 export const db = drizzle(conn, { schema });

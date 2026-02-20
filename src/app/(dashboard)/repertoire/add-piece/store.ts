@@ -30,7 +30,7 @@ function isPDF(item: string | File) {
 function isImage(item: string | File) {
   return typeof item === "string"
     ? SUPPORTED_IMAGE_FORMATS.some((format) => item.endsWith(format))
-    : SUPPORTED_IMAGE_MIME_TYPES.some((mimeType) => item.type === mimeType);
+    : SUPPORTED_IMAGE_MIME_TYPES.includes(item.type);
 }
 
 export function validateItems(
@@ -47,10 +47,10 @@ export function validateItems(
     return false;
   }
 
-  const itemList = Array.from<string | File>(items);
+  const itemList = [...items];
 
-  const hasPDF = itemList.some(isPDF);
-  const hasImages = itemList.some(isImage);
+  const hasPDF = itemList.some((item) => isPDF(item));
+  const hasImages = itemList.some((item) => isImage(item));
 
   if (hasPDF && hasImages) {
     setError(
@@ -67,15 +67,13 @@ export function validateItems(
   }
 
   if (
-    itemList.filter((item) =>
+    itemList.some((item) =>
       typeof item === "string"
         ? !item.endsWith(".pdf") &&
           !SUPPORTED_IMAGE_FORMATS.some((format) => item.endsWith(format))
         : item.type !== "application/pdf" &&
-          !SUPPORTED_IMAGE_MIME_TYPES.some(
-            (mimeType) => item.type === mimeType,
-          ),
-    ).length > 0
+          !SUPPORTED_IMAGE_MIME_TYPES.includes(item.type),
+    )
   ) {
     setError(
       `Invalid ${itemType} type. Only PDF and image ${itemType}s are supported.`,
@@ -234,22 +232,22 @@ export const useAddRepertoirePieceStore =
       }),
     mode: () => {
       const scoreSelectionMode = get().scoreSelectionMode;
-      if (scoreSelectionMode === "imslp") return undefined;
+      if (scoreSelectionMode === "imslp") return;
 
       if (scoreSelectionMode === "upload") {
-        const files = Array.from(get().uploadedScoreFiles ?? []);
+        const files = [...(get().uploadedScoreFiles ?? [])];
 
-        return files.some(isPDF)
+        return files.some((file) => isPDF(file))
           ? "pdf"
-          : files.some(isImage)
+          : files.some((file) => isImage(file))
             ? "images"
             : undefined;
       } else {
         const scoreUrls = get().scoreUrls ?? [];
 
-        return scoreUrls.some(isPDF)
+        return scoreUrls.some((url) => isPDF(url))
           ? "pdf"
-          : scoreUrls.some(isImage)
+          : scoreUrls.some((url) => isImage(url))
             ? "images"
             : undefined;
       }

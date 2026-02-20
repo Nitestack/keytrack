@@ -128,7 +128,7 @@ const AddPiece: FC = () => {
         if (mode === "pdf") params.pdfUrl = scoreUrls[0]!;
         else params.imageUrls = scoreUrls;
       } else if (scoreSelectionMode === "upload" && uploadedScoreFiles) {
-        params.files = Array.from(uploadedScoreFiles);
+        params.files = [...uploadedScoreFiles];
       }
       addPiece(params);
     } else {

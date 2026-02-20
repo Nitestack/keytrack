@@ -121,34 +121,41 @@ const RowSteps: FC<
     ];
 
     switch (color) {
-      case "primary":
+      case "primary": {
         userColor = "[--step-color:hsl(var(--heroui-primary))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-primary-foreground))]";
         break;
-      case "secondary":
+      }
+      case "secondary": {
         userColor = "[--step-color:hsl(var(--heroui-secondary))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-secondary-foreground))]";
         break;
-      case "success":
+      }
+      case "success": {
         userColor = "[--step-color:hsl(var(--heroui-success))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-success-foreground))]";
         break;
-      case "warning":
+      }
+      case "warning": {
         userColor = "[--step-color:hsl(var(--heroui-warning))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-warning-foreground))]";
         break;
-      case "danger":
+      }
+      case "danger": {
         userColor = "[--step-color:hsl(var(--heroui-error))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-error-foreground))]";
         break;
-      case "default":
+      }
+      case "default": {
         userColor = "[--step-color:hsl(var(--heroui-default))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-default-foreground))]";
         break;
-      default:
+      }
+      default: {
         userColor = "[--step-color:hsl(var(--heroui-primary))]";
         fgColor = "[--step-fg-color:hsl(var(--heroui-primary-foreground))]";
         break;
+      }
     }
 
     if (!className?.includes("--step-fg-color")) colorsVars.unshift(fgColor);

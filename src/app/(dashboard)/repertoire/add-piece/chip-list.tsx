@@ -22,13 +22,13 @@ const ChipList: FC<{
   const mode = useAddRepertoirePieceStore((state) => state.mode());
   const items = useAddRepertoirePieceStore(
     (state) =>
-      state.scoreSelectionMode !== "imslp"
-        ? state.scoreSelectionMode === "upload"
+      state.scoreSelectionMode === "imslp"
+        ? undefined
+        : state.scoreSelectionMode === "upload"
           ? state.uploadedScoreFiles
-            ? Array.from(state.uploadedScoreFiles).map((file) => file.name)
+            ? [...state.uploadedScoreFiles].map((file) => file.name)
             : undefined
-          : state.scoreUrls
-        : undefined,
+          : state.scoreUrls,
     (a, b) => {
       if (a === undefined && b === undefined) return true;
       if (a === undefined || b === undefined) return false;

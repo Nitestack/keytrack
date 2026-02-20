@@ -86,12 +86,12 @@ export async function getPdfUrlByIndex(url: string) {
       redirect: "follow",
     });
 
-    if (!response.ok) return undefined;
+    if (!response.ok) return;
 
     return response.url;
   } catch (err) {
     logger.error(err);
-    return undefined;
+    return;
   }
 }
 
@@ -172,7 +172,7 @@ export async function getScoresByWikiUrl(
               .split("-");
             if (!unresolvedId || !unresolvedScoreData) return;
 
-            const id = unresolvedId.replace(/\D/g, ""); // only include digits (ID is a number)
+            const id = unresolvedId.replaceAll(/\D/g, ""); // only include digits (ID is a number)
 
             const [unresolvedFileSize, unresolvedPages] = unresolvedScoreData
               .trim()
@@ -213,15 +213,15 @@ export async function getScoresByWikiUrl(
    * 3. whether the title is not "Complete Score"
    * 4. title
    */
-  return scores.sort(
+  return scores.toSorted(
     (a, b) =>
       (a.isUrtext ? -1 : b.isUrtext ? 1 : 0) ||
       a.publisher.name.localeCompare(b.publisher.name) ||
-      (!a.title.toLowerCase().includes("complete score")
-        ? -1
-        : !b.title.toLowerCase().includes("complete score")
-          ? 1
-          : 0) ||
+      (a.title.toLowerCase().includes("complete score")
+        ? b.title.toLowerCase().includes("complete score")
+          ? 0
+          : 1
+        : -1) ||
       a.title.localeCompare(b.title),
   );
 }

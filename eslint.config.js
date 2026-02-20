@@ -2,6 +2,7 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 // @ts-expect-error missing types
 import drizzle from "eslint-plugin-drizzle";
+import unicorn from "eslint-plugin-unicorn";
 import { defineConfig, globalIgnores } from "eslint/config";
 import tseslint from "typescript-eslint";
 
@@ -11,6 +12,7 @@ export default defineConfig(
   ...tseslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
+  unicorn.configs.all,
   {
     plugins: {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -59,6 +61,22 @@ export default defineConfig(
             "❌ RSC Warning: Importing from '@heroui/react' forces 'use client'. Please import this component directly from its package (e.g., '@heroui/button') to keep server component support.",
         },
       ],
+      "unicorn/catch-error-name": [
+        "error",
+        {
+          name: "err",
+        },
+      ],
+      "unicorn/no-keyword-prefix": "off",
+      "unicorn/no-nested-ternary": "off",
+      "unicorn/no-null": "off",
+      "unicorn/prevent-abbreviations": "off",
+    },
+  },
+  {
+    files: ["src/server/db/**"],
+    rules: {
+      "unicorn/filename-case": "off",
     },
   },
   {

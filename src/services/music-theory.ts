@@ -87,7 +87,7 @@ export function frequencyToNote(
   frequency: number,
   baseFrequency = 440,
 ): NoteInfo | undefined {
-  if (frequency <= 0 || !isFinite(frequency)) return;
+  if (frequency <= 0 || !Number.isFinite(frequency)) return;
 
   const semitoneOffset = 12 * Math.log2(frequency / baseFrequency);
   const noteIndexRaw = chromaticNotes.indexOf("A") + semitoneOffset;

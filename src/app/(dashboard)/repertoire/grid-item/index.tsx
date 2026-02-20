@@ -10,13 +10,13 @@ import type { RepertoirePiece } from "~/services/repertoire";
 
 const RepertoireGridItemComponent: FC<RepertoirePiece> = (props) => {
   const isSelectMode = useRepertoireStore((state) => state.isSelectMode);
-  if (isSelectMode) return <RepertoireGridItemCard {...props} />;
-  else
-    return (
-      <NextLink href={`/repertoire/${props.id}`} passHref>
-        <RepertoireGridItemCard {...props} />
-      </NextLink>
-    );
+  return isSelectMode ? (
+    <RepertoireGridItemCard {...props} />
+  ) : (
+    <NextLink href={`/repertoire/${props.id}`} passHref>
+      <RepertoireGridItemCard {...props} />
+    </NextLink>
+  );
 };
 
 export default RepertoireGridItemComponent;

@@ -101,7 +101,7 @@ export async function getWorkById(id: string) {
     return toMBWork(await mbApi.lookup("work", id, ["artist-rels"]));
   } catch (err) {
     logger.error(err);
-    return undefined;
+    return;
   }
 }
 
@@ -114,12 +114,12 @@ export async function getImslpURLByWorkId(id: string) {
   try {
     const work = await mbApi.lookup("work", id, ["url-rels", "work-rels"]);
 
-    if (!hasRelations(work)) return undefined;
+    if (!hasRelations(work)) return;
 
     let imslpUrl: string | undefined;
 
     // if the piece is part of a collection, where only the collection has the IMSLP URL
-    if (work.relations.find((rel) => rel.type === "parts")) {
+    if (work.relations.some((rel) => rel.type === "parts")) {
       const partsWork = await mbApi.lookup(
         "work",
         (
@@ -130,7 +130,7 @@ export async function getImslpURLByWorkId(id: string) {
         ["url-rels", "work-rels"],
       );
 
-      if (!hasRelations(partsWork)) return undefined;
+      if (!hasRelations(partsWork)) return;
 
       imslpUrl = (
         partsWork.relations.find(
@@ -146,11 +146,11 @@ export async function getImslpURLByWorkId(id: string) {
       ) as unknown as { url: { resource: string } }
     )?.url?.resource;
 
-    if (!imslpUrl?.includes("imslp")) return undefined; // if the URL is not an IMSLP URL
+    if (!imslpUrl?.includes("imslp")) return; // if the URL is not an IMSLP URL
 
     return imslpUrl;
   } catch (err) {
     logger.error(err);
-    return undefined;
+    return;
   }
 }

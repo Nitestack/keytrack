@@ -43,7 +43,7 @@ const FileUpload: FC = () => {
     if (files) {
       const dataTransfer = new DataTransfer();
       for (const file of [uploadedScoreFiles, files].flatMap((list) =>
-        list ? Array.from(list) : [],
+        list ? [...list] : [],
       )) {
         dataTransfer.items.add(file);
       }
@@ -54,9 +54,10 @@ const FileUpload: FC = () => {
 
   function handleRemoveFile(fileName: string) {
     const dataTransfer = new DataTransfer();
-    for (const file of Array.from(uploadedScoreFiles ?? [])) {
-      if (file.name !== fileName) dataTransfer.items.add(file);
-    }
+    if (uploadedScoreFiles)
+      for (const file of uploadedScoreFiles) {
+        if (file.name !== fileName) dataTransfer.items.add(file);
+      }
     setUploadedScoreFiles(dataTransfer.files);
   }
 

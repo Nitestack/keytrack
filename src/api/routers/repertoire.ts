@@ -35,6 +35,7 @@ export const repertoireRouter = {
     )
     .handler(async ({ input, context: { db, session } }) => {
       let query = "";
+      // eslint-disable-next-line unicorn/no-useless-undefined
       let entityType: EntityType | undefined = undefined;
       if (input.work) {
         entityType = "work";
@@ -61,8 +62,8 @@ export const repertoireRouter = {
           message: "Couldn't fetch pieces from user",
         });
       const works = searchResult.value.works;
-      const addedRepertoirePieceIds = dbRepertoirePiecesResult.value.map(
-        (val) => val.musicBrainzId,
+      const addedRepertoirePieceIds = new Set(
+        dbRepertoirePiecesResult.value.map((val) => val.musicBrainzId),
       );
 
       /**
@@ -75,10 +76,10 @@ export const repertoireRouter = {
         .map((work) => toMBWork(work))
         .filter(Boolean)
         .map((work) => {
-          work.isInRepertoire = addedRepertoirePieceIds.includes(work.id);
+          work.isInRepertoire = addedRepertoirePieceIds.has(work.id);
           return work;
         })
-        .sort(
+        .toSorted(
           (a, b) =>
             a.composer.localeCompare(b.composer) ||
             a.title.localeCompare(b.title) ||
@@ -146,11 +147,11 @@ export const repertoireRouter = {
             session.user.id,
             input.musicBrainzId,
           );
-        } catch (error) {
+        } catch (err) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
-              error instanceof Error
-                ? `Failed to download PDF: ${error.message}`
+              err instanceof Error
+                ? `Failed to download PDF: ${err.message}`
                 : "Failed to download PDF",
           });
         }
@@ -166,11 +167,11 @@ export const repertoireRouter = {
             session.user.id,
             input.musicBrainzId,
           );
-        } catch (error) {
+        } catch (err) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
-              error instanceof Error
-                ? `Failed to process IMSLP URL: ${error.message}`
+              err instanceof Error
+                ? `Failed to process IMSLP URL: ${err.message}`
                 : "Failed to process IMSLP URL",
           });
         }
@@ -195,11 +196,11 @@ export const repertoireRouter = {
             session.user.id,
             input.musicBrainzId,
           );
-        } catch (error) {
+        } catch (err) {
           throw new ORPCError("INTERNAL_SERVER_ERROR", {
             message:
-              error instanceof Error
-                ? `Failed to download images: ${error.message}`
+              err instanceof Error
+                ? `Failed to download images: ${err.message}`
                 : "Failed to download images",
           });
         }
@@ -280,13 +281,13 @@ export const repertoireRouter = {
       });
 
       const results = await Promise.allSettled(
-        pieces.map(mapDbPieceToRepertoirePiece),
+        pieces.map((piece) => mapDbPieceToRepertoirePiece(piece)),
       );
 
       return results
         .map((result) => {
           if (result.status === "fulfilled") return result.value;
-          return undefined;
+          return;
         })
         .filter(Boolean);
     },
@@ -300,11 +301,11 @@ export const repertoireRouter = {
     .handler(async ({ input }) => {
       const imslpUrl = await getImslpURLByWorkId(input.musicBrainzId);
 
-      if (!imslpUrl) return undefined;
+      if (!imslpUrl) return;
 
       const scores = await getScoresByWikiUrl(imslpUrl);
 
-      if (scores.length <= 0) return undefined;
+      if (scores.length <= 0) return;
 
       return {
         imslpUrl,

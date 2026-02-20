@@ -57,8 +57,8 @@ const ScoreViewer: FC<{
 
         const pdf = await pdfjs.getDocument(scoreUrls[0]).promise;
         setPdfPageCount(pdf.numPages);
-      } catch (error) {
-        logger.error(error, "Failed to load PDF metadata");
+      } catch (err) {
+        logger.error(err, "Failed to load PDF metadata");
       }
     };
 

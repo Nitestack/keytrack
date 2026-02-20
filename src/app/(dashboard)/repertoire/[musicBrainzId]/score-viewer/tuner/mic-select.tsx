@@ -28,30 +28,26 @@ const TunerMicSelect: FC = () => {
     if (selectedKey) setSelectedDeviceId(selectedKey);
   }
 
-  if (audioDevices.length > 1)
-    return (
-      <Select
-        fullWidth
-        label="Microphone"
-        selectedKeys={
-          selectedDeviceId ? new Set([selectedDeviceId]) : undefined
-        }
-        onSelectionChange={handleSelectionChange}
-        isDisabled={isListening}
-        popoverProps={{
-          portalContainer,
-        }}
-        items={audioDevices}
-        startContent={<Mic size={16} />}
-      >
-        {(device) => (
-          <SelectItem key={device.deviceId}>
-            {device.label || device.deviceId}
-          </SelectItem>
-        )}
-      </Select>
-    );
-  else return null;
+  return audioDevices.length > 1 ? (
+    <Select
+      fullWidth
+      label="Microphone"
+      selectedKeys={selectedDeviceId ? new Set([selectedDeviceId]) : undefined}
+      onSelectionChange={handleSelectionChange}
+      isDisabled={isListening}
+      popoverProps={{
+        portalContainer,
+      }}
+      items={audioDevices}
+      startContent={<Mic size={16} />}
+    >
+      {(device) => (
+        <SelectItem key={device.deviceId}>
+          {device.label || device.deviceId}
+        </SelectItem>
+      )}
+    </Select>
+  ) : null;
 };
 
 export default TunerMicSelect;

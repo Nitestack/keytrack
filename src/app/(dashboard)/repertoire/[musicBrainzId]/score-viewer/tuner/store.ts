@@ -141,30 +141,21 @@ export const useTunerStore = create<TunerStoreProps>()((set, get) => ({
     if (!get().isIncreasingTransposeKeyDisabled())
       set((state) => ({
         selectedTransposeKey:
-          transposeKeys[
-            transposeKeys.findIndex(
-              (pitch) => pitch === state.selectedTransposeKey,
-            ) + 1
-          ],
+          transposeKeys[transposeKeys.indexOf(state.selectedTransposeKey) + 1],
       }));
   },
   decreaseTransposeKey: () => {
     if (!get().isDecreasingTransposeKeyDisabled())
       set((state) => ({
         selectedTransposeKey:
-          transposeKeys[
-            transposeKeys.findIndex(
-              (pitch) => pitch === state.selectedTransposeKey,
-            ) - 1
-          ],
+          transposeKeys[transposeKeys.indexOf(state.selectedTransposeKey) - 1],
       }));
   },
   isIncreasingTransposeKeyDisabled: () =>
-    transposeKeys.findIndex((pitch) => pitch === get().selectedTransposeKey) >=
+    transposeKeys.indexOf(get().selectedTransposeKey) >=
     transposeKeys.length - 1,
   isDecreasingTransposeKeyDisabled: () =>
-    transposeKeys.findIndex((pitch) => pitch === get().selectedTransposeKey) <=
-    0,
+    transposeKeys.indexOf(get().selectedTransposeKey) <= 0,
 
   increaseBaseFrequency: () => {
     if (!get().isIncreasingBaseFrequencyDisabled())

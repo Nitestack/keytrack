@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { existsSync, statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
-import { basename, extname, join, normalize } from "node:path";
+import path from "node:path";
 import { Readable } from "node:stream";
 
 import archiver from "archiver";
@@ -32,7 +32,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { userId, path } = await params;
+    const { userId, path: filePath } = await params;
     const { searchParams } = req.nextUrl;
     const customFilename = searchParams.get("filename");
 
@@ -44,21 +44,21 @@ export async function GET(
       );
     }
 
-    const isDownload = path.at(-1) === "download";
+    const isDownload = filePath.at(-1) === "download";
 
-    const uploadsDir = join(process.cwd(), "uploads", "scores");
+    const uploadsDir = path.join(process.cwd(), "uploads", "scores");
 
     // Basic traversal protection for userId (though Next.js params are usually safe)
-    const safeUserId = normalize(userId).replace(/^(\.\.(\/|\\|$))+/, "");
+    const safeUserId = path.normalize(userId).replace(/^(\.\.(\/|\\|$))+/, "");
 
-    const unresolvedFilePath = join(
+    const unresolvedFilePath = path.join(
       uploadsDir,
       safeUserId,
-      ...(isDownload ? path.slice(0, -1) : path),
+      ...(isDownload ? filePath.slice(0, -1) : filePath),
     );
 
     // Security: Ensure the file path is within uploads directory
-    let normalizedPath = normalize(unresolvedFilePath);
+    let normalizedPath = path.normalize(unresolvedFilePath);
     if (!normalizedPath.startsWith(uploadsDir)) {
       return NextResponse.json({ error: "Invalid file path" }, { status: 400 });
     }
@@ -90,7 +90,7 @@ export async function GET(
       if (isDownload) {
         const pdfPath = normalizedPath + ".pdf";
         if (existsSync(pdfPath)) {
-          normalizedPath = normalize(pdfPath);
+          normalizedPath = path.normalize(pdfPath);
         } else {
           return NextResponse.json(
             { error: "File not found" },
@@ -104,10 +104,10 @@ export async function GET(
     }
 
     const fileBuffer = await readFile(normalizedPath);
-    const ext = extname(normalizedPath).toLowerCase();
+    const ext = path.extname(normalizedPath).toLowerCase();
     const contentType = getContentType(ext);
 
-    let responseFilename = basename(normalizedPath);
+    let responseFilename = path.basename(normalizedPath);
     if (isDownload && customFilename) {
       responseFilename = customFilename;
       if (!responseFilename.toLowerCase().endsWith(ext)) {
@@ -123,8 +123,8 @@ export async function GET(
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
-  } catch (error) {
-    logger.error(error, "File serving error:");
+  } catch (err) {
+    logger.error(err, "File serving error:");
     return NextResponse.json(
       { error: "Failed to serve file" },
       { status: 500 },

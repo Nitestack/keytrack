@@ -79,7 +79,7 @@ const IMSLPDiscover: FC = () => {
         musicBrainzId: selectedPieceId,
       });
   }
-  return imslpScores.length >= 1 ? (
+  return imslpScores.length > 0 ? (
     <div className="space-y-4">
       <Autocomplete
         aria-label="Select IMSLP score"
@@ -137,7 +137,7 @@ const IMSLPDiscover: FC = () => {
         }
       />
     </div>
-  ) : !isSuccess ? (
+  ) : isSuccess ? null : (
     <Button
       fullWidth
       color="primary"
@@ -147,7 +147,7 @@ const IMSLPDiscover: FC = () => {
     >
       Search for IMSLP scores
     </Button>
-  ) : null;
+  );
 };
 
 export default IMSLPDiscover;

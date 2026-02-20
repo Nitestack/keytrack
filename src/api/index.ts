@@ -21,9 +21,7 @@ const o = os.$context<Awaited<ReturnType<typeof createRPCContext>>>();
 const loggingMiddleware = o.middleware(async ({ next, path, context }) => {
   const procedureLogger = context.logger.child({
     rpc: {
-      ...((context.logger.bindings().rpc as
-        | Record<string, unknown>
-        | undefined) ?? {}),
+      ...(context.logger.bindings().rpc as Record<string, unknown> | undefined),
       method: path.join("."),
     },
   });
@@ -35,9 +33,9 @@ const loggingMiddleware = o.middleware(async ({ next, path, context }) => {
         logger: procedureLogger,
       },
     });
-  } catch (error) {
-    procedureLogger.error(error);
-    throw error;
+  } catch (err) {
+    procedureLogger.error(err);
+    throw err;
   }
 });
 

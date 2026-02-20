@@ -36,7 +36,7 @@ function detectPitch(
   if (rms < 0.005) return { pitch: 0, clarity: 0 };
 
   const [pitch, clarity] = detector.findPitch(audioData, sampleRate);
-  if (pitch === -1 || !isFinite(pitch) || pitch <= 0) {
+  if (pitch === -1 || !Number.isFinite(pitch) || pitch <= 0) {
     return { pitch: 0, clarity: 0 };
   }
   return { pitch, clarity };
@@ -122,7 +122,7 @@ export function useTuner() {
             ((db - MIN_VOLUME_DB) / (MAX_VOLUME_DB - MIN_VOLUME_DB)) * 100,
           ),
         );
-        setVolume(isFinite(volumeLevel) ? volumeLevel : 0);
+        setVolume(Number.isFinite(volumeLevel) ? volumeLevel : 0);
 
         const dataArray = analyserRef.current.getValue();
         if (!(dataArray instanceof Float32Array)) {
@@ -168,33 +168,37 @@ export function useTuner() {
       if (err instanceof DOMException) {
         switch (err.name) {
           case "NotAllowedError":
-          case "PermissionDeniedError":
+          case "PermissionDeniedError": {
             setError({
               type: "permission",
               message:
                 "Microphone access was denied. Please allow access in your browser settings and refresh the page.",
             });
             break;
-          case "NotFoundError":
+          }
+          case "NotFoundError": {
             setError({
               type: "device",
               message:
                 "No microphone found. Please connect a microphone and try again.",
             });
             break;
-          case "NotReadableError":
+          }
+          case "NotReadableError": {
             setError({
               type: "device",
               message:
                 "Microphone is being used by another application. Please close other applications and try again.",
             });
             break;
-          default:
+          }
+          default: {
             setError({
               type: "unknown",
               message:
                 "Could not access the microphone. Please ensure it's not being used by another application.",
             });
+          }
         }
       } else {
         setError({
@@ -237,8 +241,8 @@ export function useTuner() {
     if (getContext().state !== "running") {
       try {
         await start();
-      } catch (e) {
-        logger.error(e, "Error starting AudioContext:");
+      } catch (err) {
+        logger.error(err, "Error starting AudioContext:");
         setError({
           type: "unknown",
           message: "Could not initialize audio. Please try again.",

@@ -17,25 +17,23 @@ const AddPieceSummary: FC = () => {
     },
   );
 
-  if (selectedPiece)
-    return (
-      <div className="bg-default-100 p-3 rounded-medium space-y-4">
-        <div>
-          <User
-            avatarProps={{
-              name: selectedPiece.composer,
-              classNames: {
-                base: "hidden",
-              },
-            }}
-            name={`${selectedPiece.title}${selectedPiece.arrangement ? ` (${selectedPiece.arrangement})` : ""}`}
-            description={selectedPiece.composer}
-          />
-        </div>
-        <ChipList />
+  return selectedPiece ? (
+    <div className="bg-default-100 p-3 rounded-medium space-y-4">
+      <div>
+        <User
+          avatarProps={{
+            name: selectedPiece.composer,
+            classNames: {
+              base: "hidden",
+            },
+          }}
+          name={`${selectedPiece.title}${selectedPiece.arrangement ? ` (${selectedPiece.arrangement})` : ""}`}
+          description={selectedPiece.composer}
+        />
       </div>
-    );
-  else return null;
+      <ChipList />
+    </div>
+  ) : null;
 };
 
 export default AddPieceSummary;

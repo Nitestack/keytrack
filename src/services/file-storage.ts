@@ -1,6 +1,6 @@
 import "server-only";
 
-import path from "path";
+import path from "node:path";
 
 import fs from "fs-extra";
 import sharp from "sharp";
@@ -38,11 +38,13 @@ export type ScoreType = "pdf" | "images";
  * getContentType('.unknown') // 'application/octet-stream'
  * ```
  */
-export function getContentType(ext: string): string {
-  const normalizedExt = ext.startsWith(".") ? ext : `.${ext}`;
-  if (normalizedExt.toLowerCase() === ".pdf") return "application/pdf";
+export function getContentType(extension: string): string {
+  const normalizedExtension = extension.startsWith(".")
+    ? extension
+    : `.${extension}`;
+  if (normalizedExtension.toLowerCase() === ".pdf") return "application/pdf";
   return (
-    SUPPORTED_IMAGE_CONTENT_TYPES[normalizedExt.toLowerCase()] ??
+    SUPPORTED_IMAGE_CONTENT_TYPES[normalizedExtension.toLowerCase()] ??
     "application/octet-stream"
   );
 }
@@ -77,8 +79,8 @@ export function getImagesDir(userId: string, musicBrainzId: string): string {
  * @param filename - The filename to validate
  */
 export function isSupportedImageFormat(filename: string): boolean {
-  const ext = path.extname(filename).toLowerCase();
-  return SUPPORTED_IMAGE_FORMATS.includes(ext);
+  const extension = path.extname(filename).toLowerCase();
+  return SUPPORTED_IMAGE_FORMATS.includes(extension);
 }
 
 /**
@@ -109,10 +111,10 @@ export async function getImagePaths(
   // Sort numerically (1.webp, 2.webp, ..., 10.webp, etc.)
   return files
     .filter((f) => f.endsWith(".webp"))
-    .sort((a, b) => {
-      const numA = parseInt(a.split(".")[0]!);
-      const numB = parseInt(b.split(".")[0]!);
-      return numA - numB;
+    .toSorted((a, b) => {
+      const numberA = Number.parseInt(a.split(".")[0]!);
+      const numberB = Number.parseInt(b.split(".")[0]!);
+      return numberA - numberB;
     })
     .map((f) => path.join(imagesDir, f));
 }
@@ -135,7 +137,7 @@ export async function getScoreUrls(
       const imagePaths = await getImagePaths(userId, musicBrainzId);
       return imagePaths.map((p) => {
         const relativePath = p.replace(SCORES_DIR, "");
-        return `/api/files${relativePath.replace(/\\/g, "/")}`;
+        return `/api/files${relativePath.replaceAll("\\", "/")}`;
       });
     } catch (err) {
       logger.error(err, "Error getting image paths:");
@@ -235,8 +237,8 @@ export async function downloadAndStoreImages(
 
   try {
     // Download and process each image
-    for (let i = 0; i < urls.length; i++) {
-      const url = urls[i]!;
+    for (const [index, url_] of urls.entries()) {
+      const url = url_;
 
       // Download the image
       const response = await fetch(url);
@@ -247,7 +249,7 @@ export async function downloadAndStoreImages(
       }
 
       const buffer = Buffer.from(await response.arrayBuffer());
-      const imagePath = path.join(imagesDir, `${i + 1}.webp`);
+      const imagePath = path.join(imagesDir, `${index + 1}.webp`);
 
       // Convert to lossless WebP for perfect quality on all devices
       await sharp(buffer)
@@ -258,12 +260,12 @@ export async function downloadAndStoreImages(
 
       createdFiles.push(imagePath);
     }
-  } catch (error) {
+  } catch (err) {
     // Cleanup on failure
     for (const filePath of createdFiles) {
       await fs.remove(filePath);
     }
-    throw error;
+    throw err;
   }
 }
 
@@ -304,8 +306,8 @@ export async function storeImages(
 
   try {
     // Process each image
-    for (let i = 0; i < buffers.length; i++) {
-      const { buffer, filename } = buffers[i]!;
+    for (const [index, buffer_] of buffers.entries()) {
+      const { buffer, filename } = buffer_;
 
       // Validate file format
       if (!isSupportedImageFormat(filename)) {
@@ -314,7 +316,7 @@ export async function storeImages(
         );
       }
 
-      const imagePath = path.join(imagesDir, `${i + 1}.webp`);
+      const imagePath = path.join(imagesDir, `${index + 1}.webp`);
 
       // Convert to lossless WebP for perfect quality on all devices
       await sharp(buffer)
@@ -325,12 +327,12 @@ export async function storeImages(
 
       createdFiles.push(imagePath);
     }
-  } catch (error) {
+  } catch (err) {
     // Cleanup on failure
     for (const filePath of createdFiles) {
       await fs.remove(filePath);
     }
-    throw error;
+    throw err;
   }
 }
 
@@ -369,8 +371,8 @@ export async function deleteScore(
         await fs.remove(imagesDir);
       }
     }
-  } catch (error) {
-    logger.error(error, "Failed to delete score files");
+  } catch (err) {
+    logger.error(err, "Failed to delete score files");
     // Don't throw - we still want to delete from DB even if file deletion fails
   }
 }
