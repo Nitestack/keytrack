@@ -36,7 +36,7 @@ Follow these steps to set up the project locally for development.
 
 ### Prerequisites
 
-- [**Node.js**](https://nodejs.org) (v22+)
+- [**Node.js**](https://nodejs.org) (v24+)
 - [**pnpm**](https://pnpm.io) (Package manager)
 - [**Docker**](https://docker.com) (for the local database)
 

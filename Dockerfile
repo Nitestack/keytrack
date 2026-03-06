@@ -1,4 +1,4 @@
-FROM node:22-alpine AS base
+FROM node:24-alpine AS base
 
 # ── Dependencies ──────────────────────────────────────────────────────
 FROM base AS deps
@@ -29,7 +29,7 @@ RUN corepack enable pnpm && pnpm run build
 RUN npx esbuild src/server/db/migrate.ts \
   --bundle \
   --platform=node \
-  --target=node22 \
+  --target=node24 \
   --format=esm \
   --outfile=migrate.js
 
